@@ -99,3 +99,43 @@ for p, q in itertools.product(p_vals, q_vals):
 # %%
 results_df = pd.DataFrame(results).sort_values("BIC")
 results_df
+# %%
+final_model = SARIMAX(
+    y,
+    exog=x,
+    order=(1, 0, 2),
+    trend="c",
+    enforce_stationarity=False,
+    enforce_invertibility=False
+).fit()
+
+print(final_model.summary())
+plot_acf(final_model.resid, lags=30)
+plt.title("Final model residual ACF")
+plt.show()
+# %%
+params = pd.DataFrame({
+    "estimate": final_model.params,
+    "std_error": final_model.bse,
+    "p_value": final_model.pvalues
+})
+
+params
+
+# %%
+plot_acf(final_model.resid, lags=30)
+plt.title("Residual ACF (final SARIMAX)")
+plt.show()
+
+# %%
+acorr_ljungbox(final_model.resid, lags=[10,20], return_df=True)
+
+# %%
+comparison = pd.DataFrame({
+    "OLS": [ols_model.params[x_name], ols_model.bse[x_name]],
+    "SARIMAX": [final_model.params[x_name], final_model.bse[x_name]]
+}, index=["beta", "std_error"])
+
+comparison
+
+# %%
