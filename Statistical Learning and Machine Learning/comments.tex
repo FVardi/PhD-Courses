@@ -1,0 +1,90 @@
+\documentclass{article}
+
+% Math
+\usepackage{amsmath, amssymb}
+
+% Code listings
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  frame=single,
+  breaklines=true
+}
+
+\begin{document}
+\section{Week 2 (Lectures 3 + 4)}
+Total time spent: 5 hours
+\\\\
+\textbf{General comments}
+\begin{itemize}
+    \item The exercises are well defined, easy to understand in series and connect well with the slides.
+    \item If the students have never seen the definitions of train, validation and test sets then I think it is very important to underline the usage and usefulness of these. Especially underline the human bias of looking at the test set and the importance of avoiding data leakage.
+    \item Vectorization in NumPy could be used to show a more efficient and clean, albeit slightly more abstract, method.
+    \item Plots could have legends to more easily interpret contents.
+\end{itemize}
+
+
+\textbf{Notebooks: exercises and solutions}
+
+\begin{itemize}
+    \item Generate data
+    \begin{itemize}
+        \item \texttt{target\_func} could be passed as an argument to \texttt{generate\_data} instead of letting the latter be dependent on a global function. This would be better coding style in general but it is not necessary in a small and controlled environment like this.
+    \end{itemize}
+
+    \item[1] inear models
+    \begin{itemize}
+        \item[1.4] The function \texttt{optimial\_weights} has a typo (repeated throughout notebook).
+        \item[1.4] It could be noted that the Vandermonde matrix is the design matrix for polynomial fitting.
+        \item[1.5] Column and index names could be added to the dataframe with weights for different $M$ to more easily interpret the dimensions.
+    \end{itemize}
+
+    \item[2] Regularization
+    \begin{itemize}
+        \item[2.1] The implementation of the regularized sum of squared errors is wrong in the notebook and seems to have some leftovers from an earlier implemented solution.
+        \item[2.1] The implementation of the regularized root mean squared error can be defined in multiple ways --- for example inside or outside the square root. The solution in the notebook has implemented it inside the square root. Should it be mentioned?
+        \item[2.3] The plot of the regularized training and test errors can either not include $\lambda = 0$ or be plotted on a logarithmic axis. In the solution the first point is not plotted because it is undefined/None.
+        \item[2.3] The plots of the regularized solutions are a different color in the solutions than those in the exercise notebook. Very minor difference but it might be confusing.
+    \end{itemize}
+
+    \item[3] Model selection
+    \begin{itemize}
+        \item[3.1] A heatmap visualization of the cross-validation RMS could be a task to understand the tradeoff between model order and regularization parameter.
+    \end{itemize}
+
+    \item[4] Bayesian curve fitting
+    \begin{itemize}
+        \item There is an error in the implemented solution for the variance. $\beta$ is multiplied instead of added to the expression. This changes the plot of the solution in 4.1) significantly.
+        \item The students could be encouraged to play around with $\alpha$, $\beta$, and $M$ to understand the parameters. $\alpha$ and $\beta$ could also be related to ridge regression (already presented as a regularization method).
+    \end{itemize}
+\end{itemize}
+
+\textbf{Slides}
+
+\begin{itemize}
+    \item Lecture 3, slide 7
+    \begin{itemize}
+        \item The constant $1/2$ is applied for convenience in SSE to cancel another constant when optimizing. Should it be mentioned?
+    \end{itemize}
+    \item Lecture 3, slide 12
+    \begin{itemize}
+        \item The factor 2 in the definition of RMS comes from the $1/2$ in SSE. Should it be mentioned?
+        \item Why is the mean squared error convenient? The implementation and use in the plots feel a little unmotivated because of a lack of perspective. It could be added that the SSE varies with the number of samples while MSE is "normalized".
+    \end{itemize}
+\end{itemize}
+
+\textbf{Textbook}
+
+\begin{itemize}
+    \item Page 31: There might be a mistake in the formula for $S^{-1}$. It seems that both $\phi$-expressions should contain $x_n$.
+\end{itemize}
+
+\end{document}
