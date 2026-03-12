@@ -1,0 +1,21 @@
+# Data
+*.csv
+*.parquet
+*.feather
+
+# Python
+__pycache__/
+*.pyc
+
+# Environments
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# ignore all .csv files
+*.csv
