@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-12T13:55:21.764000",
+  "timestamp": "2026-03-13T17:12:34.653351",
   "halfhourly_dataset": {
     "dataset_type": "halfhourly_dataset",
     "blocks_loaded": [
@@ -9,7 +9,7 @@
     ],
     "blocks_failed": [],
     "total_rows_loaded": 4227000,
-    "duplicates_found": "0",
+    "duplicates_found": 0,
     "duplicates_removed": 0,
     "invalid_records": 0,
     "final_shape": [
@@ -27,7 +27,7 @@
     ],
     "blocks_failed": [],
     "total_rows_loaded": 88438,
-    "duplicates_found": "0",
+    "duplicates_found": 0,
     "duplicates_removed": 0,
     "invalid_records": 0,
     "final_shape": [
@@ -45,7 +45,7 @@
     ],
     "blocks_failed": [],
     "total_rows_loaded": 87300,
-    "duplicates_found": "0",
+    "duplicates_found": 0,
     "duplicates_removed": 0,
     "invalid_records": 0,
     "final_shape": [
