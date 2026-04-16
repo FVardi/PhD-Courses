@@ -1,202 +1,225 @@
 """
-Data loading and schema validation utilities.
-
-Provides strict schema enforcement for the London Smart Meters half-hourly dataset:
-  - Expected columns with required dtypes
-  - Timestamp parsing
-  - Sort order enforcement (household_id, timestamp)
-  - Duplicate key detection and resolution
-  - Schema validation reporting
+Reusable data loading and schema validation utilities for the London Smart Meters dataset.
 """
 
-from __future__ import annotations
-
-import os
-from dataclasses import dataclass, field
-from typing import Optional
+import logging
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 
-# ---------------------------------------------------------------------------
-# Column constants (single source of truth for the whole project)
-# ---------------------------------------------------------------------------
-COL_HOUSEHOLD_ID = "LCLid"
-COL_TIMESTAMP = "tstp"
-COL_TARGET = "energy_kWh_per_hh"   # kWh per half-hour slot
-COL_META_LABEL = "Acorn_grouped"
-COL_META_ACORN = "Acorn"
-COL_META_STD_TOU = "stdorToU"
+logger = logging.getLogger(__name__)
 
-# Expected dtypes for the processed parquet files
-SCHEMA: dict[str, str] = {
-    COL_HOUSEHOLD_ID: "object",
-    COL_TIMESTAMP:    "datetime64[ns]",
-    COL_TARGET:       "float64",
-}
-
-SCHEMA_META: dict[str, str] = {
-    COL_META_LABEL:   "object",
-    COL_META_ACORN:   "object",
-    COL_META_STD_TOU: "object",
-}
+DATA_ROOT = Path(__file__).parents[3] / "data" / "london_smart_meters"
 
 
-# ---------------------------------------------------------------------------
-# Validation report
-# ---------------------------------------------------------------------------
-@dataclass
-class SchemaReport:
-    """Collects all findings from schema validation."""
-    missing_columns: list[str] = field(default_factory=list)
-    wrong_dtype: dict[str, tuple[str, str]] = field(default_factory=dict)
-    n_duplicates_removed: int = 0
-    duplicate_examples: pd.DataFrame = field(default_factory=pd.DataFrame)
-    n_rows_before: int = 0
-    n_rows_after: int = 0
-    sort_applied: bool = False
+class SchemaValidator:
+    """Validates DataFrames against strict schemas and checks data types."""
 
-    def is_valid(self) -> bool:
-        return not self.missing_columns and not self.wrong_dtype
+    SCHEMAS: Dict[str, Dict[str, str]] = {
+        "daily_dataset": {
+            "LCLid": "string",
+            "day": "datetime64[ns]",
+            "energy_median": "float64",
+            "energy_mean": "float64",
+            "energy_max": "float64",
+            "energy_count": "int64",
+            "energy_std": "float64",
+            "energy_sum": "float64",
+            "energy_min": "float64",
+        },
+        "halfhourly_dataset": {
+            "LCLid": "string",
+            "tstp": "datetime64[ns]",
+            "energy(kWh/hh)": "float64",
+        },
+        "hhblock_dataset": {
+            "LCLid": "string",
+            "day": "datetime64[ns]",
+            # Plus hh_0 … hh_47 checked separately
+        },
+    }
 
-    def print(self) -> None:
-        print("\n=== Schema Validation Report ===")
-        print(f"  Rows before validation : {self.n_rows_before:,}")
-        print(f"  Rows after  validation : {self.n_rows_after:,}")
+    @staticmethod
+    def validate_schema(df: pd.DataFrame, schema_type: str) -> Tuple[bool, List[str]]:
+        """Return (is_valid, errors) checking required columns exist."""
+        errors: List[str] = []
+        schema = SchemaValidator.SCHEMAS.get(schema_type, {})
 
-        if self.missing_columns:
-            print(f"  [FAIL] Missing columns : {self.missing_columns}")
-        else:
-            print(f"  [OK]   All required columns present")
+        for col in schema:
+            if col not in df.columns:
+                errors.append(f"Missing required column: {col}")
 
-        if self.wrong_dtype:
-            for col, (actual, expected) in self.wrong_dtype.items():
-                print(f"  [WARN] Column '{col}': dtype={actual}, expected={expected} (cast applied)")
-        else:
-            print(f"  [OK]   All dtypes correct")
+        if schema_type == "hhblock_dataset":
+            for i in range(48):
+                col = f"hh_{i}"
+                if col not in df.columns:
+                    errors.append(f"Missing half-hour column: {col}")
 
-        if self.n_duplicates_removed:
-            print(f"  [WARN] Removed {self.n_duplicates_removed:,} duplicate (household, timestamp) rows")
-            if not self.duplicate_examples.empty:
-                print("         Example duplicates:")
-                print(self.duplicate_examples.to_string(index=False))
-        else:
-            print(f"  [OK]   No duplicate (household_id, timestamp) keys")
+        return len(errors) == 0, errors
 
-        if self.sort_applied:
-            print(f"  [OK]   Sorted by ({COL_HOUSEHOLD_ID}, {COL_TIMESTAMP})")
+    @staticmethod
+    def validate_data_types(df: pd.DataFrame, schema_type: str) -> Tuple[bool, List[str]]:
+        """Return (is_valid, errors) checking column dtypes match the schema."""
+        errors: List[str] = []
+        schema = SchemaValidator.SCHEMAS.get(schema_type, {})
 
+        for col, expected in schema.items():
+            if col not in df.columns:
+                continue
+            if "datetime" in expected:
+                if not pd.api.types.is_datetime64_any_dtype(df[col]):
+                    errors.append(f"{col}: expected datetime64, got {df[col].dtype}")
+            elif "int" in expected:
+                if not pd.api.types.is_integer_dtype(df[col]):
+                    errors.append(f"{col}: expected int, got {df[col].dtype}")
+            elif "float" in expected:
+                if not pd.api.types.is_float_dtype(df[col]):
+                    errors.append(f"{col}: expected float, got {df[col].dtype}")
 
-# ---------------------------------------------------------------------------
-# Core loader
-# ---------------------------------------------------------------------------
-def load_dataset(
-    path: str,
-    validate: bool = True,
-    include_meta: bool = True,
-) -> tuple[pd.DataFrame, SchemaReport]:
-    """
-    Load a processed parquet file with strict schema enforcement.
-
-    Steps performed:
-      1. Read parquet file.
-      2. Check all required columns are present.
-      3. Cast columns to expected dtypes (timestamp parsing included).
-      4. Sort by (household_id, timestamp).
-      5. Detect and remove duplicate (household_id, timestamp) keys.
-
-    Parameters
-    ----------
-    path : str
-        Path to a processed parquet file (train/val/test/full).
-    validate : bool
-        Whether to run schema checks. Default True.
-    include_meta : bool
-        Whether to include metadata columns in dtype checks. Default True.
-
-    Returns
-    -------
-    df : pd.DataFrame
-    report : SchemaReport
-    """
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Dataset file not found: {path}")
-
-    df = pd.read_parquet(path)
-    report = SchemaReport(n_rows_before=len(df))
-
-    if not validate:
-        report.n_rows_after = len(df)
-        return df, report
-
-    expected_schema = {**SCHEMA, **(SCHEMA_META if include_meta else {})}
-
-    # 1. Check required columns
-    report.missing_columns = [c for c in expected_schema if c not in df.columns]
-    if report.missing_columns:
-        report.n_rows_after = len(df)
-        report.print()
-        raise ValueError(f"Dataset is missing required columns: {report.missing_columns}")
-
-    # 2. Cast / enforce dtypes
-    for col, expected_dtype in expected_schema.items():
-        if col not in df.columns:
-            continue
-        actual_dtype = str(df[col].dtype)
-        if expected_dtype == "datetime64[ns]":
-            if not pd.api.types.is_datetime64_any_dtype(df[col]):
-                df[col] = pd.to_datetime(df[col])
-                report.wrong_dtype[col] = (actual_dtype, expected_dtype)
-        elif expected_dtype == "float64":
-            if not pd.api.types.is_float_dtype(df[col]):
-                df[col] = pd.to_numeric(df[col], errors="coerce")
-                report.wrong_dtype[col] = (actual_dtype, expected_dtype)
-        elif expected_dtype == "object":
-            if not pd.api.types.is_object_dtype(df[col]):
-                df[col] = df[col].astype("object")
-                report.wrong_dtype[col] = (actual_dtype, expected_dtype)
-
-    # 3. Sort by (household_id, timestamp)
-    df = df.sort_values([COL_HOUSEHOLD_ID, COL_TIMESTAMP]).reset_index(drop=True)
-    report.sort_applied = True
-
-    # 4. Detect and remove duplicates
-    duplicate_mask = df.duplicated(subset=[COL_HOUSEHOLD_ID, COL_TIMESTAMP], keep=False)
-    n_dup = duplicate_mask.sum()
-    if n_dup:
-        report.duplicate_examples = (
-            df[duplicate_mask]
-            .head(10)[[COL_HOUSEHOLD_ID, COL_TIMESTAMP, COL_TARGET]]
-        )
-        n_before = len(df)
-        df = df.drop_duplicates(subset=[COL_HOUSEHOLD_ID, COL_TIMESTAMP], keep="first")
-        report.n_duplicates_removed = n_before - len(df)
-
-    report.n_rows_after = len(df)
-    return df, report
+        return len(errors) == 0, errors
 
 
-# ---------------------------------------------------------------------------
-# Convenience loaders for each split
-# ---------------------------------------------------------------------------
-def _resolve_processed_dir(processed_dir: Optional[str]) -> str:
-    if processed_dir is not None:
-        return processed_dir
-    here = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(os.path.dirname(here))
-    return os.path.join(project_root, "data", "processed")
+class DataLoader:
+    """Load and clean London Smart Meters blocks with schema validation."""
 
+    def __init__(self, data_root: Path = DATA_ROOT):
+        self.data_root = Path(data_root)
+        self.validator = SchemaValidator()
 
-def load_train(processed_dir: Optional[str] = None, **kwargs) -> tuple[pd.DataFrame, SchemaReport]:
-    return load_dataset(os.path.join(_resolve_processed_dir(processed_dir), "train.parquet"), **kwargs)
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
+    def load_block(self, dataset_type: str, block_num: int) -> Optional[pd.DataFrame]:
+        """Load a single block CSV, parse timestamps, and validate schema."""
+        block_path = self.data_root / dataset_type / dataset_type / f"block_{block_num}.csv"
 
-def load_val(processed_dir: Optional[str] = None, **kwargs) -> tuple[pd.DataFrame, SchemaReport]:
-    return load_dataset(os.path.join(_resolve_processed_dir(processed_dir), "val.parquet"), **kwargs)
+        if not block_path.exists():
+            logger.error("File not found: %s", block_path)
+            return None
 
+        try:
+            df = pd.read_csv(block_path)
+        except Exception as exc:
+            logger.error("Error reading %s: %s", block_path, exc)
+            return None
 
-def load_test(processed_dir: Optional[str] = None, **kwargs) -> tuple[pd.DataFrame, SchemaReport]:
-    return load_dataset(os.path.join(_resolve_processed_dir(processed_dir), "test.parquet"), **kwargs)
+        df = self._parse_timestamps(df, dataset_type)
 
+        schema_ok, errs = self.validator.validate_schema(df, dataset_type)
+        if not schema_ok:
+            logger.warning("Schema errors in %s/block_%d: %s", dataset_type, block_num, errs)
 
-def load_full(processed_dir: Optional[str] = None, **kwargs) -> tuple[pd.DataFrame, SchemaReport]:
-    return load_dataset(os.path.join(_resolve_processed_dir(processed_dir), "full_dataset.parquet"), **kwargs)
+        dtype_ok, errs = self.validator.validate_data_types(df, dataset_type)
+        if not dtype_ok:
+            logger.warning("Dtype errors in %s/block_%d: %s", dataset_type, block_num, errs)
+
+        return df
+
+    def load_and_clean_dataset(
+        self,
+        dataset_type: str,
+        blocks: Optional[List[int]] = None,
+        sort: bool = True,
+        handle_duplicates: str = "keep_first",
+    ) -> Tuple[Optional[pd.DataFrame], Dict]:
+        """
+        Load one or more blocks, validate, deduplicate, and optionally sort.
+
+        Args:
+            dataset_type:      'daily_dataset', 'halfhourly_dataset', or 'hhblock_dataset'
+            blocks:            Block numbers to load; None loads all 112.
+            sort:              Sort by (LCLid, timestamp) if True.
+            handle_duplicates: Unused parameter kept for API compatibility; first
+                               occurrence is always kept.
+
+        Returns:
+            (DataFrame, metadata_dict)
+        """
+        if blocks is None:
+            blocks = list(range(112))
+
+        logger.info("Loading %s (%d blocks)…", dataset_type, len(blocks))
+
+        metadata: Dict = {
+            "dataset_type": dataset_type,
+            "blocks_loaded": [],
+            "blocks_failed": [],
+            "total_rows_loaded": 0,
+            "duplicates_found": 0,
+            "duplicates_removed": 0,
+            "invalid_records": 0,
+        }
+
+        dfs = []
+        for block_num in blocks:
+            df = self.load_block(dataset_type, block_num)
+            if df is not None:
+                dfs.append(df)
+                metadata["blocks_loaded"].append(block_num)
+                metadata["total_rows_loaded"] += len(df)
+            else:
+                metadata["blocks_failed"].append(block_num)
+
+        if not dfs:
+            logger.error("No blocks loaded from %s", dataset_type)
+            return None, metadata
+
+        combined = pd.concat(dfs, ignore_index=True)
+        logger.info("Combined shape: %s", combined.shape)
+
+        ts_col = self._get_timestamp_col(dataset_type)
+        id_col = "LCLid"
+
+        # Drop rows with null keys
+        before = len(combined)
+        combined = combined.dropna(subset=[id_col, ts_col])
+        metadata["invalid_records"] = before - len(combined)
+        if metadata["invalid_records"]:
+            logger.warning("Dropped %d rows with null keys", metadata["invalid_records"])
+
+        # Deduplicate
+        dup_mask = combined.duplicated(subset=[id_col, ts_col], keep=False)
+        n_dups = int(dup_mask.sum())
+        metadata["duplicates_found"] = n_dups
+        if n_dups:
+            combined = combined.drop_duplicates(subset=[id_col, ts_col], keep="first")
+            metadata["duplicates_removed"] = n_dups
+            logger.warning("Removed %d duplicate rows (kept first)", n_dups)
+
+        if sort:
+            combined = combined.sort_values([id_col, ts_col]).reset_index(drop=True)
+            logger.info("Sorted by (%s, %s)", id_col, ts_col)
+
+        metadata["final_shape"] = combined.shape
+        metadata["final_rows"] = len(combined)
+        return combined, metadata
+
+    def save_dataset(self, df: pd.DataFrame, name: str, out_dir: Path) -> Path:
+        """Save a cleaned DataFrame to *out_dir*/<name>.parquet."""
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{name}.parquet"
+        df.to_parquet(out_path, index=False)
+        logger.info("Saved %s  →  %s  (%.1f MB)", name, out_path, out_path.stat().st_size / 1e6)
+        return out_path
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _get_timestamp_col(dataset_type: str) -> str:
+        return "tstp" if dataset_type == "halfhourly_dataset" else "day"
+
+    @staticmethod
+    def _parse_timestamps(df: pd.DataFrame, dataset_type: str) -> pd.DataFrame:
+        if dataset_type in ("daily_dataset", "hhblock_dataset"):
+            df["day"] = pd.to_datetime(df["day"])
+        elif dataset_type == "halfhourly_dataset":
+            df["tstp"] = pd.to_datetime(df["tstp"])
+            if "energy(kWh/hh)" in df.columns:
+                df["energy(kWh/hh)"] = pd.to_numeric(
+                    df["energy(kWh/hh)"].astype(str).str.strip(), errors="coerce"
+                )
+        return df

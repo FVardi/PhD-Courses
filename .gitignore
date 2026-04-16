@@ -1,23 +1,21 @@
-# Data files
-data/
+# Data
 *.csv
 *.parquet
-*.pkl
-*.zip
+*.feather
 
 # Python
 __pycache__/
-*.py[cod]
-*.pyo
+*.pyc
+
+# Environments
 .venv/
-*.egg-info/
+env/
 
 # Jupyter
 .ipynb_checkpoints/
 
-# Reports / artifacts (large outputs)
-report/artifacts/
-
 # OS
 .DS_Store
-Thumbs.db
+
+# ignore all .csv files
+*.csv

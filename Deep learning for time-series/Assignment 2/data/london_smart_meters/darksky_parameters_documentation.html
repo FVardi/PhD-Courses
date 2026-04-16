@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <title>Dark Sky API:  Documentation Overview
+</title>
+
+  <link href="https://darksky.net/favicon.ico" rel="shortcut icon" sizes="32x32 16x16" type="image/x-icon">
+  <link href="Dark%20Sky%20API%20Documentation%20Overview_files/css.css" rel="stylesheet" type="text/css">
+  <link href="Dark%20Sky%20API%20Documentation%20Overview_files/normalize.css" rel="stylesheet" type="text/css">
+  <link href="Dark%20Sky%20API%20Documentation%20Overview_files/flexboxgrid.css" rel="stylesheet" type="text/css">
+  <link href="Dark%20Sky%20API%20Documentation%20Overview_files/style.css" rel="stylesheet" type="text/css">
+  <link href="Dark%20Sky%20API%20Documentation%20Overview_files/responsive.css" rel="stylesheet" type="text/css">
+
+  <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "name": "Dark Sky",
+        "url": "https://darksky.net"
+      }
+    </script>
+  <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "url"  : "https://darksky.net",
+        "logo" : "https://darksky.net/dev/img/logo.png",
+        "sameAs": [
+          "https://www.linkedin.com/company/the-dark-sky-company",
+          "https://twitter.com/darkskyapp"
+        ]
+      }
+    </script>
+
+  <meta name="description" content="The Dark Sky API allows you to request weather forecasts and historical weather data programmatically.">
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@id": "https://darksky.net/dev/",
+        "name": "Dark Sky API"
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "item": {
+        "@id": "https://darksky.net/dev/docs",
+        "name": "Documentation"
+      }
+    }
+  ]
+}
+</script>
+
+  
+</head>
+
+<body data-new-gr-c-s-check-loaded="8.898.0" data-gr-ext-installed="">
+  <header class="header">
+    <div class="header-container">
+      <div class="wrap container-fluid">
+        <div class="header">
+          <div class="header-logo">
+            <a class="logo" href="https://darksky.net/dev/">
+              <span class="svg-logo-container">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+                  <path fill="#FFF" d="M 485 165 C 526 154 568 149 597 147 545 68 512 18 496 0 496 0 493 61 371 210 393 198 438 177 485 165 Z"></path>
+                  <path fill="#FFF" d="M 460 868 C 434 800 427 722 427 722 L 387 745 C 387 745 368 680 361 614 354 550 361 486 361 486 L 308 507 C 308 507 304 430 317 356 325 307 340 261 349 236 348 238 346 240 344 242 236 367 144 491 144 644 144 841 303 1000 499 1000 509 1000 519 1000 529 999 513 974 481 923 460 868 Z"></path>
+                  <path fill="#FFF" d="M 643 216 C 631 198 620 181 610 166 590 187 561 222 537 259 502 312 482 370 482 370 L 560 346 C 560 346 519 417 499 491 480 555 482 624 482 624 L 536 599 C 536 599 512 688 510 792 508 883 526 965 535 998 714 980 853 829 855 644 856 484 739 359 643 216 Z"></path>
+                </svg>
+              </span>
+  
+              <span class="logo company-name">Dark Sky API</span>
+            </a>
+          </div>
+  
+          <div class="header-links">
+            <nav class="nav">
+              <ul class="links">
+                <li><a href="https://darksky.net/dev/docs">Docs</a></li>
+                <li><a href="https://darksky.net/dev/docs/faq">FAQ</a></li>
+                <li><a class="button" href="https://darksky.net/dev/account">Console</a></li>
+                <li><a class="button" href="https://darksky.net/dev/account/edit">Account
+                    Settings</a></li>
+                <li><a class="button filled" href="https://darksky.net/dev/logout">Log out</a></li>
+              </ul>
+            </nav>
+          </div>
+  
+        </div> <!-- row -->
+      </div> <!-- wrap container-fluid -->
+    </div>
+  </header>
+  
+  
+
+  <div class="main wrap container-fluid">
+    <script type="text/javascript" src="Dark%20Sky%20API%20Documentation%20Overview_files/jquery.js"></script>
+<link href="Dark%20Sky%20API%20Documentation%20Overview_files/scrollspy.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="Dark%20Sky%20API%20Documentation%20Overview_files/scrollspy.js"></script>
+<div class="row max-container doc-body-bottom">
+  <div class="col-xs-12 col-md-3 col-lg-3">
+    <div class="box">
+      <nav id="js-scrollspy" style="margin-top: -145px; position: fixed;">
+        <ul class="js-scrollspy-nav scrollspy-nav">
+          <li class="primary-nav-link scrollspy-link">
+            <a href="#overview">Overview</a>
+          </li>
+          <li class="primary-nav-link scrollspy-link">
+            <a href="#forecast-request">Forecast Request</a>
+          </li>
+          <li class="primary-nav-link scrollspy-link">
+            <a href="#time-machine-request" class="">Time Machine Request</a>
+          </li>
+          <li class="primary-nav-link scrollspy-link">
+            <a href="#response-format" class="is-inview">Response Format</a>
+            <ul class="sub-nav js-sub-scrollspy-nav" style="display: block;">
+              <li class="secondary-nav-link"><a href="#data-point-object" class="is-inview-2">Data Point Object</a></li>
+              <li class="secondary-nav-link"><a href="#data-block-object">Data Block Object</a></li>
+              <li class="secondary-nav-link"><a href="#response-alerts">Alerts</a></li>
+              <li class="secondary-nav-link"><a href="#response-flags">Flags Object</a></li>
+              <li class="secondary-nav-link"><a href="#response-headers">Response Headers</a></li>
+              <li class="secondary-nav-link"><a href="#response-notes">Notes</a></li>
+            </ul>
+          </li>
+          <li><hr></li>
+            <li class="primary-nav-link extra-info"><a href="https://darksky.net/dev/docs/faq">FAQ</a></li>
+          <li class="primary-nav-link extra-info">
+            <a href="https://darksky.net/dev/docs/sources">Data Sources</a>
+          </li>
+          <li class="primary-nav-link extra-info"><a href="https://darksky.net/dev/docs/libraries">API Libraries</a></li>
+          <li class="primary-nav-link extra-info">
+            <a href="https://darksky.net/dev/docs/privacy">Privacy Policy</a>
+          </li>
+          <li class="primary-nav-link extra-info"><a href="https://darksky.net/dev/docs/terms">Terms of Service</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-md-9 col-lg-9">
+    <div class="box">
+      <div class="js-scrollspy-content content">
+    <div id="overview">
+      <h1>Dark Sky API — Overview</h1>
+    
+      <p>The Dark Sky API allows you to look up the weather anywhere on the globe,
+        returning (where available):</p>
+    
+        <ul>
+          <li>Current weather conditions</li>
+          <li>Minute-by-minute forecasts out to one hour</li>
+          <li>Hour-by-hour and day-by-day forecasts out to seven days</li>
+          <li>Hour-by-hour and day-by-day observations going back decades</li>
+          <li>Severe weather alerts in the US, Canada, European Union member nations, and Israel</li>
+        </ul>
+    
+        <h2>Weather API Call Types</h2>
+        <p>We provide two types of API requests to retrieve the weather anywhere in
+          the world:</p>
+    
+        <ul>
+          <li>The <a href="#forecast-request">Forecast Request</a> returns the current weather forecast for the next week.</li>
+          <li>The <a href="#time-machine-request">Time Machine Request</a> returns the observed or forecast weather conditions for a date in the past or future.</li>
+        </ul>
+    
+        <h3>Weather Conditions</h3>
+        <p>The Dark Sky API offers a full collection of meteorological conditions
+          in 39 different languages, including:</p><p>
+        </p><ul>
+          <li>Apparent (feels-like) temperature</li>
+          <li>Atmospheric pressure</li>
+          <li>Cloud cover</li>
+          <li>Dew point</li>
+          <li>Humidity</li>
+          <li>Liquid precipitation rate</li>
+          <li>Moon phase</li>
+          <li>Nearest storm distance</li>
+          <li>Nearest storm direction</li>
+          <li>Ozone</li>
+          <li>Precipitation type</li>
+          <li>Snowfall</li>
+          <li>Sun rise/set</li>
+          <li>Temperature</li>
+          <li>Text summaries</li>
+          <li>UV index</li>
+          <li>Wind gust</li>
+          <li>Wind speed</li>
+          <li>Wind direction</li>
+        </ul>
+        <p>Both forecast and time machine requests return the same weather
+          conditions, in the same convenient
+          <a href="#response-format">JSON format</a>. You can parse the response
+          directly, or use one several community-contributed
+          <a href="https://darksky.net/dev/docs/libraries">libraries</a> to interact with our
+          API in the programming language of your choice.
+        </p>
+    
+        <h2>Pricing and Attribution</h2>
+        <p>Pricing is dead-simple.</p>
+    
+        <ul>
+          <li>The first 1,000 API requests you make every day are
+            <em>free of charge</em>.</li>
+          <li>Every API request over the free daily limit costs $0.0001.</li>
+        </ul>
+        <p>You are required to display the message
+          “<a href="https://darksky.net/poweredby/">Powered by Dark
+          Sky</a>” that links to <code>https://darksky.net/poweredby/</code>
+          somewhere prominent in your app or service.
+        </p>
+    
+        <p>Further details can be found in the
+          <a href="https://darksky.net/dev/docs/terms#attribution">terms of service</a>.
+    
+        </p><p>If you have any questions, please <a href="https://darksky.net/dev/docs/faq">check the FAQ</a> and, if you can’t find what you’re looking for there, <a href="mailto:developer@darksky.net">send us an email</a>.</p>
+    
+      </div>
+
+    <!-- API Request types -->
+
+    <div id="api-request-types">
+      <h1>API Request Types</h1>
+      <!-- Forecast Request -->
+      <div id="forecast-request">
+      
+      <h2>Forecast Request</h2>
+      
+      <pre>      https://api.darksky.net/forecast/[key]/[latitude],[longitude]
+      </pre>
+      
+      <p>A Forecast Request returns the current weather conditions, a 
+minute-by-minute forecast for the next hour (where available), an 
+hour-by-hour forecast for the next 48 hours, and a day-by-day forecast 
+for the next week.</p>
+      
+      <div id="example-request">
+      
+      <h3>Example Request</h3>
+      
+      <pre>GET&nbsp;https://api.darksky.net/forecast/0123456789abcdef9876543210fedcba/42.3601,-71.0589
+      
+      {
+          "latitude": 42.3601,
+          "longitude": -71.0589,
+          "timezone": "America/New_York",
+          "currently": {
+              "time": 1509993277,
+              "summary": "Drizzle",
+              "icon": "rain",
+              "nearestStormDistance": 0,
+              "precipIntensity": 0.0089,
+              "precipIntensityError": 0.0046,
+              "precipProbability": 0.9,
+              "precipType": "rain",
+              "temperature": 66.1,
+              "apparentTemperature": 66.31,
+              "dewPoint": 60.77,
+              "humidity": 0.83,
+              "pressure": 1010.34,
+              "windSpeed": 5.59,
+              "windGust": 12.03,
+              "windBearing": 246,
+              "cloudCover": 0.7,
+              "uvIndex": 1,
+              "visibility": 9.84,
+              "ozone": 267.44
+          },
+          "minutely": {
+              "summary": "Light rain stopping in 13 min., starting again 30 min. later.",
+              "icon": "rain",
+              "data": [{
+                  "time": 1509993240,
+                  "precipIntensity": 0.007,
+                  "precipIntensityError": 0.004,
+                  "precipProbability": 0.84,
+                  "precipType": "rain"
+              },
+            ...
+            ]
+          },
+          "hourly": {
+              "summary": "Rain starting later this afternoon, continuing until this evening.",
+              "icon": "rain",
+              "data": [{
+                  "time": 1509991200,
+                  "summary": "Mostly Cloudy",
+                  "icon": "partly-cloudy-day",
+                  "precipIntensity": 0.0007,
+                  "precipProbability": 0.1,
+                  "precipType": "rain",
+                  "temperature": 65.76,
+                  "apparentTemperature": 66.01,
+                  "dewPoint": 60.99,
+                  "humidity": 0.85,
+                  "pressure": 1010.57,
+                  "windSpeed": 4.23,
+                  "windGust": 9.52,
+                  "windBearing": 230,
+                  "cloudCover": 0.62,
+                  "uvIndex": 1,
+                  "visibility": 9.32,
+                  "ozone": 268.95
+              },
+            ...
+            ]
+          },
+         "daily": {
+              "summary": "Mixed precipitation throughout the week, with temperatures falling to 39°F on Saturday.",
+              "icon": "rain",
+              "data": [{
+                  "time": 1509944400,
+                  "summary": "Rain starting in the afternoon, continuing until evening.",
+                  "icon": "rain",
+                  "sunriseTime": 1509967519,
+                  "sunsetTime": 1510003982,
+                  "moonPhase": 0.59,
+                  "precipIntensity": 0.0088,
+                  "precipIntensityMax": 0.0725,
+                  "precipIntensityMaxTime": 1510002000,
+                  "precipProbability": 0.73,
+                  "precipType": "rain",
+                  "temperatureHigh": 66.35,
+                  "temperatureHighTime": 1509994800,
+                  "temperatureLow": 41.28,
+                  "temperatureLowTime": 1510056000,
+                  "apparentTemperatureHigh": 66.53,
+                  "apparentTemperatureHighTime": 1509994800,
+                  "apparentTemperatureLow": 35.74,
+                  "apparentTemperatureLowTime": 1510056000,
+                  "dewPoint": 57.66,
+                  "humidity": 0.86,
+                  "pressure": 1012.93,
+                  "windSpeed": 3.22,
+                  "windGust": 26.32,
+                  "windGustTime": 1510023600,
+                  "windBearing": 270,
+                  "cloudCover": 0.8,
+                  "uvIndex": 2,
+                  "uvIndexTime": 1509987600,
+                  "visibility": 10,
+                  "ozone": 269.45,
+                  "temperatureMin": 52.08,
+                  "temperatureMinTime": 1510027200,
+                  "temperatureMax": 66.35,
+                  "temperatureMaxTime": 1509994800,
+                  "apparentTemperatureMin": 52.08,
+                  "apparentTemperatureMinTime": 1510027200,
+                  "apparentTemperatureMax": 66.53,
+                  "apparentTemperatureMaxTime": 1509994800
+              },
+            ...
+            ]
+          },
+          "alerts": [
+          {
+            "title": "Flood Watch for Mason, WA",
+            "time": 1509993360,
+            "expires": 1510036680,
+            "description": "...FLOOD WATCH REMAINS IN EFFECT THROUGH LATE MONDAY NIGHT...\nTHE FLOOD WATCH CONTINUES FOR\n* A PORTION OF NORTHWEST WASHINGTON...INCLUDING THE FOLLOWING\nCOUNTY...MASON.\n* THROUGH LATE FRIDAY NIGHT\n* A STRONG WARM FRONT WILL BRING HEAVY RAIN TO THE OLYMPICS\nTONIGHT THROUGH THURSDAY NIGHT. THE HEAVY RAIN WILL PUSH THE\nSKOKOMISH RIVER ABOVE FLOOD STAGE TODAY...AND MAJOR FLOODING IS\nPOSSIBLE.\n* A FLOOD WARNING IS IN EFFECT FOR THE SKOKOMISH RIVER. THE FLOOD\nWATCH REMAINS IN EFFECT FOR MASON COUNTY FOR THE POSSIBILITY OF\nAREAL FLOODING ASSOCIATED WITH A MAJOR FLOOD.\n",
+            "uri": "http://alerts.weather.gov/cap/wwacapget.php?x=WA1255E4DB8494.FloodWatch.1255E4DCE35CWA.SEWFFASEW.38e78ec64613478bb70fc6ed9c87f6e6"
+          },
+          ...
+          ],
+          {
+            "flags": {
+              "units": "us",
+              ...
+            }
+          }
+        </pre>
+      
+      </div>
+      
+      <div id="request-parameters">
+      
+        <h2>Request Parameters</h2>
+      
+        <p>Required parameters slot directly into the request URL. Optional parameters should be specified as <a href="https://en.wikipedia.org/wiki/Query_string">HTTP query parameters</a>.</p>
+      
+        <ul class="parameters">
+          <li class="parameter"><span class="name">key</span> <span class="optional">required</span><div class="description">Your Dark Sky secret key. (Your secret key <em>must</em> be kept secret; in particular, <em>do not</em> embed it in JavaScript source code that you transmit to clients.)</div></li>
+          <li class="parameter"><span class="name">latitude</span> <span class="optional">required</span><div class="description">The latitude of a location (in decimal degrees). Positive is north, negative is south.</div></li>
+          <li class="parameter"><span class="name">longitude</span> <span class="optional">required</span><div class="description">The longitude of a location (in decimal degrees). Positive is east, negative is west.</div></li>
+      
+          <li class="parameter"><span class="name">exclude=[blocks]</span> <span class="optional">optional</span><div class="description"><p>Exclude some number of data blocks from the API response. This is useful for reducing latency and saving cache space. The value <code>blocks</code> should be a comma-delimeted list (without spaces) of any of the following:</p>
+      
+            <ul>
+              <li><code>currently</code></li>
+              <li><code>minutely</code></li>
+              <li><code>hourly</code></li>
+              <li><code>daily</code></li>
+              <li><code>alerts</code></li>
+              <li><code>flags</code></li>
+            </ul></div></li>
+          <li class="parameter"><span class="name">extend=hourly</span> <span class="optional">optional</span><div class="description">When present, return hour-by-hour data for the next 168 hours, instead of the next 48. When using this option, we <em>strongly</em> recommend enabling HTTP compression.</div></li>
+          <li class="parameter"><span class="name">lang=[language]</span> <span class="optional">optional</span><div class="description"><p>Return <code>summary</code> properties in the desired language. (Note that units in the summary will be set according to the <code>units</code> parameter, so be sure to set both parameters appropriately.) <code>language</code> may be:</p>
+      
+            <ul>
+              <li><code>ar</code>: Arabic</li>
+              <li><code>az</code>: Azerbaijani</li>
+              <li><code>be</code>: Belarusian</li>
+              <li><code>bg</code>: Bulgarian</li>
+              <li><code>bn</code>: Bengali</li>
+              <li><code>bs</code>: Bosnian</li>
+              <li><code>ca</code>: Catalan</li>
+              <li><code>cs</code>: Czech</li>
+              <li><code>da</code>: Danish</li>
+              <li><code>de</code>: German</li>
+              <li><code>el</code>: Greek</li>
+              <li><code>en</code>: English (which is the default)</li>
+              <li><code>eo</code>: Esperanto</li>
+              <li><code>es</code>: Spanish</li>
+              <li><code>et</code>: Estonian</li>
+              <li><code>fi</code>: Finnish</li>
+              <li><code>fr</code>: French</li>
+              <li><code>he</code>: Hebrew</li>
+              <li><code>hi</code>: Hindi</li>
+              <li><code>hr</code>: Croatian</li>
+              <li><code>hu</code>: Hungarian</li>
+              <li><code>id</code>: Indonesian</li>
+              <li><code>is</code>: Icelandic</li>
+              <li><code>it</code>: Italian</li>
+              <li><code>ja</code>: Japanese</li>
+              <li><code>ka</code>: Georgian</li>
+              <li><code>kn</code>: Kannada</li>
+              <li><code>ko</code>: Korean</li>
+              <li><code>kw</code>: Cornish</li>
+              <li><code>lv</code>: Latvian</li>
+              <li><code>ml</code>: Malayam</li>
+              <li><code>mr</code>: Marathi</li>
+              <li><code>nb</code>: Norwegian Bokmål</li>
+              <li><code>nl</code>: Dutch</li>
+              <li><code>no</code>: Norwegian Bokmål (alias for <code>nb</code>)</li>
+              <li><code>pa</code>: Punjabi</li>
+              <li><code>pl</code>: Polish</li>
+              <li><code>pt</code>: Portuguese</li>
+              <li><code>ro</code>: Romanian</li>
+              <li><code>ru</code>: Russian</li>
+              <li><code>sk</code>: Slovak</li>
+              <li><code>sl</code>: Slovenian</li>
+              <li><code>sr</code>: Serbian</li>
+              <li><code>sv</code>: Swedish</li>
+              <li><code>ta</code>: Tamil</li>
+              <li><code>te</code>: Telugu</li>
+              <li><code>tet</code>: Tetum</li>
+              <li><code>tr</code>: Turkish</li>
+              <li><code>uk</code>: Ukrainian</li>
+              <li><code>ur</code>: Urdu</li>
+              <li><code>x-pig-latin</code>: Igpay Atinlay</li>
+              <li><code>zh</code>: simplified Chinese</li>
+              <li><code>zh-tw</code>: traditional Chinese</li>
+            </ul>
+      
+            <p>If you require a language not listed here, please consider contributing to our <a href="https://github.com/darkskyapp/forecast-io-translations">API translation module</a> on Github.</p></div></li>
+          <li class="parameter"><span class="name">units=[units]</span> <span class="optional">optional</span><div class="description"><p>Return weather conditions in the requested units. <code>[units]</code> should be one of the following:</p>
+      
+            <ul>
+              <li><code>auto</code>: automatically select units based on geographic location</li>
+              <li><code>ca</code>: same as <code>si</code>, except that <code>windSpeed</code> and <code>windGust</code> are in kilometers per hour</li>
+              <li><code>uk2</code>: same as <code>si</code>, except that <code>nearestStormDistance</code> and <code>visibility</code> are in miles, and <code>windSpeed</code> and <code>windGust</code> in miles per hour</li>
+              <li><code>us</code>: Imperial units (the default)</li>
+              <li><code>si</code>: SI units</li>
+            </ul>
+      
+            <p>SI units are as follows:</p>
+      
+            <ul>
+              <li><code>summary</code>: Any summaries containing temperature or snow
+                accumulation units will have their values in degrees Celsius or in
+                centimeters (respectively).</li>
+                <li><code>nearestStormDistance</code>: Kilometers.</li>
+                <li><code>precipIntensity</code>: Millimeters per hour.</li>
+                <li><code>precipIntensityMax</code>: Millimeters per hour.</li>
+                <li><code>precipAccumulation</code>: Centimeters.</li>
+                <li><code>temperature</code>: Degrees Celsius.</li>
+                <li><code>temperatureMin</code>: Degrees Celsius.</li>
+                <li><code>temperatureMax</code>: Degrees Celsius.</li>
+                <li><code>apparentTemperature</code>: Degrees Celsius.</li>
+                <li><code>dewPoint</code>: Degrees Celsius.</li>
+                <li><code>windSpeed</code>: Meters per second.</li>
+                <li><code>windGust</code>: Meters per second.</li>
+                <li><code>pressure</code>: Hectopascals.</li>
+                <li><code>visibility</code>: Kilometers.</li>
+              </ul></div></li>
+          </ul>
+      
+        </div>
+      
+      </div>
+      <!-- Time Machine Request -->
+      <div id="time-machine-request">
+      
+        <h2>Time Machine Request</h2>
+      
+        <pre>          https://api.darksky.net/forecast/[key]/[latitude],[longitude],[time]
+        </pre>
+      
+        <p>A Time Machine Request returns the observed (in the past) or 
+forecasted (in the future) hour-by-hour weather and daily weather 
+conditions for a particular date. A Time Machine request is identical in
+ structure to a <a href="#forecast-request">Forecast Request</a>, except:</p>
+      
+        <ul>
+          <li>The <code>currently</code> data point will refer to the time provided, rather than the current time.</li>
+          <li>The <code>minutely</code> data block will be omitted, unless you are requesting a time within an hour of the present.</li>
+          <li>The <code>hourly</code> data block will contain data 
+points starting at midnight (local time) of the day requested, and 
+continuing until midnight (local time) of the following day.</li>
+          <li>The <code>daily</code> data block will contain a single data point referring to the requested date.</li>
+          <li>The <code>alerts</code> data block will be omitted.</li>
+        </ul>
+      
+        <div id="example-time-machine-request">
+      
+          <h3>Example Request</h3>
+      
+      
+          <pre>      GET&nbsp;https://api.darksky.net/forecast/0123456789abcdef9876543210fedcba/42.3601,-71.0589,255657600?exclude=currently,flags
+      
+      {
+        "latitude": 42.3601,
+        "longitude": -71.0589,
+        "timezone": "America/New_York",
+        "hourly": {
+          "summary": "Snow (6–9 in.) and windy starting in the afternoon.",
+          "icon": "snow",
+          "data": [
+            {
+              "time": 255589200,
+              "summary": "Mostly Cloudy",
+              "icon": "partly-cloudy-night",
+              "precipIntensity": 0,
+              "precipProbability": 0,
+              "temperature": 22.8,
+              "apparentTemperature": 16.46,
+              "dewPoint": 15.51,
+              "humidity": 0.73,
+              "pressure": 1026.78,
+              "windSpeed": 4.83,
+              "windBearing": 354,
+              "cloudCover": 0.78,
+              "uvIndex": 0,
+              "visibility": 9.62
+            },
+            ...
+          ]
+        },
+        "daily": {
+          "data": [
+            {
+              "time": 255589200,
+              "summary": "Snow (9–14 in.) and windy starting in the afternoon.",
+              "icon": "snow",
+              "sunriseTime": 255613996,
+              "sunsetTime": 255650764,
+              "moonPhase": 0.97,
+              "precipIntensity": 0.0354,
+              "precipIntensityMax": 0.1731,
+              "precipIntensityMaxTime": 255657600,
+              "precipProbability": 1,
+              "precipAccumulation": 7.337,
+              "precipType": "snow",
+              "temperatureHigh": 31.84,
+              "temperatureHighTime": 255632400,
+              "temperatureLow": 28.63,
+              "temperatureLowTime": 255697200,
+              "apparentTemperatureHigh": 20.47,
+              "apparentTemperatureHighTime": 255625200,
+              "apparentTemperatureLow": 13.03,
+              "apparentTemperatureLowTime": 255697200,
+              "dewPoint": 24.72,
+              "humidity": 0.86,
+              "pressure": 1016.41,
+              "windSpeed": 22.93,
+              "windBearing": 56,
+              "cloudCover": 0.95,
+              "uvIndex": 1,
+              "uvIndexTime": 255621600,
+              "visibility": 4.83,
+              "temperatureMin": 22.72,
+              "temperatureMinTime": 255596400,
+              "temperatureMax": 32.04,
+              "temperatureMaxTime": 255672000,
+              "apparentTemperatureMin": 11.13,
+              "apparentTemperatureMinTime": 255650400,
+              "apparentTemperatureMax": 20.47,
+              "apparentTemperatureMaxTime": 255625200
+            }
+          ]
+        },
+        "offset": -5
+      }
+          </pre>
+      
+        </div>
+      
+        <div id="time-machine-request-parameters">
+      
+          <h2>Request Parameters</h2>
+      
+          <p>Required parameters slot directly into the request URL. Optional parameters should be specified as <a href="https://en.wikipedia.org/wiki/Query_string">HTTP query parameters</a>.</p>
+      
+          <ul class="parameters">
+            <li class="parameter"><span class="name">key</span> <span class="optional">required</span><div class="description">Your Dark Sky secret key. (Your secret key <em>must</em> be kept secret; in particular, <em>do not</em> embed it in JavaScript source code that you transmit to clients.)</div></li>
+            <li class="parameter"><span class="name">latitude</span> <span class="optional">required</span><div class="description">The latitude of a location (in decimal degrees). Positive is north, negative is south.</div></li>
+            <li class="parameter"><span class="name">longitude</span> <span class="optional">required</span><div class="description">The longitude of a location (in decimal degrees). Positive is east, negative is west.</div></li>
+            <li class="parameter"><span class="name">time</span> <span class="optional">required</span><div class="description">Either be a UNIX time (that is, seconds since midnight GMT on 1 Jan 1970) or a string formatted as follows: <code>[YYYY]-[MM]-[DD]T[HH]:[MM]:[SS][timezone]</code>. <code>timezone</code> should either be omitted (to refer to local time for the location being requested), <code>Z</code> (referring to GMT time), or <code>+[HH][MM]</code> or <code>-[HH][MM]</code>
+ for an offset from GMT in hours and minutes. The timezone is only used 
+for determining the time of the request; the response will always be 
+relative to the local time zone.</div></li>
+      
+            <li class="parameter"><span class="name">exclude=[blocks]</span> <span class="optional">optional</span><div class="description"><p>Exclude some number of data blocks from the API response. This is useful for reducing latency and saving cache space. The value <code>blocks</code> should be a comma-delimeted list (without spaces) of any of the following:</p>
+      
+              <ul>
+                <li><code>currently</code></li>
+                <li><code>minutely</code></li>
+                <li><code>hourly</code></li>
+                <li><code>daily</code></li>
+                <li><code>alerts</code></li>
+                <li><code>flags</code></li>
+              </ul></div></li>
+            <li class="parameter"><span class="name">lang=[language]</span> <span class="optional">optional</span><div class="description"><p>Return <code>summary</code> properties in the desired language. (Note that units in the summary will be set according to the <code>units</code> parameter, so be sure to set both parameters appropriately.) <code>language</code> may be:</p>
+      
+              <ul>
+                <li><code>ar</code>: Arabic</li>
+                <li><code>az</code>: Azerbaijani</li>
+                <li><code>be</code>: Belarusian</li>
+                <li><code>bg</code>: Bulgarian</li>
+                <li><code>bn</code>: Bengali</li>
+                <li><code>bs</code>: Bosnian</li>
+                <li><code>ca</code>: Catalan</li>
+                <li><code>cs</code>: Czech</li>
+                <li><code>da</code>: Danish</li>
+                <li><code>de</code>: German</li>
+                <li><code>el</code>: Greek</li>
+                <li><code>en</code>: English (which is the default)</li>
+                <li><code>eo</code>: Esperanto</li>
+                <li><code>es</code>: Spanish</li>
+                <li><code>et</code>: Estonian</li>
+                <li><code>fi</code>: Finnish</li>
+                <li><code>fr</code>: French</li>
+                <li><code>he</code>: Hebrew</li>
+                <li><code>hi</code>: Hindi</li>
+                <li><code>hr</code>: Croatian</li>
+                <li><code>hu</code>: Hungarian</li>
+                <li><code>id</code>: Indonesian</li>
+                <li><code>is</code>: Icelandic</li>
+                <li><code>it</code>: Italian</li>
+                <li><code>ja</code>: Japanese</li>
+                <li><code>ka</code>: Georgian</li>
+                <li><code>kn</code>: Kannada</li>
+                <li><code>ko</code>: Korean</li>
+                <li><code>kw</code>: Cornish</li>
+                <li><code>lv</code>: Latvian</li>
+                <li><code>ml</code>: Malayam</li>
+                <li><code>mr</code>: Marathi</li>
+                <li><code>nb</code>: Norwegian Bokmål</li>
+                <li><code>nl</code>: Dutch</li>
+                <li><code>no</code>: Norwegian Bokmål (alias for <code>nb</code>)</li>
+                <li><code>pa</code>: Punjabi</li>
+                <li><code>pl</code>: Polish</li>
+                <li><code>pt</code>: Portuguese</li>
+                <li><code>ro</code>: Romanian</li>
+                <li><code>ru</code>: Russian</li>
+                <li><code>sk</code>: Slovak</li>
+                <li><code>sl</code>: Slovenian</li>
+                <li><code>sr</code>: Serbian</li>
+                <li><code>sv</code>: Swedish</li>
+                <li><code>ta</code>: Tamil</li>
+                <li><code>te</code>: Telugu</li>
+                <li><code>tet</code>: Tetum</li>
+                <li><code>tr</code>: Turkish</li>
+                <li><code>uk</code>: Ukrainian</li>
+                <li><code>ur</code>: Urdu</li>
+                <li><code>x-pig-latin</code>: Igpay Atinlay</li>
+                <li><code>zh</code>: simplified Chinese</li>
+                <li><code>zh-tw</code>: traditional Chinese</li>
+              </ul>
+      
+              <p>If you require a language not listed here, please consider contributing to our <a href="https://github.com/darkskyapp/forecast-io-translations">API translation module</a> on Github.</p></div></li>
+            <li class="parameter"><span class="name">units=[units]</span> <span class="optional">optional</span><div class="description"><p>Return weather conditions in the requested units. <code>[units]</code> should be one of the following:</p>
+      
+              <ul>
+                <li><code>auto</code>: automatically select units based on geographic location</li>
+                <li><code>ca</code>: same as <code>si</code>, except that <code>windSpeed</code> is in kilometers per hour</li>
+                <li><code>uk2</code>: same as <code>si</code>, except that <code>nearestStormDistance</code> and <code>visibility</code> are in miles and <code>windSpeed</code> is in miles per hour</li>
+                <li><code>us</code>: Imperial units (the default)</li>
+                <li><code>si</code>: SI units</li>
+              </ul>
+      
+              <p>SI units are as follows:</p>
+      
+              <ul>
+                <li><code>summary</code>: Any summaries containing temperature or snow
+                  accumulation units will have their values in degrees Celsius or in
+                  centimeters (respectively).</li>
+                  <li><code>nearestStormDistance</code>: Kilometers.</li>
+                  <li><code>precipIntensity</code>: Millimeters per hour.</li>
+                  <li><code>precipIntensityMax</code>: Millimeters per hour.</li>
+                  <li><code>precipAccumulation</code>: Centimeters.</li>
+                  <li><code>temperature</code>: Degrees Celsius.</li>
+                  <li><code>temperatureMin</code>: Degrees Celsius.</li>
+                  <li><code>temperatureMax</code>: Degrees Celsius.</li>
+                  <li><code>apparentTemperature</code>: Degrees Celsius.</li>
+                  <li><code>dewPoint</code>: Degrees Celsius.</li>
+                  <li><code>windSpeed</code>: Meters per second.</li>
+                  <li><code>pressure</code>: Hectopascals.</li>
+                  <li><code>visibility</code>: Kilometers.</li>
+                </ul></div></li>
+            </ul>
+      
+          </div>
+      
+        </div>
+      
+      </div>
+      <div id="response-format">
+      <h1>Response Format</h1>
+      
+      <p>API responses consist of a UTF-8-encoded, JSON-formatted object with the following properties:</p>
+      
+      <ul class="parameters">
+        <li class="parameter"><span class="name">latitude</span> <span class="optional">required</span><div class="description">The requested latitude.</div></li>
+        <li class="parameter"><span class="name">longitude</span> <span class="optional">required</span><div class="description">The requested longitude.</div></li>
+        <li class="parameter"><span class="name">timezone</span> <span class="example">(e.g. <code>America/New_York</code>)</span> <span class="optional">required</span><div class="description">The IANA timezone name for the requested location. This is used for text summaries and for determining when <code>hourly</code> and <code>daily</code> data block objects begin.</div></li>
+        <li class="parameter"><span class="name">offset</span> <span class="deprecated">deprecated</span><div class="description">The
+ current timezone offset in hours. (Use of this property will almost 
+certainly result in Daylight Saving Time bugs. Please use <code>timezone</code>, instead.)</div></li>
+        <li class="parameter"><span class="name">currently</span> <span class="optional">optional</span><div class="description">A <a href="#data-point">data point</a> containing the current weather conditions at the requested location.</div></li>
+        <li class="parameter"><span class="name">minutely</span> <span class="optional">optional</span><div class="description">A <a href="#data-block">data block</a> containing the weather conditions minute-by-minute for the next hour.</div></li>
+        <li class="parameter"><span class="name">hourly</span> <span class="optional">optional</span><div class="description">A <a href="#data-block">data block</a> containing the weather conditions hour-by-hour for the next two days.</div></li>
+        <li class="parameter"><span class="name">daily</span> <span class="optional">optional</span><div class="description">A <a href="#data-block">data block</a> containing the weather conditions day-by-day for the next week.</div></li>
+        <li class="parameter"><span class="name">alerts</span> <span class="optional">optional</span><div class="description">An <a href="#alerts">alerts array</a>, which, if present, contains any severe weather alerts pertinent to the requested location.</div></li>
+        <li class="parameter"><span class="name">flags</span> <span class="optional">optional</span><div class="description">A <a href="#flags">flags object</a> containing miscellaneous metadata about the request.</div></li>
+      </ul>
+      
+      <div id="data-point-object">
+      <h2 id="data-point">Data Point Object</h2>
+      
+      <p>A <em>data point</em> object contains various properties, each 
+representing the average (unless otherwise specified) of a particular 
+weather phenomenon occurring during a period of time: an instant in the 
+case of <code>currently</code>, a minute for <code>minutely</code>, an hour for <code>hourly</code>, and a day for <code>daily</code>. These properties are:</p>
+      
+      <ul class="parameters">
+        <li class="parameter"><span class="name">apparentTemperature</span> <span class="optional">optional, only on <code>hourly</code> and <code>currently</code></span><div class="description">The apparent (or “feels like”) temperature in degrees Fahrenheit.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureHigh</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The daytime high apparent temperature.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureHighTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the daytime high apparent temperature occurs.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureLow</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The overnight low apparent temperature.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureLowTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the overnight low apparent temperature occurs.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureMax</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The maximum apparent temperature during a given date.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureMaxTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the maximum apparent temperature during a given date occurs.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureMin</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The minimum apparent temperature during a given date.</div></li>
+        <li class="parameter"><span class="name">apparentTemperatureMinTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the minimum apparent temperature during a given date occurs.</div></li>
+        <li class="parameter"><span class="name">cloudCover</span> <span class="optional">optional</span><div class="description">The percentage of sky occluded by clouds, between <code>0</code> and <code>1</code>, inclusive.</div></li>
+        <li class="parameter"><span class="name">dewPoint</span> <span class="optional">optional</span><div class="description">The dew point in degrees Fahrenheit.</div></li>
+        <li class="parameter"><span class="name">humidity</span> <span class="optional">optional</span><div class="description">The relative humidity, between <code>0</code> and <code>1</code>, inclusive.</div></li>
+        <li class="parameter"><span class="name">icon</span> <span class="optional">optional</span><div class="description">A
+ machine-readable text summary of this data point, suitable for 
+selecting an icon for display. If defined, this property will have one 
+of the following values: <code>clear-day</code>, <code>clear-night</code>, <code>rain</code>, <code>snow</code>, <code>sleet</code>, <code>wind</code>, <code>fog</code>, <code>cloudy</code>, <code>partly-cloudy-day</code>, or <code>partly-cloudy-night</code>. (Developers should ensure that a sensible default is defined, as additional values, such as <code>hail</code>, <code>thunderstorm</code>, or <code>tornado</code>, may be defined in the future.)</div></li>
+        <li class="parameter"><span class="name">moonPhase</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The fractional part of the <a href="https://en.wikipedia.org/wiki/Lunation_Number">lunation number</a> during the given day: a value of <code>0</code> corresponds to a new moon, <code>0.25</code> to a first quarter moon, <code>0.5</code> to a full moon, and <code>0.75</code>
+ to a last quarter moon. (The ranges in between these represent waxing 
+crescent, waxing gibbous, waning gibbous, and waning crescent moons, 
+respectively.)</div></li>
+        <li class="parameter"><span class="name">nearestStormBearing</span> <span class="optional">optional, only on <code>currently</code></span><div class="description">The approximate direction of the nearest storm in degrees, with true north at 0° and progressing clockwise. (If <code>nearestStormDistance</code> is zero, then this value will not be defined.)</div></li>
+        <li class="parameter"><span class="name">nearestStormDistance</span> <span class="optional">optional, only on <code>currently</code></span><div class="description">The approximate distance to the nearest storm in miles. (A storm distance of <code>0</code> doesn’t necessarily refer to a storm at the requested location, but rather a storm in the vicinity of that location.)</div></li>
+        <li class="parameter"><span class="name">ozone</span> <span class="optional">optional</span><div class="description">The columnar density of total atmospheric ozone at the given time in Dobson units.</div></li>
+        <li class="parameter"><span class="name">precipAccumulation</span> <span class="optional">optional, only on <code>hourly</code>,<code>currently</code> and <code>daily</code></span><div class="description">The
+ amount of snowfall accumulation expected to occur (over the hour or 
+day, respectively), in inches. (If no snowfall is expected, this 
+property will not be defined.)</div></li>
+        <li class="parameter"><span class="name">precipIntensity</span> <span class="optional">optional</span><div class="description">The intensity (in inches of liquid water per hour) of precipitation occurring at the given time. This value is <em>conditional on probability</em> (that is, assuming any precipitation occurs at all).</div></li>
+        <li class="parameter"><span class="name">precipIntensityError</span> <span class="optional">optional</span><div class="description">The standard deviation of the distribution of <code>precipIntensity</code>. (We only return this property when the full distribution, and not merely the expected mean, can be estimated with accuracy.)</div></li>
+        <li class="parameter"><span class="name">precipIntensityMax</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The maximum value of <code>precipIntensity</code> during a given day.</div></li>
+        <li class="parameter"><span class="name">precipIntensityMaxTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time of when <code>precipIntensityMax</code> occurs during a given day.</div></li>
+        <li class="parameter"><span class="name">precipProbability</span> <span class="optional">optional</span><div class="description">The probability of precipitation occurring, between <code>0</code> and <code>1</code>, inclusive.</div></li>
+        <li class="parameter"><span class="name">precipType</span> <span class="optional">optional</span><div class="description">The type of precipitation occurring at the given time. If defined, this property will have one of the following values: <code>"rain"</code>, <code>"snow"</code>, or <code>"sleet"</code> (which refers to each of freezing rain, ice pellets, and “wintery mix”). (If <code>precipIntensity</code> is zero, then this property will not be defined. Additionally, due to the lack of data in our sources, historical <code>precipType</code> information is usually estimated, rather than observed.)</div></li>
+        <li class="parameter"><span class="name">pressure</span> <span class="optional">optional</span><div class="description">The sea-level air pressure in millibars.</div></li>
+        <li class="parameter"><span class="name">summary</span> <span class="optional">optional</span><div class="description">A
+ human-readable text summary of this data point. (This property has 
+millions of possible values, so don’t use it for automated purposes: use
+ the <code>icon</code> property, instead!)</div></li>
+        <li class="parameter"><span class="name">sunriseTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time of when the sun will rise during a given day.</div></li>
+        <li class="parameter"><span class="name">sunsetTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time of when the sun will set during a given day.</div></li>
+        <li class="parameter"><span class="name">temperature</span> <span class="optional">optional, only on <code>hourly</code> and <code>currently</code></span><div class="description">The air temperature in degrees Fahrenheit.</div></li>
+        <li class="parameter"><span class="name">temperatureHigh</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The daytime high temperature.</div></li>
+        <li class="parameter"><span class="name">temperatureHighTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the daytime high temperature occurs.</div></li>
+        <li class="parameter"><span class="name">temperatureLow</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The overnight low temperature.</div></li>
+        <li class="parameter"><span class="name">temperatureLowTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the overnight low temperature occurs.</div></li>
+        <li class="parameter"><span class="name">temperatureMax</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The maximum temperature during a given date.</div></li>
+        <li class="parameter"><span class="name">temperatureMaxTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the maximum temperature during a given date occurs.</div></li>
+        <li class="parameter"><span class="name">temperatureMin</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The minimum temperature during a given date.</div></li>
+        <li class="parameter"><span class="name">temperatureMinTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time representing when the minimum temperature during a given date occurs.</div></li>
+        <li class="parameter"><span class="name">time</span> <span class="optional">required</span><div class="description">The UNIX time at which this data point begins. <code>minutely</code> data point are always aligned to the top of the minute, <code>hourly</code> data point objects to the top of the hour, <code>daily</code> data point objects to midnight of the day, and <code>currently</code> data point object to the point of time provided all according to the local time zone.</div></li>
+        
+        <li class="parameter"><span class="name">uvIndex</span> <span class="optional">optional</span><div class="description">The UV index.</div></li>
+        <li class="parameter"><span class="name">uvIndexTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The UNIX time of when the maximum <code>uvIndex</code> occurs during a given day.</div></li>
+        <li class="parameter"><span class="name">visibility</span> <span class="optional">optional</span><div class="description">The average visibility in miles, capped at 10 miles.</div></li>
+        <li class="parameter"><span class="name">windBearing</span> <span class="optional">optional</span><div class="description">The direction that the wind is coming <em>from</em> in degrees, with true north at 0° and progressing clockwise. (If <code>windSpeed</code> is zero, then this value will not be defined.)</div></li>
+        <li class="parameter"><span class="name">windGust</span> <span class="optional">optional</span><div class="description">The wind gust speed in miles per hour.</div></li>
+        <li class="parameter"><span class="name">windGustTime</span> <span class="optional">optional, only on <code>daily</code></span><div class="description">The time at which the maximum wind gust speed occurs during the day.</div></li>
+        <li class="parameter"><span class="name">windSpeed</span> <span class="optional">optional</span><div class="description">The wind speed in miles per hour.</div></li>
+      </ul>
+      </div>
+      
+      <div id="data-block-object">
+      <h2 id="data-block">Data Block Object</h2>
+      
+      <p>A <em>data block</em> object represents the various weather phenomena occurring over a period of time. Such objects contain the following properties:</p>
+      
+      <ul class="parameters">
+        <li class="parameter"><span class="name">data</span> <span class="optional">required</span><div class="description">An array of <a href="#data-point">data points</a>, ordered by time, which together describe the weather conditions at the requested location over time.</div></li>
+        <li class="parameter"><span class="name">summary</span> <span class="optional">optional</span><div class="description">A human-readable summary of this data block.</div></li>
+        <li class="parameter"><span class="name">icon</span> <span class="optional">optional</span><div class="description">A machine-readable text summary of this data block. (May take on the same values as the <code>icon</code>property of <a href="#data-point">data points</a>.)</div></li>
+      </ul>
+      </div>
+      
+      <div id="response-alerts">
+      <h2 id="alerts">Alerts Array</h2>
+      
+      <p>The <em>alerts array</em> contains objects representing the 
+severe weather warnings issued for the requested location by a 
+governmental authority (please see our <a href="https://darksky.net/dev/docs/sources">data sources page</a> for a list of sources). Objects in the alerts array contain the following properties:</p>
+      
+      <ul class="parameters">
+        <li class="parameter"><span class="name">description</span> <span class="optional">required</span><div class="description">A detailed description of the alert.</div></li>
+        <li class="parameter"><span class="name">expires</span> <span class="optional">required</span><div class="description">The UNIX time at which the alert will expire.</div></li>
+        <li class="parameter"><span class="name">regions</span> <span class="optional">required</span><div class="description">An array of strings representing the names of the regions covered by this weather alert.</div></li>
+        <li class="parameter"><span class="name">severity</span> <span class="optional">required</span><div class="description">The severity of the weather alert. Will take one of the following values: <code>"advisory"</code> (an individual should be aware of potentially severe weather), <code>"watch"</code> (an individual should prepare for potentially severe weather), or <code>"warning"</code> (an individual should take immediate action to protect themselves and others from potentially severe weather).</div></li>
+        <li class="parameter"><span class="name">time</span> <span class="optional">required</span><div class="description">The UNIX time at which the alert was issued.</div></li>
+        <li class="parameter"><span class="name">title</span> <span class="optional">required</span><div class="description">A brief description of the alert.</div></li>
+        <li class="parameter"><span class="name">uri</span> <span class="optional">required</span><div class="description">An HTTP(S) URI that one may refer to for detailed information about the alert.</div></li>
+      </ul>
+      </div>
+      
+      <div id="response-flags">
+      <h2 id="flags">Flags Object</h2>
+      
+      <p>The <em>flags object</em> contains various metadata information
+ related to the request. This object may optionally contain any of the 
+following properties:</p>
+      
+      <ul class="parameters">
+        <li class="parameter"><span class="name">darksky-unavailable</span> <span class="optional">optional</span><div class="description">The
+ presence of this property indicates that the Dark Sky data source 
+supports the given location, but a temporary error (such as a radar 
+station being down for maintenance) has made the data unavailable.</div></li>
+        <li class="parameter"><span class="name">nearest-station</span> <span class="optional">required</span><div class="description">The
+ distance to the nearest weather station that contributed data to this 
+response. Note, however, that many other stations may have also been 
+used; this value is primarily for debugging purposes. This property's 
+value is in miles (if US units are selected) or kilometers (if SI units 
+are selected).</div></li>
+        <li class="parameter"><span class="name">sources</span> <span class="optional">required</span><div class="description">This property contains an array of IDs for each <a href="https://darksky.net/dev/docs/sources">data source</a> utilized in servicing this request.</div></li>
+        <li class="parameter"><span class="name">units</span> <span class="optional">required</span><div class="description">Indicates the units which were used for the data in this request.</div></li>
+      </ul>
+      </div>
+      
+      <div id="response-headers">
+      <h2 id="response">Response Headers</h2>
+      
+      <p>The API will set the following HTTP response headers to values useful to developers:</p>
+      
+      <ul class="parameters">
+        <li class="parameter"><span class="name">Cache-Control</span> <span class="optional">optional</span><div class="description">Set to a conservative value for data caching purposes based on the data present in the response body.</div></li>
+        <li class="parameter"><span class="name">Expires</span> <span class="deprecated">deprecated</span><div class="description">Set to a conservative value for data caching purposes based on
+      the data present in the response body.</div></li>
+        <li class="parameter"><span class="name">X-Forecast-API-Calls</span> <span class="optional">optional</span><div class="description">The number of API requests made by the given API key for today.</div></li>
+        <li class="parameter"><span class="name">X-Response-Time</span> <span class="optional">optional</span><div class="description">The server-side response time of the request.</div></li>
+      </ul>
+      </div>
+      
+      <div id="response-notes">
+      <h2>Notes</h2>
+      
+      <ul>
+        <li>Never make any assumptions about the presence of data or 
+lengths of arrays. For example, a lack of data in our data sources may 
+cause data to be missing; or Daylight Savings Time may cause a day to 
+consist of 23 or 25 hours (instead of the usual 24); or, at high 
+latitudes, a given day may not have a sunrise or sunset. <em>Always</em> check for the presence of data before trying to use it.</li>
+        <li>Overnight low temperatures usually occur around dawn, and so
+ will usually occur on a different date from the daytime high 
+temperatures. (This is the primary difference between <code>temperatureLow</code> and <code>temperatureMin</code>.)</li>
+        <li>Summaries on the <code>hourly</code> data block actually 
+only cover up to a maximum of 24 hours, rather than the full time period
+ in the data block. We found that covering the full 48 hours could be, 
+in a number of circumstances, far too wordy to be practical.</li>
+        <li>Summaries and icons on <code>daily</code> data point objects
+ actually cover the period from 4AM to 4AM, rather than the stated time 
+period of midnight to midnight. We found that the summaries so generated
+ were less awkward.</li>
+        <li>The Forecast Data API supports HTTP compression. We heartily
+ recommend using it, as it will make responses much smaller over the 
+wire. To enable it, simply add an <code>Accept-Encoding: gzip</code> 
+header to your request. (Most HTTP client libraries wrap this 
+functionality for you, please consult your library’s documentation for 
+details.)</li>
+      </ul>
+      </div>
+      </div>
+    </div>
+</div>
+
+    </div>
+  </div>
+</div>
+<script>
+
+function stickyScroll() {
+  var URLregex = /libraries/;
+
+  var librariesCheck = URLregex.test(window.location.href);
+
+  if(librariesCheck) {
+    if($(window).scrollTop() > 90 && $(window).scrollTop() <= 2500) {
+      $("#js-scrollspy").css({
+        "margin-top": "-145px",
+        "position": "fixed"
+      });
+      return;
+    }
+    else if($(window).scrollTop() > 2500) {
+      if(window.location.href.indexOf('libraries') !== -1) {
+        $("#js-scrollspy").css({
+          "margin-top": "-" + ($(window).scrollTop() - 2500) + "px"
+        });
+      }
+      return;
+    }
+    else {
+      $("#js-scrollspy").css({
+        "margin-top": "35px",
+        "position": "static"
+      });
+    }
+  } else {
+    if($(window).scrollTop() > 180) {
+      $("#js-scrollspy").css({
+        "margin-top": "-145px",
+        "position": "fixed"
+      });
+      return;
+    }
+    else if($(window).scrollTop() > 2500) {
+      if(window.location.href.indexOf('libraries') !== -1) {
+        $("#js-scrollspy").css({
+          "margin-top": "-" + ($(window).scrollTop() - 2500) + "px"
+        });
+      }
+      return;
+    }
+    else {
+      $("#js-scrollspy").css({
+        "margin-top": "35px",
+        "position": "static"
+      });
+    }
+  }
+}
+
+// Smooth scroll animation for navigation
+  $(function() {
+
+    stickyScroll();
+
+    var spy = new ScrollSpy('#js-scrollspy', {
+      nav: '.js-scrollspy-nav > .scrollspy-link > a',
+      className: 'is-inview'
+    });
+
+    var subSpy = new ScrollSpy('#js-scrollspy', {
+      nav: '.js-sub-scrollspy-nav > li > a',
+      className: 'is-inview-2',
+      callback: function () {
+        $(".sub-nav").hide();
+        $(".is-inview-2").parent().parent().show();
+      }
+    });
+
+    $("#footer").css("margin-top", "300px");
+      $('a[href*="#"]:not([href="#"])').click(function() {
+        if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+          var target = $(this.hash);
+          target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+          if (target.length) {
+            $('html, body').animate({
+              scrollTop: target.offset().top
+            }, 1000);
+            return false;
+          }
+        }
+      });
+
+      $.each($("a[href*='#']"), function(i, val) {
+        $(val).on("click", function() {
+          window.location.hash = $(this).attr("href");
+        });
+      });
+
+      $(window).scroll(stickyScroll);
+
+
+    });
+</script>
+
+  
+
+  <div id="footer" style="margin-top: 300px;">
+    <ul>
+      <li><a href="https://darksky.net/">Dark Sky</a></li>
+      <li><a href="mailto:info@darksky.net">Inquiries</a></li>
+      <li><a href="http://status.darksky.net/">Status</a></li>
+      <li><a href="mailto:developer@darksky.net">Support</a></li>
+      <li><a href="https://darksky.net/dev/docs/terms">Terms of Service</a></li>
+      <li><a href="https://darksky.net/dev/docs/privacy">Privacy Policy</a></li>
+    </ul>
+    <div class="copyright">
+      <span class="copyright">
+        Copyright © 2022 <a href="https://apple.com/">Apple Inc.</a> All rights reserved.&nbsp;</span>
+      
+    </div>
+  </div>  
+
+
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>

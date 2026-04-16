@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-03-13T17:12:34.653351",
+  "halfhourly_dataset": {
+    "dataset_type": "halfhourly_dataset",
+    "blocks_loaded": [
+      0,
+      1,
+      2
+    ],
+    "blocks_failed": [],
+    "total_rows_loaded": 4227000,
+    "duplicates_found": 0,
+    "duplicates_removed": 0,
+    "invalid_records": 0,
+    "final_shape": [
+      4227000,
+      3
+    ],
+    "final_rows": 4227000
+  },
+  "daily_dataset": {
+    "dataset_type": "daily_dataset",
+    "blocks_loaded": [
+      0,
+      1,
+      2
+    ],
+    "blocks_failed": [],
+    "total_rows_loaded": 88438,
+    "duplicates_found": 0,
+    "duplicates_removed": 0,
+    "invalid_records": 0,
+    "final_shape": [
+      88438,
+      9
+    ],
+    "final_rows": 88438
+  },
+  "hhblock_dataset": {
+    "dataset_type": "hhblock_dataset",
+    "blocks_loaded": [
+      0,
+      1,
+      2
+    ],
+    "blocks_failed": [],
+    "total_rows_loaded": 87300,
+    "duplicates_found": 0,
+    "duplicates_removed": 0,
+    "invalid_records": 0,
+    "final_shape": [
+      87300,
+      50
+    ],
+    "final_rows": 87300
+  }
+}
