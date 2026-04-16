@@ -1,0 +1,23 @@
+# Data files
+data/
+*.csv
+*.parquet
+*.pkl
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Reports / artifacts (large outputs)
+report/artifacts/
+
+# OS
+.DS_Store
+Thumbs.db
