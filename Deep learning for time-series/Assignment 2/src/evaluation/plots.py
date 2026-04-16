@@ -61,6 +61,57 @@ def plot_multiple_households(
     return fig
 
 
+def plot_acf_pacf(
+    df: pd.DataFrame,
+    household_ids: Sequence[str],
+    lags: int = 100,
+    timestamp_col: str = "tstp",
+    value_col: str = "energy(kWh/hh)",
+    figsize: tuple = (14, 4),
+) -> plt.Figure:
+    """Plot ACF and PACF side-by-side for each household (n rows × 2 cols).
+
+    Args:
+        df:             Halfhourly DataFrame sorted by (LCLid, tstp).
+        household_ids:  Household LCLids to plot (up to 3 recommended).
+        lags:           Number of lags.  Default 100 shows past the daily peak (lag 48).
+        timestamp_col:  Timestamp column name.
+        value_col:      Energy column name.
+        figsize:        (width, height-per-row) tuple.
+
+    Returns:
+        matplotlib Figure.
+    """
+    from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+    ids = list(household_ids)
+    fig, axes = plt.subplots(
+        nrows=len(ids),
+        ncols=2,
+        figsize=(figsize[0], figsize[1] * len(ids)),
+        constrained_layout=True,
+    )
+    if len(ids) == 1:
+        axes = axes[np.newaxis, :]
+
+    for row_idx, hid in enumerate(ids):
+        series = (
+            df[df["LCLid"] == hid]
+            .sort_values(timestamp_col)[value_col]
+            .dropna()
+            .reset_index(drop=True)
+        )
+        plot_acf(series, lags=lags, ax=axes[row_idx, 0], title=f"ACF — {hid}")
+        plot_pacf(series, lags=lags, ax=axes[row_idx, 1], title=f"PACF — {hid}", method="ywm")
+
+    fig.suptitle(
+        f"ACF / PACF  ({lags} lags)",
+        fontsize=11,
+        y=1.01,
+    )
+    return fig
+
+
 # Zoom levels: (label, half-window timedelta, date formatter, major locator)
 _ZOOM_LEVELS = [
     ("3 months", pd.Timedelta(days=45),  mdates.DateFormatter("%d %b"),  mdates.WeekdayLocator(byweekday=0)),
@@ -160,26 +211,6 @@ def plot_halfhourly_zoom(
 # Distribution helpers
 # ---------------------------------------------------------------------------
 
-def plot_energy_distribution(
-    df: pd.DataFrame,
-    value_col: str = "energy(kWh/hh)",
-    bins: int = 80,
-    figsize: tuple = (10, 4),
-) -> plt.Figure:
-    """Histogram of energy values with basic summary statistics."""
-    vals = df[value_col].dropna()
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.hist(vals, bins=bins, edgecolor="none", alpha=0.75, color="steelblue")
-    ax.axvline(vals.mean(), color="red", linewidth=1.2, label=f"mean={vals.mean():.3f}")
-    ax.axvline(vals.median(), color="orange", linewidth=1.2, linestyle="--", label=f"median={vals.median():.3f}")
-    ax.set_xlabel(value_col)
-    ax.set_ylabel("Count")
-    ax.set_title(f"Distribution of {value_col}")
-    ax.legend()
-    fig.tight_layout()
-    return fig
-
-
 def plot_daily_profile(
     df: pd.DataFrame,
     timestamp_col: str = "tstp",
@@ -246,7 +277,7 @@ def print_dataset_summary(df: pd.DataFrame, dataset_type: str, metadata: dict) -
     print(f"Shape   : {df.shape}")
     print(f"Households : {df['LCLid'].nunique()}")
     if ts_col in df.columns:
-        print(f"Time range : {df[ts_col].min()}  →  {df[ts_col].max()}")
+        print(f"Time range : {df[ts_col].min()}  to  {df[ts_col].max()}")
     print(f"Blocks loaded  : {len(metadata.get('blocks_loaded', []))}")
     print(f"Blocks failed  : {len(metadata.get('blocks_failed', []))}")
     print(f"Duplicates removed : {metadata.get('duplicates_removed', 0)}")
