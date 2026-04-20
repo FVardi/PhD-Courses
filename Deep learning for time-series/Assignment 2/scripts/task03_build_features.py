@@ -101,3 +101,11 @@ for batch_idx in range(n_batches):
 logger.info("Done. %d part files written to %s", n_batches, FEATURES_DIR)
 
 # %%
+
+# TODO: Implement rolling window features of mean and std. The shift must be non-zero to only use past values. Use the existing lags for each household (1-6 periods)
+# TODO: Implement seasonal rolling features which align to daily and weekly periods with non-zero shift. Use the existing lags for each household (48 and 336 periods).
+# TODO: Implement exponentially weighted features (EWMA) with multiple spans/alphas, computed past-only (shifted). Do this on the original value column.
+# TODO: Implement temporal/calendar features: hour-of-day, day-of-week, month, weekend flag.
+# TODO: Implement Fourier features for daily and weekly periodicities, with a configurable number of terms. Start with 2 terms (sine and cosine) for each period.
+# TODO: Ensure feature traceability: each builder must add new columns and return or log the list of newly created feature names.
+# Make sure that all above tasks are implemented in src/feature_engineering/builders.py as reusable functions.
