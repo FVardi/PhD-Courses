@@ -47,8 +47,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DATA_ROOT = PROJECT_ROOT / "data" / "london_smart_meters"
-RESULTS_DIR = PROJECT_ROOT / "results"
-FIGURES_DIR = RESULTS_DIR / "figures"
+RESULTS_DIR   = PROJECT_ROOT / "results"
+ARTIFACTS_DIR = RESULTS_DIR / "artifacts"
 
 DATASETS = [
     ("halfhourly_dataset", [0, 1, 2], "tstp", "30min"),
@@ -93,7 +93,7 @@ def run_dataset(loader: DataLoader, dataset_type: str, blocks: list, ts_col: str
     # --- Subtask 3: Visualise household series ---
     if dataset_type == "halfhourly_dataset":
         sample_ids = df["LCLid"].unique()[:5].tolist()
-        figures_dir = FIGURES_DIR
+        figures_dir = ARTIFACTS_DIR
         figures_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info("Plotting zoom levels for households: %s", sample_ids)
@@ -110,7 +110,7 @@ def run_dataset(loader: DataLoader, dataset_type: str, blocks: list, ts_col: str
 
     # --- Subtask 4: ACF/PACF diagnostics ---
     if dataset_type == "halfhourly_dataset":
-        figures_dir = FIGURES_DIR
+        figures_dir = ARTIFACTS_DIR
         figures_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info("Plotting ACF/PACF (halfhourly) for households: %s", sample_ids[:3])
@@ -122,7 +122,7 @@ def run_dataset(loader: DataLoader, dataset_type: str, blocks: list, ts_col: str
 
     if dataset_type == "daily_dataset":
         sample_ids = df["LCLid"].unique()[:3].tolist()
-        figures_dir = FIGURES_DIR
+        figures_dir = ARTIFACTS_DIR
         figures_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info("Plotting ACF/PACF (daily) for households: %s", sample_ids)

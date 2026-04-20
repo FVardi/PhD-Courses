@@ -95,13 +95,13 @@ logger.info("Top %d households by longest gap:\n%s",    N, household_stats.nlarg
 # %%
 # --- Step 3: Short / long gap classification ----------------------------------
 #
-# Decision: threshold = 7 half-hour slots (3.5 hours).
+# Decision: threshold = 9 half-hour slots.
 # The 75th percentile of all gap lengths is 6.75 slots, meaning three-quarters
-# of gaps are 6 slots or fewer.  Setting the boundary at 7 captures this natural
+# of gaps are 6 slots or fewer.  Setting the boundary at 9 captures this natural
 # majority as "short" (safely interpolable from local context) while flagging the
 # heavier-tailed minority as "long" (structural outages requiring special handling).
 
-SHORT_THRESHOLD = 7  # 75th-percentile of gap lengths is 6.75; ceiling captures short-gap majority
+SHORT_THRESHOLD = 9  # 75th-percentile of gap lengths is 6.75; ceiling captures short-gap majority
 short_count = int((gap_df["gap_length"] <  SHORT_THRESHOLD).sum())
 long_count  = int((gap_df["gap_length"] >= SHORT_THRESHOLD).sum())
 logger.info(

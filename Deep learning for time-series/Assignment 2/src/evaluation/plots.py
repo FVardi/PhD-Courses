@@ -270,6 +270,104 @@ def plot_missing_heatmap(
 
 
 
+def plot_households_with_splits(
+    data: pd.DataFrame,
+    lclids: Sequence[str],
+    value_col: str = "energy(kWh/hh)",
+    train_end: Optional[pd.Timestamp] = None,
+    test_start: Optional[pd.Timestamp] = None,
+    figsize: tuple = (14, 3),
+) -> plt.Figure:
+    """Plot energy consumption for each household with optional split boundary lines.
+
+    Args:
+        data:       MultiIndex (LCLid, tstp) DataFrame.
+        lclids:     Household IDs to plot.
+        value_col:  Energy column name.
+        train_end:  Timestamp for the train/val boundary (orange dashed).
+        test_start: Timestamp for the val/test boundary (red dashed).
+        figsize:    (width, height-per-row) tuple.
+
+    Returns:
+        matplotlib Figure.
+    """
+    ids = list(lclids)
+    fig, axes = plt.subplots(
+        len(ids), 1,
+        figsize=(figsize[0], figsize[1] * len(ids)),
+        sharex=False,
+    )
+    if len(ids) == 1:
+        axes = [axes]
+
+    for ax, lclid in zip(axes, ids):
+        series = data.xs(lclid, level="LCLid")[value_col].dropna()
+        ax.plot(series.index, series.values, linewidth=0.6, color="steelblue")
+        if train_end is not None:
+            ax.axvline(train_end,  color="darkorange", linewidth=1.2,
+                       linestyle="--", label="train/val")
+        if test_start is not None:
+            ax.axvline(test_start, color="crimson",    linewidth=1.2,
+                       linestyle="--", label="val/test")
+        ax.set_title(lclid, fontsize=10)
+        ax.set_ylabel("kWh/hh")
+        ax.tick_params(axis="x", labelrotation=30)
+        ax.legend(fontsize=7, loc="upper right")
+
+    fig.tight_layout()
+    return fig
+
+
+def plot_ols_diagnostics(
+    results: list[tuple],
+    figsize: tuple = (15, 3),
+) -> plt.Figure:
+    """Three-panel OLS diagnostic plots for each household.
+
+    Args:
+        results:  List of (lclid, model, y, y_hat, residuals) tuples as returned
+                  by fit_ols_households.
+        figsize:  (width, height-per-row) tuple.
+
+    Returns:
+        matplotlib Figure with shape (n_households × 3).
+    """
+    n = len(results)
+    fig, axes = plt.subplots(n, 3, figsize=(figsize[0], figsize[1] * n))
+    if n == 1:
+        axes = axes[np.newaxis, :]
+
+    for row_idx, (lclid, model, y, y_hat, residuals) in enumerate(results):
+        r2   = model.rsquared
+        mae  = residuals.abs().mean()
+        rmse = (residuals ** 2).mean() ** 0.5
+
+        # Actual vs predicted
+        axes[row_idx, 0].scatter(y, y_hat, s=1, alpha=0.2, color="steelblue")
+        lim = (min(y.min(), y_hat.min()), max(y.max(), y_hat.max()))
+        axes[row_idx, 0].plot(lim, lim, color="crimson", linewidth=1)
+        axes[row_idx, 0].set_title(f"{lclid} — Actual vs Predicted  (R²={r2:.3f})", fontsize=9)
+        axes[row_idx, 0].set_xlabel("Actual")
+        axes[row_idx, 0].set_ylabel("Predicted")
+
+        # Residuals over time
+        axes[row_idx, 1].plot(y.index, residuals.values, linewidth=0.4, color="steelblue")
+        axes[row_idx, 1].axhline(0, color="crimson", linewidth=0.8)
+        axes[row_idx, 1].set_title(f"{lclid} — Residuals  (RMSE={rmse:.4f})", fontsize=9)
+        axes[row_idx, 1].set_ylabel("Residual (kWh/hh)")
+        axes[row_idx, 1].tick_params(axis="x", labelrotation=30)
+
+        # Residual distribution
+        axes[row_idx, 2].hist(residuals, bins=80, color="steelblue", edgecolor="none")
+        axes[row_idx, 2].axvline(0, color="crimson", linewidth=0.8)
+        axes[row_idx, 2].set_title(f"{lclid} — Residual dist.  (MAE={mae:.4f})", fontsize=9)
+        axes[row_idx, 2].set_xlabel("Residual (kWh/hh)")
+
+    fig.suptitle("OLS diagnostics (training data)", fontsize=11)
+    fig.tight_layout()
+    return fig
+
+
 def print_dataset_summary(df: pd.DataFrame, dataset_type: str, metadata: dict) -> None:
     """Print a concise diagnostic summary to stdout."""
     ts_col = "tstp" if dataset_type == "halfhourly_dataset" else "day"

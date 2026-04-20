@@ -28,7 +28,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.feature_engineering.builders import build_lag_features, build_rolling_features
+from src.feature_engineering.builders import (
+    build_lag_features,
+    build_rolling_features,
+    build_ewma_features,
+    build_calendar_features,
+    build_fourier_features,
+)
 
 # %%
 
@@ -50,6 +56,9 @@ BATCH_SIZE   = 50  # households per batch; tune down if memory is tight
 FEATURE_BUILDERS = [
     partial(build_lag_features,     lags=[1, 2, 3, 4, 5, 6, 48, 336]),
     partial(build_rolling_features, windows=[6, 48, 336]),
+    partial(build_ewma_features,    spans=[6, 48, 336]),
+    build_calendar_features,
+    partial(build_fourier_features, periods=[48, 336], n_terms=2),
 ]
 
 # %%
@@ -102,10 +111,3 @@ logger.info("Done. %d part files written to %s", n_batches, FEATURES_DIR)
 
 # %%
 
-# TODO: Implement rolling window features of mean and std. The shift must be non-zero to only use past values. Use the existing lags for each household (1-6 periods)
-# TODO: Implement seasonal rolling features which align to daily and weekly periods with non-zero shift. Use the existing lags for each household (48 and 336 periods).
-# TODO: Implement exponentially weighted features (EWMA) with multiple spans/alphas, computed past-only (shifted). Do this on the original value column.
-# TODO: Implement temporal/calendar features: hour-of-day, day-of-week, month, weekend flag.
-# TODO: Implement Fourier features for daily and weekly periodicities, with a configurable number of terms. Start with 2 terms (sine and cosine) for each period.
-# TODO: Ensure feature traceability: each builder must add new columns and return or log the list of newly created feature names.
-# Make sure that all above tasks are implemented in src/feature_engineering/builders.py as reusable functions.
