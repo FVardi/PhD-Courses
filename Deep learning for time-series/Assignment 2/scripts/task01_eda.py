@@ -10,6 +10,10 @@ Run from the Assignment 2 root:
     python scripts/task01_eda.py
 =================================================================
 """
+# Reusable logic lives in:
+#   src/utils/data_loader.py     (DataLoader, SchemaValidator)
+#   src/evaluation/plots.py      (plotting / diagnostic helpers)
+#   src/evaluation/gaps.py       (gap quantification helpers)
 
 # %%
 import json
@@ -29,10 +33,9 @@ from src.evaluation.plots import (
     print_dataset_summary,
     plot_halfhourly_zoom,
     plot_acf_pacf,
-    plot_energy_distribution,
     plot_daily_profile,
 )
-from src.utils.gaps import gaps_per_household, summarise_gaps
+from src.evaluation.gaps import summarise_gaps
 
 
 # %%
@@ -44,7 +47,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DATA_ROOT = PROJECT_ROOT / "data" / "london_smart_meters"
-PREPROCESSED_DIR = PROJECT_ROOT / "data" / "preprocessed"
 RESULTS_DIR = PROJECT_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 
@@ -87,8 +89,6 @@ def run_dataset(loader: DataLoader, dataset_type: str, blocks: list, ts_col: str
         gap_summary["n_households"],
         gap_summary["overall_missingness_rate"] * 100,
     )
-
-    gap_df = gaps_per_household(df, ts_col=ts_col, freq=freq)
 
     # --- Subtask 3: Visualise household series ---
     if dataset_type == "halfhourly_dataset":
@@ -134,17 +134,6 @@ def run_dataset(loader: DataLoader, dataset_type: str, blocks: list, ts_col: str
 
     # --- Subtask 5: Dataset summary ---
     print_dataset_summary(df, dataset_type, meta)
-
-    if dataset_type == "halfhourly_dataset":
-        logger.info("Plotting energy distribution…")
-        fig_dist = plot_energy_distribution(df)
-        fig_dist.savefig(figures_dir / "energy_distribution.png", dpi=150, bbox_inches="tight")
-        plt.close(fig_dist)
-        logger.info("Saved energy distribution → %s", figures_dir / "energy_distribution.png")
-
-    logger.info("Saving %s to %s…", dataset_type, PREPROCESSED_DIR)
-    loader.save_dataset(df, dataset_type, PREPROCESSED_DIR)
-    loader.save_dataset(gap_df, f"{dataset_type}_gaps_per_household", PREPROCESSED_DIR)
 
     return meta
 # %%

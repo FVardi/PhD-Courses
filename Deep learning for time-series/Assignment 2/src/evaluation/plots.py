@@ -269,6 +269,7 @@ def plot_missing_heatmap(
     return fig
 
 
+
 def print_dataset_summary(df: pd.DataFrame, dataset_type: str, metadata: dict) -> None:
     """Print a concise diagnostic summary to stdout."""
     ts_col = "tstp" if dataset_type == "halfhourly_dataset" else "day"

@@ -1,5 +1,17 @@
 """
-Task 02: Missing Data Analysis
+Task 02: Missing Data Analysis and Imputation
+
+Pipeline:
+  1. Load preprocessed halfhourly data and resample to a complete 30-min grid.
+  2. Analyse gap structure (distribution, worst-case households).
+  3. Classify gaps as short (<7 slots, ≤3 h) or long (≥7 slots).
+  4. Impute missing values with two strategies and compare residual NaNs.
+  5. Build and save a final annotated dataset with gap_length and is_imputed columns.
+
+Reusable logic lives in:
+  src/utils/resampling.py        (build_resampled_grid)
+  src/evaluation/gaps.py         (gap_length_dataframe, label_gap_lengths)
+  src/imputation/strategies.py   (naive_impute, seasonal_mean_impute)
 """
 
 # %%
@@ -13,6 +25,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.utils.data_loader import DataLoader
+from src.utils.resampling import build_resampled_grid
+from src.evaluation.gaps import gap_length_dataframe, label_gap_lengths
+from src.imputation.strategies import naive_impute, seasonal_mean_impute
+
 # %%
 
 logging.basicConfig(
@@ -21,73 +38,145 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-PREPROCESSED_DIR = PROJECT_ROOT / "data" / "preprocessed"
+DATA_ROOT   = PROJECT_ROOT / "data" / "london_smart_meters"
+OUTPUT_DIR  = PROJECT_ROOT / "data" / "preprocessed"
+VALUE_COL   = "energy(kWh/hh)"
+BLOCKS      = None
 
 # %%
-# Load a small slice: first N_HOUSEHOLDS from halfhourly_dataset
+# --- Step 1: Load and resample -------------------------------------------------
 
-hh_path = PREPROCESSED_DIR / "halfhourly_dataset.parquet"
-logger.info("Loading %s", hh_path)
-
-raw = pd.read_parquet(hh_path, columns=["LCLid", "tstp", "energy(kWh/hh)"])
-
-logger.info("Loaded %d rows for %d households", len(raw), raw["LCLid"].nunique())
-
-# %%
-# Resample each household to a complete 30-min grid, introducing NaN where data is missing. Calculate percentage missingness.
-
-raw["tstp"] = pd.to_datetime(raw["tstp"])
-raw = raw.set_index("tstp")
-
-def resample_household(df: pd.DataFrame) -> pd.DataFrame:
-    return df[["energy(kWh/hh)"]].resample("30min").mean()
-
-hh_df = (
-    raw.groupby("LCLid")
-    .apply(resample_household)
+logger.info("Loading halfhourly_dataset (blocks %s) …", BLOCKS)
+loader = DataLoader(data_root=DATA_ROOT)
+raw, meta = loader.load_and_clean_dataset(
+    dataset_type="halfhourly_dataset", blocks=BLOCKS, sort=True
+)
+logger.info(
+    "Loaded %d rows across %d households (%d duplicates removed, %d invalid records)",
+    meta["final_rows"], raw["LCLid"].nunique(),
+    meta["duplicates_removed"], meta["invalid_records"],
 )
 
-logger.info("Resampled shape: %s", hh_df.shape)
+hh_df = build_resampled_grid(raw)
+n_slots = len(hh_df)
+logger.info(
+    "Resampled to complete 30-min grid: %d total slots across %d households",
+    n_slots,
+    hh_df.index.get_level_values("LCLid").nunique(),
+)
 
 # %%
-# For each household, find consecutive NaN runs and record their lengths
+# --- Step 2: Gap structure analysis -------------------------------------------
 
-def find_gap_lengths(series: pd.Series) -> list[int]:
-    is_nan = series.isna()
-    run_id = (is_nan != is_nan.shift()).cumsum()
-    return [
-        len(group)
-        for _, group in is_nan.groupby(run_id)
-        if group.iloc[0]  # only NaN runs
-    ]
+initial_nan = int(hh_df[VALUE_COL].isna().sum())
+logger.info(
+    "Missing slots: %d / %d  (%.2f%%)",
+    initial_nan, n_slots, initial_nan / n_slots * 100,
+)
 
-records = []
-for lclid, group in hh_df.groupby(level="LCLid"):
-    for length in find_gap_lengths(group["energy(kWh/hh)"]):
-        records.append({"LCLid": lclid, "gap_length": length})
+gap_df = gap_length_dataframe(hh_df)
+logger.info(
+    "Gap structure: %d distinct gaps across %d households",
+    len(gap_df), gap_df["LCLid"].nunique(),
+)
+logger.info("Gap length distribution (half-hour slots):\n%s", gap_df["gap_length"].describe())
 
-gap_df = pd.DataFrame(records)
-
-logger.info("Total gaps found: %d across %d households", len(gap_df), gap_df["LCLid"].nunique())
-logger.info("Gap length statistics across all households:\n%s", gap_df["gap_length"].describe())
-
-# %%
-# Worst cases: by missingness % and by longest single gap
-
-total_per_hh = hh_df.groupby(level="LCLid")["energy(kWh/hh)"].size()
-missing_per_hh = hh_df.groupby(level="LCLid")["energy(kWh/hh)"].apply(lambda s: s.isna().sum())
+# Worst-case households
+total_per_hh   = hh_df.groupby(level="LCLid")[VALUE_COL].size()
+missing_per_hh = hh_df.groupby(level="LCLid")[VALUE_COL].apply(lambda s: s.isna().sum())
 missingness_pct = (missing_per_hh / total_per_hh * 100).rename("missingness_pct")
-
-longest_gap = gap_df.groupby("LCLid")["gap_length"].max().rename("longest_gap")
-
+longest_gap     = gap_df.groupby("LCLid")["gap_length"].max().rename("longest_gap")
 household_stats = pd.concat([missingness_pct, longest_gap], axis=1).fillna(0)
 
 N = 3
-logger.info("Top %d by missingness %%:\n%s", N, household_stats.nlargest(N, "missingness_pct"))
-logger.info("Top %d by longest gap:\n%s", N, household_stats.nlargest(N, "longest_gap"))
+logger.info("Top %d households by missingness %%:\n%s", N, household_stats.nlargest(N, "missingness_pct"))
+logger.info("Top %d households by longest gap:\n%s",    N, household_stats.nlargest(N, "longest_gap"))
 
 # %%
-SHORT_THRESHOLD = 7
-short = (gap_df["gap_length"] < SHORT_THRESHOLD).sum()
-long  = (gap_df["gap_length"] >= SHORT_THRESHOLD).sum()
-logger.info("Short gaps (<7): %d  |  Long gaps (>=7): %d", short, long)
+# --- Step 3: Short / long gap classification ----------------------------------
+#
+# Decision: threshold = 7 half-hour slots (3.5 hours).
+# The 75th percentile of all gap lengths is 6.75 slots, meaning three-quarters
+# of gaps are 6 slots or fewer.  Setting the boundary at 7 captures this natural
+# majority as "short" (safely interpolable from local context) while flagging the
+# heavier-tailed minority as "long" (structural outages requiring special handling).
+
+SHORT_THRESHOLD = 7  # 75th-percentile of gap lengths is 6.75; ceiling captures short-gap majority
+short_count = int((gap_df["gap_length"] <  SHORT_THRESHOLD).sum())
+long_count  = int((gap_df["gap_length"] >= SHORT_THRESHOLD).sum())
+logger.info(
+    "Gap classification (threshold=%d slots = %.1f h): short=%d, long=%d",
+    SHORT_THRESHOLD, SHORT_THRESHOLD * 0.5, short_count, long_count,
+)
+
+# %%
+# --- Step 4: Imputation -------------------------------------------------------
+#
+# Strategy A — Naive lag-48: fill each NaN with the value from the identical
+#   half-hour slot 24 hours earlier.  Fast and interpretable but fails when the
+#   lag slot is also missing.
+#
+# Strategy B — Seasonal mean (primary): fill each NaN with the causal expanding
+#   mean of all previous observations at that half-hour slot for the same
+#   household.  Uses no future data and improves as history accumulates.  This
+#   is the strategy used for the saved output.
+
+logger.info("Running naive (lag-48) imputation …")
+imputed_naive = (
+    hh_df.groupby(level="LCLid")[VALUE_COL]
+    .transform(naive_impute)
+)
+remaining_naive = int(imputed_naive.isna().sum())
+filled_naive    = initial_nan - remaining_naive
+logger.info(
+    "Naive imputation:          filled %d / %d NaNs  (%d remaining)",
+    filled_naive, initial_nan, remaining_naive,
+)
+
+logger.info("Running seasonal mean imputation …")
+imputed_seasonal = seasonal_mean_impute(hh_df, value_col=VALUE_COL)
+remaining_seasonal = int(imputed_seasonal.isna().sum())
+filled_seasonal    = initial_nan - remaining_seasonal
+logger.info(
+    "Seasonal mean imputation:  filled %d / %d NaNs  (%d remaining)",
+    filled_seasonal, initial_nan, remaining_seasonal,
+)
+
+logger.info(
+    "Selected strategy for output: seasonal mean  "
+    "(fills %d more NaNs than naive, more robust for long gaps)",
+    filled_seasonal - filled_naive,
+)
+
+# %%
+# --- Step 5: Build and save annotated output ----------------------------------
+#
+# Final DataFrame columns:
+#   energy(kWh/hh)   – seasonally imputed values
+#   gap_length       – length of the NaN run the slot belonged to (0 if observed)
+#   is_imputed       – True where the original was missing and imputation succeeded
+
+logger.info("Building annotated output dataset …")
+
+gap_length_col = (
+    hh_df.groupby(level="LCLid")[VALUE_COL]
+    .transform(label_gap_lengths)
+    .rename("gap_length")
+)
+
+result = hh_df.copy()
+result[VALUE_COL]   = imputed_seasonal
+result["gap_length"] = gap_length_col
+result["is_imputed"] = hh_df[VALUE_COL].isna() & imputed_seasonal.notna()
+
+out_path = OUTPUT_DIR / "halfhourly_imputed.parquet"
+result.to_parquet(out_path)
+logger.info(
+    "Saved annotated dataset → %s  (%.1f MB, %d rows, %d imputed slots)",
+    out_path,
+    out_path.stat().st_size / 1e6,
+    len(result),
+    int(result["is_imputed"].sum()),
+)
+
+# %%

@@ -3,14 +3,13 @@ Reusable data loading and schema validation utilities for the London Smart Meter
 """
 
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 
 logger = logging.getLogger(__name__)
-
-DATA_ROOT = Path(__file__).parents[3] / "data" / "london_smart_meters"
 
 
 class SchemaValidator:
@@ -83,8 +82,9 @@ class SchemaValidator:
 class DataLoader:
     """Load and clean London Smart Meters blocks with schema validation."""
 
-    def __init__(self, data_root: Path = DATA_ROOT):
+    def __init__(self, data_root: Path, n_jobs: int = 8):
         self.data_root = Path(data_root)
+        self.n_jobs    = n_jobs
         self.validator = SchemaValidator()
 
     # ------------------------------------------------------------------
@@ -99,8 +99,17 @@ class DataLoader:
             logger.error("File not found: %s", block_path)
             return None
 
+        # Force energy column to str so mixed-type values (e.g. "Null", "") are
+        # handled uniformly by _parse_timestamps rather than causing DtypeWarnings.
+        _DTYPE_OVERRIDES = {
+            "halfhourly_dataset": {"energy(kWh/hh)": str},
+        }
         try:
-            df = pd.read_csv(block_path)
+            df = pd.read_csv(
+                block_path,
+                dtype=_DTYPE_OVERRIDES.get(dataset_type),
+                low_memory=False,
+            )
         except Exception as exc:
             logger.error("Error reading %s: %s", block_path, exc)
             return None
@@ -122,17 +131,14 @@ class DataLoader:
         dataset_type: str,
         blocks: Optional[List[int]] = None,
         sort: bool = True,
-        handle_duplicates: str = "keep_first",
     ) -> Tuple[Optional[pd.DataFrame], Dict]:
         """
         Load one or more blocks, validate, deduplicate, and optionally sort.
 
         Args:
-            dataset_type:      'daily_dataset', 'halfhourly_dataset', or 'hhblock_dataset'
-            blocks:            Block numbers to load; None loads all 112.
-            sort:              Sort by (LCLid, timestamp) if True.
-            handle_duplicates: Unused parameter kept for API compatibility; first
-                               occurrence is always kept.
+            dataset_type:  'daily_dataset', 'halfhourly_dataset', or 'hhblock_dataset'
+            blocks:        Block numbers to load; None loads all 112.
+            sort:          Sort by (LCLid, timestamp) if True.
 
         Returns:
             (DataFrame, metadata_dict)
@@ -153,14 +159,17 @@ class DataLoader:
         }
 
         dfs = []
-        for block_num in blocks:
-            df = self.load_block(dataset_type, block_num)
-            if df is not None:
-                dfs.append(df)
-                metadata["blocks_loaded"].append(block_num)
-                metadata["total_rows_loaded"] += len(df)
-            else:
-                metadata["blocks_failed"].append(block_num)
+        with ThreadPoolExecutor(max_workers=self.n_jobs) as pool:
+            futures = {pool.submit(self.load_block, dataset_type, b): b for b in blocks}
+            for future in as_completed(futures):
+                block_num = futures[future]
+                df = future.result()
+                if df is not None:
+                    dfs.append(df)
+                    metadata["blocks_loaded"].append(block_num)
+                    metadata["total_rows_loaded"] += len(df)
+                else:
+                    metadata["blocks_failed"].append(block_num)
 
         if not dfs:
             logger.error("No blocks loaded from %s", dataset_type)
@@ -172,14 +181,12 @@ class DataLoader:
         ts_col = self._get_timestamp_col(dataset_type)
         id_col = "LCLid"
 
-        # Drop rows with null keys
         before = len(combined)
         combined = combined.dropna(subset=[id_col, ts_col])
         metadata["invalid_records"] = before - len(combined)
         if metadata["invalid_records"]:
             logger.warning("Dropped %d rows with null keys", metadata["invalid_records"])
 
-        # Deduplicate
         dup_mask = combined.duplicated(subset=[id_col, ts_col], keep=False)
         n_dups = int(dup_mask.sum())
         metadata["duplicates_found"] = n_dups
