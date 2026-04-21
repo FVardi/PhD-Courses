@@ -166,7 +166,7 @@ logger.info(
 #   mean of all previous observations at that half-hour slot for the same
 #   household.  Uses no future data and improves as history accumulates.  This
 #   is the strategy used for the saved output.
-
+# TODO: Make it so that both imputation methods are saved in the output dataset, so we can compare them in later tasks.
 logger.info("Running naive (lag-48) imputation …")
 imputed_naive = (
     hh_df.groupby(level="LCLid")[VALUE_COL]

@@ -196,44 +196,6 @@ fig.tight_layout()
 _save_fig(fig, "task04_household_quality_distributions.png")
 
 # %%
-# --- Average energy over training period (10 households) ---------------------
-
-PLOT_LCLIDS = [
-    "MAC000002", "MAC000003", "MAC000004", "MAC000005", "MAC000006",
-    "MAC000007", "MAC000008", "MAC000009", "MAC000010", "MAC000011",
-]
-
-avg_data = pd.read_parquet(
-    FEATURES_DIR,
-    filters=[("LCLid", "in", PLOT_LCLIDS)],
-    columns=[VALUE_COL],
-)
-
-train_data = avg_data.loc[avg_data.index.get_level_values("tstp") < TRAIN_END]
-
-# Mean across households at each timestamp
-avg_series = (
-    train_data
-    .groupby(level="tstp")[VALUE_COL]
-    .mean()
-)
-
-# Daily resampled mean for a readable trend line
-daily_avg = avg_series.resample("D").mean()
-
-fig, ax = plt.subplots(figsize=(14, 4))
-ax.plot(avg_series.index, avg_series.values,
-        linewidth=0.4, color="steelblue", alpha=0.5, label="30-min avg")
-ax.plot(daily_avg.index, daily_avg.values,
-        linewidth=1.5, color="crimson", label="daily avg")
-ax.set_xlabel("Date")
-ax.set_ylabel("kWh/hh")
-ax.set_title(f"Average energy consumption — {len(PLOT_LCLIDS)} households (training period)")
-ax.legend()
-fig.tight_layout()
-_save_fig(fig, "task04_avg_energy_training.png")
-
-# %%
 # --- Load target series for stationarity tests --------------------------------
 
 logger.info("Loading %d households …", len(LCLIDS))
