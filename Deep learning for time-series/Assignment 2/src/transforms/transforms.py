@@ -16,6 +16,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 
 class BaseTransform(ABC):
@@ -215,7 +216,8 @@ class DetrendingTransform(BaseTransform):
     # Helpers
     # ------------------------------------------------------------------
 
-    def _get_timestamps(self, series: pd.Series) -> pd.DatetimeIndex:
+    @staticmethod
+    def _get_timestamps(series: pd.Series) -> pd.DatetimeIndex:
         idx = series.index
         if isinstance(idx, pd.MultiIndex):
             return pd.DatetimeIndex(idx.get_level_values("tstp"))
@@ -238,3 +240,140 @@ class DetrendingTransform(BaseTransform):
         else:
             x = self._days(series)
             return pd.Series(np.polyval(self._coeffs, x), index=series.index)
+
+
+class DeseasonalisingTransform(BaseTransform):
+    """Seasonal mean subtraction (period-adjusted averaging).
+
+    Fits a seasonal profile by averaging over each half-hour slot of the day
+    (slots 0–47) using training data only.  The transform subtracts the slot
+    mean; the inverse adds it back.
+
+    Works on a plain DatetimeIndex Series.  For a MultiIndex Series the tstp
+    level is used to extract timestamps.
+
+    Parameters
+    ----------
+    period : int
+        Number of slots per cycle.  Default 48 (half-hourly daily cycle).
+
+    Inversion state
+    ---------------
+    _seasonal_means : pd.Series indexed 0 … period-1 — mean per slot.
+    """
+
+    def __init__(self, period: int = 48) -> None:
+        if period < 1:
+            raise ValueError(f"period must be >= 1, got {period}")
+        self.period = period
+        self._seasonal_means: pd.Series | None = None
+        self._fitted = False
+
+    def fit(self, series: pd.Series) -> "DeseasonalisingTransform":
+        ts = self._get_timestamps(series)
+        slot = ts.hour * 2 + ts.minute // 30
+        tmp = pd.Series(series.values, index=slot, name="v")
+        self._seasonal_means = tmp.groupby(level=0).mean()
+        self._fitted = True
+        return self
+
+    def transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        return (series - self._seasonal(series)).rename(series.name)
+
+    def inverse_transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        return (series + self._seasonal(series)).rename(series.name)
+
+    def _seasonal(self, series: pd.Series) -> pd.Series:
+        ts = self._get_timestamps(series)
+        slot = ts.hour * 2 + ts.minute // 30
+        return pd.Series(
+            self._seasonal_means.reindex(slot).values,
+            index=series.index,
+        )
+
+    @staticmethod
+    def _get_timestamps(series: pd.Series) -> pd.DatetimeIndex:
+        idx = series.index
+        if isinstance(idx, pd.MultiIndex):
+            return pd.DatetimeIndex(idx.get_level_values("tstp"))
+        return pd.DatetimeIndex(idx)
+
+
+class LogTransform(BaseTransform):
+    """Variance-stabilising log transform using log1p / expm1.
+
+    Uses ``np.log1p`` so that zero values are handled correctly
+    (log1p(0) = 0).  Negative values are shifted by
+    ``abs(min) + epsilon`` during fit so the transform is always valid;
+    the same shift is applied during transform and removed during inversion.
+
+    Inversion state
+    ---------------
+    _shift : float — non-negative offset added before log1p so all values > 0.
+    """
+
+    def __init__(self) -> None:
+        self._shift: float = 0.0
+        self._fitted = False
+
+    def fit(self, series: pd.Series) -> "LogTransform":
+        min_val = float(series.min())
+        self._shift = max(0.0, -min_val + 1e-8)
+        self._fitted = True
+        return self
+
+    def transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        return np.log1p(series + self._shift).rename(series.name)
+
+    def inverse_transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        return (np.expm1(series) - self._shift).rename(series.name)
+
+
+class BoxCoxTransform(BaseTransform):
+    """Variance-stabilising Box-Cox transform with training-only lambda estimate.
+
+    ``scipy.stats.boxcox`` requires strictly positive values.  Any non-positive
+    values are handled by shifting the series by ``abs(min) + epsilon`` before
+    fitting; the same shift is applied at transform time and reversed at inversion.
+
+    Inversion state
+    ---------------
+    _lambda : float — Box-Cox lambda estimated from training data.
+    _shift  : float — offset added to ensure all values are > 0 before fit.
+    """
+
+    def __init__(self) -> None:
+        self._lambda: float | None = None
+        self._shift: float = 0.0
+        self._fitted = False
+
+    def fit(self, series: pd.Series) -> "BoxCoxTransform":
+        min_val = float(series.min())
+        self._shift = max(0.0, -min_val + 1e-8)
+        shifted = series + self._shift
+        _, lmbda = stats.boxcox(shifted.dropna().values)
+        self._lambda = float(lmbda)
+        self._fitted = True
+        return self
+
+    def transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        shifted = series + self._shift
+        return pd.Series(
+            stats.boxcox(shifted.values, lmbda=self._lambda),
+            index=series.index,
+            name=series.name,
+        )
+
+    def inverse_transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        lmbda = self._lambda
+        if lmbda == 0:
+            restored = np.exp(series.values)
+        else:
+            restored = np.power(lmbda * series.values + 1, 1.0 / lmbda)
+        return pd.Series(restored - self._shift, index=series.index, name=series.name)

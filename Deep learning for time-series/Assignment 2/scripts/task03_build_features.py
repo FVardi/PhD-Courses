@@ -46,8 +46,14 @@ logger = logging.getLogger(__name__)
 
 IMPUTED_PATH = PROJECT_ROOT / "data" / "preprocessed" / "halfhourly_imputed.parquet"
 FEATURES_DIR = PROJECT_ROOT / "data" / "features"
-VALUE_COL    = "energy(kWh/hh)"
-BATCH_SIZE   = 50  # households per batch; tune down if memory is tight
+VALUE_COL    = "energy_imputed_seasonal"
+
+# ── Run mode ──────────────────────────────────────────────────────────────────
+# QUICK_RUN=True  → process only the first 50 households; fast for inspection.
+# QUICK_RUN=False → process all households; required before tasks 04–10.
+QUICK_RUN    = True
+MAX_HH_QUICK = 50     # households to process in quick mode
+BATCH_SIZE   = 50     # households per batch; tune down if memory is tight
 
 # %%
 # --- Feature configuration ----------------------------------------------------
@@ -71,6 +77,10 @@ all_lclids = (
     .unique()
     .tolist()
 )
+if QUICK_RUN:
+    all_lclids = all_lclids[:MAX_HH_QUICK]
+    logger.info("QUICK_RUN: limiting to %d households", len(all_lclids))
+
 n_households = len(all_lclids)
 n_batches    = (n_households + BATCH_SIZE - 1) // BATCH_SIZE
 logger.info(
