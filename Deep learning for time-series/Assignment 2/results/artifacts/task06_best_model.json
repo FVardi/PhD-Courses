@@ -1,0 +1,16 @@
+{
+  "family": "LightGBM",
+  "params": {
+    "num_leaves": 31,
+    "n_estimators": 200,
+    "learning_rate": 0.05,
+    "random_state": 42,
+    "verbose": -1
+  },
+  "model_name": "LightGBM(l=31)",
+  "val_mae": 0.0887,
+  "transform": "DeseasonalisingTransform",
+  "transform_params": {
+    "period": 48
+  }
+}

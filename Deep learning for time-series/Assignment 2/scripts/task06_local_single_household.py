@@ -12,6 +12,8 @@ Pipeline:
 MASE denominator: mean |y_t − y_{t−48}| on training data only.
 """
 
+# TODO: Apply transforsm from task 4. Probably log transform and de-seasoning.
+
 # %%
 import json
 import logging

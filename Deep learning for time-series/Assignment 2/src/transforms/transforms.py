@@ -193,11 +193,11 @@ class DetrendingTransform(BaseTransform):
         if self.per_household and isinstance(series.index, pd.MultiIndex):
             self._coeffs = {}
             for lclid, group in series.groupby(level="LCLid"):
-                x = self._days(group)
-                self._coeffs[lclid] = np.polyfit(x, group.values.astype(float), self.degree)
+                clean = group.dropna()
+                self._coeffs[lclid] = np.polyfit(self._days(clean), clean.values.astype(float), self.degree)
         else:
-            x = self._days(series)
-            self._coeffs = np.polyfit(x, series.values.astype(float), self.degree)
+            clean = series.dropna()
+            self._coeffs = np.polyfit(self._days(clean), clean.values.astype(float), self.degree)
 
         self._fitted = True
         return self

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import statsmodels.api as sm
 from statsmodels.tsa.stattools import acf
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -25,10 +26,8 @@ from src.evaluation.plots import plot_acf_pacf, plot_households_with_splits, plo
 from src.transforms.diagnostics import run_adf_tests, run_mann_kendall, run_white_test
 from src.transforms.ols import fit_ols_households
 from src.transforms.transforms import (
-    BoxCoxTransform,
     DeseasonalisingTransform,
     DetrendingTransform,
-    DifferencingTransform,
     LogTransform,
 )
 
@@ -41,20 +40,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
-IMPUTED_PATH  = PROJECT_ROOT / "data" / "preprocessed" / "halfhourly_imputed.parquet"
 ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 VALUE_COL = "energy_imputed_seasonal"
-
-# ── Run mode ──────────────────────────────────────────────────────────────────
-# QUICK_RUN=True  → use 3 households for diagnostics/transforms; fast for
-#                   inspection.  The quality screening step still runs fully
-#                   (its CSV output is required by tasks 06–10).
-# QUICK_RUN=False → use 5 households for a richer diagnostic picture.
-QUICK_RUN = True
-LCLIDS    = ["MAC000002", "MAC000003", "MAC000004"] if QUICK_RUN else \
-            ["MAC000002", "MAC000003", "MAC000004", "MAC000005", "MAC000006"]
+LCLIDS    = ["MAC000002", "MAC000003", "MAC000004", "MAC000005", "MAC000006"]
 
 # --- Data splits --------------------------------------------------------------
 # All diagnostics, transforms, and modelling must respect these boundaries.
@@ -77,123 +67,12 @@ def _save_csv(df: pd.DataFrame, name: str) -> None:
     df.to_csv(path)
     logger.info("Saved table  → %s", path)
 
+# TODO: Implement check for time series quality again. It is needed here and used later in task 06. Include a check where the validation and test sets must have an average energy consumption above 0.25, since it doesnt make sense to predict intervals with no energy usage.
 
 # %%
-# --- Household quality screening ----------------------------------------------
-#
-# Criteria (evaluated on the training period only):
-#   imputed_frac     : fraction of slots that were imputed  → lower is better
-#   max_zero_run     : longest consecutive streak of near-zero energy (< 0.05 kWh/hh)
-#                      → flags households that were away / meter offline for days
-#
-# Thresholds (adjustable):
-#   MAX_IMPUTED_FRAC = 0.05  (≤5 % imputed slots)
-#   MAX_ZERO_RUN     = 48    (no zero-streak longer than 1 day = 48 half-hours)
-
-MAX_IMPUTED_FRAC = 0.05
-MAX_ZERO_RUN     = 48
-ZERO_THRESHOLD   = 0.05   # kWh/hh — treat as "no usage"
-SCREEN_BATCH     = 200    # households per read batch
-
-logger.info("Screening all households for quality (training period only) …")
-
-# Get full household list without loading values
-all_lclids = (
-    pd.read_parquet(IMPUTED_PATH, columns=[])
-    .index.get_level_values("LCLid")
-    .unique()
-    .tolist()
-)
-logger.info("Total households to screen: %d", len(all_lclids))
-
-
-def _max_consecutive_below(values, threshold):
-    """Length of the longest consecutive run of values < threshold."""
-    import numpy as np
-    mask = (values < threshold).astype(int)
-    if mask.sum() == 0:
-        return 0
-    changes = np.diff(mask, prepend=0, append=0)
-    starts  = (changes ==  1).nonzero()[0]
-    ends    = (changes == -1).nonzero()[0]
-    return int((ends - starts).max())
-
-
-rows = []
-n_batches = (len(all_lclids) + SCREEN_BATCH - 1) // SCREEN_BATCH
-
-for i in range(n_batches):
-    batch_ids = all_lclids[i * SCREEN_BATCH : (i + 1) * SCREEN_BATCH]
-    batch = pd.read_parquet(
-        IMPUTED_PATH,
-        filters=[("LCLid", "in", batch_ids)],
-        columns=[VALUE_COL, "is_imputed"],
-    )
-    # Restrict to training period
-    batch = batch.loc[batch.index.get_level_values("tstp") < TRAIN_END]
-
-    for lclid, grp in batch.groupby(level="LCLid"):
-        energy = grp[VALUE_COL].values
-        rows.append({
-            "LCLid":         lclid,
-            "n_slots":       len(grp),
-            "imputed_frac":  grp["is_imputed"].mean(),
-            "max_zero_run":  _max_consecutive_below(energy, ZERO_THRESHOLD),
-            "mean_energy":   energy.mean(),
-        })
-
-    if (i + 1) % 10 == 0 or (i + 1) == n_batches:
-        logger.info("  screened %d / %d batches", i + 1, n_batches)
-
-quality = pd.DataFrame(rows).set_index("LCLid")
-
-# Apply filters
-good = quality[
-    (quality["imputed_frac"] <= MAX_IMPUTED_FRAC) &
-    (quality["max_zero_run"] <= MAX_ZERO_RUN)
-].sort_values(["imputed_frac", "max_zero_run"])
-
-logger.info(
-    "Households passing quality screen: %d / %d  "
-    "(imputed ≤%.0f%%, zero-run ≤%d slots)",
-    len(good), len(quality), MAX_IMPUTED_FRAC * 100, MAX_ZERO_RUN,
-)
-
-_save_csv(quality, "task04_household_quality_all.csv")
-_save_csv(good,    "task04_household_quality_good.csv")
-
-print(f"\n--- Quality screen: {len(good)} households passed ---")
-print(good.head(20).to_string())
-
-# %%
-# --- Distribution of quality metrics ------------------------------------------
-
-fig, axes = plt.subplots(1, 3, figsize=(14, 4))
-
-axes[0].hist(quality["imputed_frac"] * 100, bins=60, color="steelblue", edgecolor="none")
-axes[0].axvline(MAX_IMPUTED_FRAC * 100, color="crimson", linewidth=1.2, linestyle="--")
-axes[0].set_xlabel("Imputed slots (%)")
-axes[0].set_title("Imputation fraction")
-
-axes[1].hist(quality["max_zero_run"], bins=60, color="steelblue", edgecolor="none")
-axes[1].axvline(MAX_ZERO_RUN, color="crimson", linewidth=1.2, linestyle="--")
-axes[1].set_xlabel("Max consecutive near-zero slots")
-axes[1].set_title("Longest near-zero run")
-
-axes[2].hist(quality["mean_energy"], bins=60, color="steelblue", edgecolor="none")
-axes[2].set_xlabel("Mean energy (kWh/hh)")
-axes[2].set_title("Mean energy usage")
-
-for ax in axes:
-    ax.set_ylabel("Households")
-
-fig.suptitle(
-    f"Household quality metrics (training period) — "
-    f"{len(good)}/{len(quality)} pass thresholds",
-    fontsize=11,
-)
-fig.tight_layout()
-_save_fig(fig, "task04_household_quality_distributions.png")
+# ==============================================================================
+# PART 1 — DIAGNOSTICS
+# ==============================================================================
 
 # %%
 # --- Load target series for stationarity tests --------------------------------
@@ -203,8 +82,15 @@ logger.info("Loading %d households …", len(LCLIDS))
 multi = pd.read_parquet(
     FEATURES_DIR,
     filters=[("LCLid", "in", LCLIDS)],
-    columns=[VALUE_COL],
+    columns=[VALUE_COL, "is_imputed", "gap_length"],
 )
+
+# TODO: Write to logger the max gap length and the imputation percentage to justify using these houses.
+max_gap_length = multi["gap_length"].max()
+imputation_percentage = multi["is_imputed"].mean() * 100 
+logger.info("Max gap length: %d", max_gap_length)
+logger.info("Imputation percentage: %.2f%%", imputation_percentage)
+
 
 # %%
 # --- ADF stationarity tests ---------------------------------------------------
@@ -214,12 +100,8 @@ _save_csv(adf_results, "task04_adf_results.csv")
 
 n_stat = adf_results["stationary (p<0.05)"].sum()
 logger.info(
-    "ADF summary: %d / %d tests reject the unit-root null — series are stationary.",
+    "ADF summary: %d / %d tests reject the unit-root null — series are stationary in a stochastic sense.",
     n_stat, len(adf_results),
-)
-logger.info(
-    "All ADF statistics are strongly negative (well below the ~-3.5 critical value). "
-    "Energy consumption mean-reverts around daily/weekly cycles; differencing is not required."
 )
 
 # %%
@@ -227,6 +109,16 @@ logger.info(
 
 mk_results = run_mann_kendall(multi, LCLIDS, VALUE_COL, TRAIN_END)
 _save_csv(mk_results, "task04_mk_results.csv")
+
+logger.info(
+    "Mann-Kendall caveat: with %d training slots the test has very high statistical power — "
+    "even a negligibly small trend will produce a significant p-value.  "
+    "Visual inspection of the series is needed to judge practical significance.  "
+    "Because the series is periodic, the choice of training window can also induce a spurious "
+    "trend if the split does not fall at a natural cycle boundary; a significant result may "
+    "not generalise to other time periods.",
+    multi.loc[multi.index.get_level_values("tstp") < TRAIN_END].shape[0] // len(LCLIDS),
+)
 
 # %%
 # --- Visual inspection --------------------------------------------------------
@@ -238,7 +130,7 @@ fig_ts = plot_households_with_splits(
 _save_fig(fig_ts, "task04_households_with_splits.png")
 
 # %%
-# --- ACF / PACF up to lag 336 (daily + weekly seasonality) -------------------
+# --- ACF / PACF up to lag 3×336 (3 weekly cycles) ----------------------------
 
 train_flat = (
     multi
@@ -249,7 +141,7 @@ train_flat = (
 fig_acf = plot_acf_pacf(
     train_flat,
     household_ids=LCLIDS,
-    lags=336,
+    lags=3 * 336,
     timestamp_col="tstp",
     value_col=VALUE_COL,
 )
@@ -277,6 +169,13 @@ _save_csv(ols_metrics_df, "task04_ols_metrics.csv")
 white_results = run_white_test(results_list)
 _save_csv(white_results, "task04_white_test.csv")
 
+n_hetero = (white_results["LM p-value"] < 0.05).sum()
+logger.info(
+    "White test summary: %d / %d households show significant heteroskedasticity (p < 0.05) — "
+    "a variance-stabilising transform (e.g. log, Box-Cox) may be warranted.",
+    n_hetero, len(white_results),
+)
+
 # %%
 # --- Diagnostic summary table -------------------------------------------------
 
@@ -287,7 +186,7 @@ def _recommend(row: pd.Series) -> str:
     if row["trend slope"] != 0.0:
         recs.append("detrend")
     if row["ACF lag-48"] > 0.3 or row["ACF lag-336"] > 0.3:
-        recs.append("seasonal features ✓")
+        recs.append("seasonal features or deseasonalise")
     return ", ".join(recs) if recs else "none"
 
 adf_pivot = (
@@ -321,87 +220,24 @@ summary["recommended transform(s)"] = summary.apply(_recommend, axis=1)
 _save_csv(summary, "task04_diagnostic_summary.csv")
 
 # %%
-# --- Differencing transform ---------------------------------------------------
-
-series = (
-    multi.xs(LCLIDS[0], level="LCLid")[VALUE_COL]
-    .loc[lambda s: s.index < TRAIN_END]
-    .dropna()
-)
-
-for lag, seasonal_lag in [(1, None), (1, 48), (48, None)]:
-    t = DifferencingTransform(lag=lag, seasonal_lag=seasonal_lag)
-    differenced   = t.fit_transform(series)
-    reconstructed = t.inverse_transform(differenced)
-    max_err = (series - reconstructed.loc[series.index]).abs().max()
-    logger.info(
-        "DifferencingTransform(lag=%d, seasonal_lag=%s)  |  len %d → %d  |  max err: %.2e",
-        lag, seasonal_lag, len(series), len(differenced), max_err,
-    )
+# ==============================================================================
+# PART 2 — TRANSFORMS
+# ==============================================================================
 
 # %%
-# --- DetrendingTransform ------------------------------------------------------
-
-for degree in [1, 2]:
-    t = DetrendingTransform(degree=degree, per_household=False)
-    detrended     = t.fit_transform(series)
-    reconstructed = t.inverse_transform(detrended)
-    max_err = (series - reconstructed).abs().max()
-    logger.info(
-        "DetrendingTransform(degree=%d)  |  max reconstruction error: %.2e",
-        degree, max_err,
-    )
-
-# %%
-# --- DeseasonalisingTransform -------------------------------------------------
-# Fits slot means (0-47) on training data; subtracts on transform, adds on inverse.
-
-t_seas = DeseasonalisingTransform(period=48)
-deseasonalised = t_seas.fit_transform(series)
-reconstructed  = t_seas.inverse_transform(deseasonalised)
-max_err = (series - reconstructed).abs().max()
-logger.info(
-    "DeseasonalisingTransform  |  residual std %.4f (original %.4f)  |  max err: %.2e",
-    deseasonalised.std(), series.std(), max_err,
-)
-
-# %%
-# --- Variance-stabilising transforms ------------------------------------------
-# LogTransform  : log1p / expm1.  Handles zeros natively; shifts negatives if needed.
-# BoxCoxTransform: MLE lambda estimated on training data only.  Also shifts for non-positives.
-
-for TransformCls, label in [(LogTransform, "LogTransform"), (BoxCoxTransform, "BoxCoxTransform")]:
-    t = TransformCls()
-    transformed   = t.fit_transform(series)
-    reconstructed = t.inverse_transform(transformed)
-    max_err = (series - reconstructed).abs().max()
-    logger.info(
-        "%s  |  lambda=%s  |  max reconstruction err: %.2e",
-        label,
-        getattr(t, "_lambda", "N/A"),
-        max_err,
-    )
-
-# %%
-# --- Preserving the original target -------------------------------------------
-# When transforms are applied for modelling, a new column is created so that
-# the original scale is available for evaluation.  Predictions are always
-# inverse-transformed before computing metrics.
-
-_demo = ols_data.xs(LCLIDS[0], level="LCLid")[[VALUE_COL]].copy()
-_demo = _demo.loc[_demo.index < TRAIN_END]
-
-t_log = LogTransform()
-t_log.fit(_demo[VALUE_COL])
-_demo["energy_t"] = t_log.transform(_demo[VALUE_COL])          # transformed column
-_demo["energy_hat_t"] = _demo["energy_t"]                       # placeholder: model predictions
-_demo["energy_hat"] = t_log.inverse_transform(_demo["energy_hat_t"])  # back to original scale
-
-mae_original = (_demo[VALUE_COL] - _demo["energy_hat"]).abs().mean()
-logger.info(
-    "Target preservation demo  |  original col '%s' intact  |  MAE on original scale: %.4f",
-    VALUE_COL, mae_original,
-)
+# --- Available transforms -----------------------------------------------------
+#
+# DetrendingTransform(degree, per_household)
+#   Fits a polynomial trend on training data and subtracts it.
+#
+# DeseasonalisingTransform(period)
+#   Fits per-slot means (0 … period-1) on training data and subtracts them.
+#
+# LogTransform / BoxCoxTransform
+#   Variance-stabilising; fitted on training data only.
+#   Predictions are always inverse-transformed before computing metrics.
+#
+# All transforms are applied in the comparison experiment below.
 
 # %%
 # --- Transform comparison experiment ------------------------------------------
@@ -411,8 +247,6 @@ logger.info(
 # inverse-transformed to the original scale before metrics are computed.
 #
 # MASE denominator: mean |y_t - y_{t-48}| on training (seasonal naïve baseline).
-
-import statsmodels.api as sm
 
 EVAL_HOUSEHOLD = LCLIDS[0]
 
@@ -432,8 +266,8 @@ X_val   = _val.drop(columns=_drop).astype(float)
 
 def _fit_predict(y_t: pd.Series, X_t: pd.DataFrame, X_v: pd.DataFrame) -> pd.Series:
     idx  = X_t.dropna(how="any").index.intersection(y_t.dropna().index)
-    Xc_t = sm.add_constant(X_t.loc[idx])
-    Xc_v = sm.add_constant(X_v.dropna(how="any"))
+    Xc_t = sm.add_constant(X_t.loc[idx], has_constant="add")
+    Xc_v = sm.add_constant(X_v.dropna(how="any"), has_constant="add")
     return pd.Series(
         sm.OLS(y_t.loc[idx], Xc_t).fit().predict(Xc_v),
         index=Xc_v.index,
@@ -517,3 +351,6 @@ logger.info(
     EVAL_HOUSEHOLD, VAL_START.date(), VAL_END.date(),
     comparison_df.to_string(),
 )
+
+# TODO: Plot the transformed series and their predictions to visually verify the results.
+# TODO: Write which transforms performed best and whether the results align with the diagnostics.

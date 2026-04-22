@@ -51,7 +51,7 @@ VALUE_COL    = "energy_imputed_seasonal"
 # ── Run mode ──────────────────────────────────────────────────────────────────
 # QUICK_RUN=True  → process only the first 50 households; fast for inspection.
 # QUICK_RUN=False → process all households; required before tasks 04–10.
-QUICK_RUN    = True
+QUICK_RUN    = False
 MAX_HH_QUICK = 50     # households to process in quick mode
 BATCH_SIZE   = 50     # households per batch; tune down if memory is tight
 

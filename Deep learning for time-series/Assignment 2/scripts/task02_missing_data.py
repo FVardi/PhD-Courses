@@ -45,7 +45,7 @@ VALUE_COL   = "energy(kWh/hh)"
 # ── Run mode ──────────────────────────────────────────────────────────────────
 # QUICK_RUN=True  → load only block_0 (~500 households); fast for inspection.
 # QUICK_RUN=False → load all blocks; required before running tasks 03–10.
-QUICK_RUN = True
+QUICK_RUN = False
 BLOCKS    = [0] if QUICK_RUN else None
 
 # %%
@@ -100,10 +100,10 @@ logger.info("Top %d households by longest gap:\n%s",    N, household_stats.nlarg
 # %%
 # --- Step 3: Household quality filter -----------------------------------------
 #
-# Drop households whose training-period data does not meet quality thresholds.
+# Drop households whose data does not meet quality thresholds.
 # Thresholds are evaluated on the full loaded series (no train/test split yet).
 
-MAX_MISSINGNESS_PCT = 10.0   # drop if > 5 % of slots are missing
+MAX_MISSINGNESS_PCT = 10.0   # drop if > 10 % of slots are missing
 MAX_GAP_SLOTS       = 48    # drop if longest single gap exceeds 1 day (48 half-hours)
 
 fail_missingness = household_stats[household_stats["missingness_pct"] > MAX_MISSINGNESS_PCT].index

@@ -44,7 +44,8 @@ def fit_ols_household(
         .dropna()
     )
 
-    feature_cols = [c for c in train.columns if c != value_col]
+    drop_cols = {value_col} | {c for c in train.columns if c.startswith("energy") or c in ("gap_length", "is_imputed")}
+    feature_cols = [c for c in train.columns if c not in drop_cols]
     X = sm.add_constant(train[feature_cols].astype(float))
     y = train[value_col].astype(float)
 

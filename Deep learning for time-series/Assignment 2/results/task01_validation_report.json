@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-20T14:53:59.498576",
+  "timestamp": "2026-04-22T10:35:26.241918",
   "halfhourly_dataset": {
     "dataset_type": "halfhourly_dataset",
     "blocks_loaded": [
       0,
-      1,
-      2
+      2,
+      1
     ],
     "blocks_failed": [],
     "total_rows_loaded": 4227000,
@@ -22,8 +22,8 @@
     "dataset_type": "daily_dataset",
     "blocks_loaded": [
       0,
-      1,
-      2
+      2,
+      1
     ],
     "blocks_failed": [],
     "total_rows_loaded": 88438,

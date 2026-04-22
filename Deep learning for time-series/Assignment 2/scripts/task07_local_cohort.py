@@ -59,7 +59,7 @@ ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 # ── Run mode ──────────────────────────────────────────────────────────────────
 # QUICK_RUN=True  → 5 households; fast for inspection.
 # QUICK_RUN=False → 50 households; recommended before submitting.
-QUICK_RUN      = True
+QUICK_RUN      = False
 MAX_HOUSEHOLDS = 5  if QUICK_RUN else 50
 N_JOBS         = -1
 
