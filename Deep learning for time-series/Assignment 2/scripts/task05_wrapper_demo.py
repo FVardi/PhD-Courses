@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
-ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 LCLID = "MAC000002"

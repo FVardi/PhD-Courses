@@ -49,14 +49,14 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
-ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 ACORN_PATH    = PROJECT_ROOT / "data" / "london_smart_meters" / "informations_households.csv"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Run mode ──────────────────────────────────────────────────────────────────
 # QUICK_RUN=True  → 5 households; fast for inspection.
 # QUICK_RUN=False → 50 households; recommended before submitting.
-QUICK_RUN      = True
+QUICK_RUN      = False
 MAX_HOUSEHOLDS = 5 if QUICK_RUN else 50
 
 META_COLS = ["stdorToU", "Acorn", "Acorn_grouped"]
@@ -235,18 +235,20 @@ comparison = pd.DataFrame(results).set_index("variant")
 save_csv(comparison, "task09_encoding_comparison.csv", ARTIFACTS_DIR)
 logger.info("Comparison table:\n%s", comparison.to_string())
 
-best_variant = comparison["val_mae"].idxmin()
-logger.info("Best variant by Val MAE: %s", best_variant)
+best_variant = comparison["val_mase"].idxmin()
+logger.info("Best variant by Val MASE: %s", best_variant)
 
 # %%
 # --- Step 6: Bar chart -------------------------------------------------------
 
 fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-for ax, metric, title in zip(axes, ["val_mae", "test_mae"], ["Validation MAE", "Test MAE"]):
+for ax, metric, title in zip(axes, ["val_mase", "test_mase"], ["Validation MASE", "Test MASE"]):
     vals = comparison[metric]
     bars = ax.bar(vals.index, vals.values, color="steelblue", edgecolor="k", linewidth=0.5)
     ax.bar_label(bars, fmt="%.4f", padding=2, fontsize=8)
-    ax.set_title(title); ax.set_ylabel("MAE"); ax.tick_params(axis="x", rotation=20)
+    ax.axhline(1.0, color="crimson", linestyle="--", linewidth=1, label="MASE = 1 (naïve)")
+    ax.set_title(title); ax.set_ylabel("MASE"); ax.tick_params(axis="x", rotation=20)
+    ax.legend(fontsize=8)
 fig.suptitle("Task 09 — Encoding Variant Comparison", fontsize=12)
 fig.tight_layout()
 save_fig(fig, "task09_encoding_comparison.png", ARTIFACTS_DIR)
@@ -278,16 +280,19 @@ Interpretation
 ==============
 Meta-features: %s
 
-(a) Baseline  — lclid_enc only (no meta-features).
-(b) OHE       — exact group membership; sparse but unambiguous.  "Unknown"
-                 handled by handle_unknown="ignore" in OneHotEncoder.
-(c) Count enc — group frequency as a numeric signal; conflates groups of
-                 similar size; unseen → 0.
-(d) Target enc— strongest direct signal (mean consumption per group), but
-                 susceptible to overfitting when groups are small.
-                 Unseen → global training mean.
+(a) Baseline   — no meta-features; only household_id as a categorical feature. No generalization across households; unseen households in val/test → "Unknown" bin. Seems to overfit a little or not catch shared patterns.
 
-Best variant: %s  (Val MAE=%.4f)
+(b) OHE        — generalizes across households of the same category but applied no weights. Seems to be the most robust variant, improving over baseline without overfitting.
+
+(c) Count enc  — generalizes across households of the same category, weighted by training frequency. Similar to OHE but slightly better on validation, less better on test → possible overfitting to training frequencies.
+
+(d) Target enc — generalizes across households of the same category, weighted by training target mean. Good on validation but seems to overfit and not generalize as well as count and ohe enc.
+
+Count encoding is deemed best for its low validation MASE and test MASE as well as its generalization strength (second to OHE).
+
+The chosen meta features procide useful information beyond household_id alone.
+
+Best variant: %s  (Val MASE=%.4f)
 """,
-    META_COLS, best_variant, float(best_row["val_mae"]),
+    META_COLS, best_variant, float(best_row["val_mase"]),
 )

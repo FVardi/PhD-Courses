@@ -47,8 +47,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DATA_ROOT = PROJECT_ROOT / "data" / "london_smart_meters"
-RESULTS_DIR   = PROJECT_ROOT / "results"
-ARTIFACTS_DIR = RESULTS_DIR / "artifacts"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 
 DATASETS = [
     ("halfhourly_dataset", [0, 1, 2], "tstp", "30min"),
@@ -150,8 +149,8 @@ def main() -> None:
         all_meta[dataset_type] = run_dataset(loader, dataset_type, blocks, ts_col, freq)
 
     report = {"timestamp": datetime.now().isoformat(), **all_meta}
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    report_path = RESULTS_DIR / "task01_validation_report.json"
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+    report_path = ARTIFACTS_DIR / "task01_validation_report.json"
     with open(report_path, "w") as fh:
         json.dump(report, fh, indent=2, default=str)
     logger.info("Validation report saved to %s", report_path)

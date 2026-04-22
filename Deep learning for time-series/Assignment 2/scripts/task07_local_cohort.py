@@ -38,12 +38,11 @@ from src.pipeline import (
     VALUE_COL, TRAIN_END, VAL_START, VAL_END, TEST_START, TEST_END,
     make_feature_config, make_missing_config,
     mase_denom, eval_metrics,
-    load_cohort,
+    load_cohort, build_transform,
     save_fig, save_csv,
 )
 from src.configs import ModelConfig
 from src.forecasting import MLForecast
-from src.transforms.transforms import DeseasonalisingTransform
 
 # %%
 
@@ -52,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
 IMPUTED_PATH  = PROJECT_ROOT / "data" / "preprocessed" / "halfhourly_imputed.parquet"
-ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 ACORN_PATH    = PROJECT_ROOT / "data" / "london_smart_meters" / "informations_households.csv"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -152,10 +151,7 @@ def _fit_one_household(
         if d == 0 or np.isnan(d):
             return {"LCLid": lclid, "error": "zero MASE denominator"}
 
-        transform = (
-            DeseasonalisingTransform(**transform_params)
-            if transform_name == "DeseasonalisingTransform" else None
-        )
+        transform = build_transform(transform_name, transform_params)
         mc = ModelConfig(
             estimator           = _build_estimator(model_family, model_params),
             model_name          = model_family,
@@ -262,7 +258,7 @@ if _quality_path.exists():
 
 hard_detail = per_hh.loc[hard_ids, metric_cols]
 if quality is not None:
-    hard_detail = hard_detail.join(quality[["imputed_frac", "max_zero_run", "mean_energy"]])
+    hard_detail = hard_detail.join(quality[["imputed_frac", "mean_energy"]])
 save_csv(hard_detail, "task07_hard_households_detail.csv", ARTIFACTS_DIR)
 
 # Plot time series for 2 hard + 2 easy households

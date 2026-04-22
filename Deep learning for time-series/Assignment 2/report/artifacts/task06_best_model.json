@@ -1,15 +1,15 @@
 {
   "family": "LightGBM",
   "params": {
-    "num_leaves": 31,
+    "num_leaves": 63,
     "n_estimators": 200,
     "learning_rate": 0.05,
     "random_state": 42,
     "verbose": -1
   },
-  "model_name": "LightGBM(l=31)",
-  "val_mae": 0.0887,
-  "transform": "DeseasonalisingTransform",
+  "model_name": "LightGBM(l=63)",
+  "val_mae": 0.0852,
+  "transform": "LogDeseasonalising",
   "transform_params": {
     "period": 48
   }

@@ -40,11 +40,19 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
-ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
+IMPUTED_PATH  = PROJECT_ROOT / "data" / "preprocessed" / "halfhourly_imputed.parquet"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 VALUE_COL = "energy_imputed_seasonal"
 LCLIDS    = ["MAC000002", "MAC000003", "MAC000004", "MAC000005", "MAC000006"]
+
+# ── Run mode ──────────────────────────────────────────────────────────────────
+# QUICK_RUN=True  → skip quality screening if the CSVs already exist (fast
+#                   for repeated inspection runs).
+# QUICK_RUN=False → always recompute quality screen (required on first run
+#                   or after task02 regenerates the imputed parquet).
+QUICK_RUN = False
 
 # --- Data splits --------------------------------------------------------------
 # All diagnostics, transforms, and modelling must respect these boundaries.
@@ -67,7 +75,105 @@ def _save_csv(df: pd.DataFrame, name: str) -> None:
     df.to_csv(path)
     logger.info("Saved table  → %s", path)
 
-# TODO: Implement check for time series quality again. It is needed here and used later in task 06. Include a check where the validation and test sets must have an average energy consumption above 0.25, since it doesnt make sense to predict intervals with no energy usage.
+# %%
+# ==============================================================================
+# PART 0 — HOUSEHOLD QUALITY SCREEN
+# ==============================================================================
+#
+# Evaluated on the imputed parquet (not the features parquet) so no feature
+# engineering is needed.  Three groups of criteria:
+#
+#   Training period (strictly before TRAIN_END):
+#     imputed_frac  ≤ MAX_IMPUTED_FRAC  — fraction of slots that were imputed
+#
+#   Validation period [VAL_START, VAL_END):
+#     val_mean_energy  > MIN_MEAN_ENERGY — discard households with near-zero
+#                                          average consumption in the val period
+#
+#   Test period [TEST_START, TEST_END):
+#     test_mean_energy > MIN_MEAN_ENERGY — same check on the test period
+#
+# Rationale for the energy-consumption check: predicting a household that uses
+# almost no electricity in the evaluation window is trivially "easy" (predict
+# near-zero) and distorts cohort-level metrics.
+
+MAX_IMPUTED_FRAC = 0.1     # ≤ 10 % imputed slots in training
+MIN_MEAN_ENERGY  = 0.25    # kWh/hh — minimum mean energy in val / test period
+SCREEN_BATCH     = 200     # households per read batch
+
+_quality_all_path  = ARTIFACTS_DIR / "task04_household_quality_all.csv"
+_quality_good_path = ARTIFACTS_DIR / "task04_household_quality_good.csv"
+
+if QUICK_RUN and _quality_all_path.exists() and _quality_good_path.exists():
+    quality = pd.read_csv(_quality_all_path,  index_col="LCLid")
+    good    = pd.read_csv(_quality_good_path, index_col="LCLid")
+    logger.info(
+        "QUICK_RUN: loaded pre-computed quality screen — %d / %d households pass.",
+        len(good), len(quality),
+    )
+else:
+    all_lclids = (
+        pd.read_parquet(IMPUTED_PATH, columns=[])
+        .index.get_level_values("LCLid")
+        .unique()
+        .tolist()
+    )
+    logger.info("Quality screening %d households …", len(all_lclids))
+
+    rows      = []
+    n_batches = (len(all_lclids) + SCREEN_BATCH - 1) // SCREEN_BATCH
+
+    for i in range(n_batches):
+        batch_ids = all_lclids[i * SCREEN_BATCH : (i + 1) * SCREEN_BATCH]
+        batch = pd.read_parquet(
+            IMPUTED_PATH,
+            filters=[("LCLid", "in", batch_ids)],
+            columns=[VALUE_COL, "is_imputed"],
+        )
+
+        for lclid, grp in batch.groupby(level="LCLid"):
+            grp_tstp = grp.index.get_level_values("tstp")
+            tr = grp.loc[grp_tstp < TRAIN_END]
+            vl = grp.loc[(grp_tstp >= VAL_START)  & (grp_tstp < VAL_END)]
+            te = grp.loc[(grp_tstp >= TEST_START) & (grp_tstp < TEST_END)]
+
+            energy_tr = tr[VALUE_COL].values
+            rows.append({
+                "LCLid":            lclid,
+                "n_slots":          len(tr),
+                "imputed_frac":     float(tr["is_imputed"].mean()) if len(tr) else 1.0,
+                "mean_energy":      float(energy_tr.mean()) if len(energy_tr) else 0.0,
+                "val_mean_energy":  float(vl[VALUE_COL].mean()) if len(vl) else 0.0,
+                "test_mean_energy": float(te[VALUE_COL].mean()) if len(te) else 0.0,
+            })
+
+        if (i + 1) % 10 == 0 or (i + 1) == n_batches:
+            logger.info("  screened %d / %d batches", i + 1, n_batches)
+
+    quality = pd.DataFrame(rows).set_index("LCLid")
+
+    good = quality[
+        (quality["imputed_frac"]     <= MAX_IMPUTED_FRAC) &
+        (quality["val_mean_energy"]  >  MIN_MEAN_ENERGY)  &
+        (quality["test_mean_energy"] >  MIN_MEAN_ENERGY)
+    ].sort_values("imputed_frac")
+
+    _save_csv(quality, "task04_household_quality_all.csv")
+    _save_csv(good,    "task04_household_quality_good.csv")
+
+logger.info(
+    "Quality screen: %d / %d households pass  "
+    "(imputed ≤%.0f%%, val/test mean ≥%.2f kWh/hh)",
+    len(good), len(quality),
+    MAX_IMPUTED_FRAC * 100, MIN_MEAN_ENERGY,
+)
+logger.info(
+    "Passing households — imputed_frac: mean=%.2f%%  "
+    "val_mean_energy: mean=%.3f  test_mean_energy: mean=%.3f",
+    good["imputed_frac"].mean() * 100,
+    good["val_mean_energy"].mean(),
+    good["test_mean_energy"].mean(),
+)
 
 # %%
 # ==============================================================================
@@ -291,12 +397,21 @@ rows_cmp.append({
     **_eval(y_val, _fit_predict(y_train, X_train, X_val)),
 })
 
-# (b) Differencing (lag=1) — reconstruct from last training value
-_y_b  = y_train.diff(1).dropna()
+# (b) Differencing (lag=1) — one-step-ahead inverse: ŷ_t = y_{t-1} + ∆ŷ_t
+# Using actual y_{t-1} (not predicted) is consistent with the one-step-ahead
+# evaluation in all other conditions.
+#
+# Expected result: identical to (a) for OLS.  Since lag_1 = y_{t-1} is already
+# a column of X, the hat matrix satisfies H·lag_1 = lag_1, so
+#   Xβ_orig = Xα_diff + lag_1  algebraically.
+# This algebraic equivalence does NOT hold for tree models; the comparison
+# becomes meaningful once models with non-linear feature interactions are used.
+_y_b    = y_train.diff(1).dropna()
 _yhat_b = _fit_predict(_y_b, X_train.loc[_y_b.index], X_val)
+_y_prev = pd.concat([y_train, y_val]).shift(1).reindex(_yhat_b.index)
 rows_cmp.append({
     "condition": "(b) Differencing (lag=1)",
-    **_eval(y_val, _yhat_b.cumsum() + y_train.iloc[-1]),
+    **_eval(y_val, _yhat_b + _y_prev),
 })
 
 # (c) Detrending (linear polynomial, training only)

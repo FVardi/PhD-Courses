@@ -1,0 +1,15 @@
+{
+  "strategy": "bayesian",
+  "params": {
+    "num_leaves": 88,
+    "objective": "regression_l1",
+    "colsample_bytree": 0.978936896513396,
+    "lambda_l1": 8.324426408004218,
+    "lambda_l2": 2.1233911067827616,
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "min_child_samples": 20,
+    "subsample": 0.8
+  },
+  "val_mase": 0.57985100835105
+}

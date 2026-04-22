@@ -33,7 +33,7 @@ from src.pipeline import (
     VALUE_COL,
     LGBM_DEFAULTS,
     make_feature_config, make_missing_config, make_lgbm_model_config,
-    per_hh_metrics,
+    mase_denom, eval_metrics, per_hh_metrics,
     load_cohort, load_splits, add_lclid_enc,
     save_fig, save_csv,
 )
@@ -46,13 +46,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
-ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Run mode ──────────────────────────────────────────────────────────────────
 # QUICK_RUN=True  → 5 households; fast for inspection.
 # QUICK_RUN=False → 50 households; recommended before submitting.
-QUICK_RUN      = True
+QUICK_RUN      = False
 MAX_HOUSEHOLDS = 5 if QUICK_RUN else 50
 
 # %%
@@ -75,7 +75,7 @@ logger.info("lclid_enc: %d households, range [0, %d]", len(_lclid_map), len(_lcl
 #
 # LightGBM baseline hyperparameters — deliberately conservative.
 # Tuning is deferred to Task 10.  Documented defaults:
-#   num_leaves=31       : LightGBM default; balances expressiveness vs overfitting
+#   num_leaves=31       : LightGBM default
 #   n_estimators=500    : enough iterations to converge at lr=0.05
 #   learning_rate=0.05  : standard moderate step size
 #   min_child_samples=20: prevents tiny leaves on noisy households
@@ -110,14 +110,25 @@ y_hat_test = wrapper.predict(test_pool)
 y_val_true  = val_pool[VALUE_COL].reindex(y_hat_val.index)
 y_test_true = test_pool[VALUE_COL].reindex(y_hat_test.index)
 
-pooled_val_mae   = (y_val_true  - y_hat_val).abs().mean()
-pooled_val_rmse  = np.sqrt(((y_val_true  - y_hat_val) ** 2).mean())
-pooled_test_mae  = (y_test_true - y_hat_test).abs().mean()
-pooled_test_rmse = np.sqrt(((y_test_true - y_hat_test) ** 2).mean())
+# Pooled MASE denominator: mean of per-household seasonal-naïve MAE on training.
+# Computed per-household so lag-48 differences never cross household boundaries.
+_pooled_denom = float(
+    train_pool.groupby(level="LCLid")[VALUE_COL]
+    .apply(mase_denom)
+    .mean()
+)
+
+pooled_val  = eval_metrics(y_val_true,  y_hat_val,  _pooled_denom)
+pooled_test = eval_metrics(y_test_true, y_hat_test, _pooled_denom)
 
 logger.info(
-    "Pooled — Val  MAE=%.4f  RMSE=%.4f | Test MAE=%.4f  RMSE=%.4f",
-    pooled_val_mae, pooled_val_rmse, pooled_test_mae, pooled_test_rmse,
+    "Pooled — Val  MAE=%.4f  RMSE=%.4f  MASE=%.4f | Test MAE=%.4f  RMSE=%.4f  MASE=%.4f",
+    pooled_val["mae"], pooled_val["rmse"], pooled_val["mase"],
+    pooled_test["mae"], pooled_test["rmse"], pooled_test["mase"],
+)
+save_csv(
+    pd.DataFrame({"val": pooled_val, "test": pooled_test}).T,
+    "task08_pooled_metrics.csv", ARTIFACTS_DIR,
 )
 
 # %%
@@ -157,21 +168,14 @@ if local_metrics is not None and "test_mase" in local_metrics.columns:
     n_global_better = (glo["test_mase"] < loc["test_mase"]).sum()
     n_local_better  = (loc["test_mase"] < glo["test_mase"]).sum()
 
-    summary = pd.DataFrame({
-        "metric": ["val_mae", "val_rmse", "test_mae", "test_rmse",
-                   "test_mase_mean", "test_mase_median"],
-        "local (task07)": [
-            loc["val_mae"].mean()  if "val_mae"  in loc.columns else np.nan,
-            loc["val_rmse"].mean() if "val_rmse" in loc.columns else np.nan,
-            loc["test_mae"].mean(), loc["test_rmse"].mean(),
-            loc["test_mase"].mean(), loc["test_mase"].median(),
-        ],
-        "global (task08)": [
-            glo["val_mae"].mean(), glo["val_rmse"].mean(),
-            glo["test_mae"].mean(), glo["test_rmse"].mean(),
-            glo["test_mase"].mean(), glo["test_mase"].median(),
-        ],
-    }).set_index("metric").round(4)
+    _metric_cols = ["val_mae", "val_rmse", "val_mase", "test_mae", "test_rmse", "test_mase"]
+    summary = pd.DataFrame(
+        {
+            "local (task07)":  [loc[c].mean() if c in loc.columns else np.nan for c in _metric_cols],
+            "global (task08)": [glo[c].mean()                                 for c in _metric_cols],
+        },
+        index=_metric_cols,
+    ).round(4)
 
     save_csv(summary, "task08_comparison_summary.csv", ARTIFACTS_DIR)
     logger.info(
@@ -225,7 +229,6 @@ Disadvantages:
   - Household heterogeneity: a single model may underfit outlier households.
   - lclid_enc cannot generalise to unseen households (cold-start).
   - Hyperparameters tuned globally; individual tuning may help hard cases (Task 10).
-  - Inference cost scales with pooled feature space.
 """,
     len(cohort_ids),
 )

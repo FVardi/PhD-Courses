@@ -333,6 +333,48 @@ class LogTransform(BaseTransform):
         return (np.expm1(series) - self._shift).rename(series.name)
 
 
+class ComposedTransform(BaseTransform):
+    """Chain multiple transforms in sequence.
+
+    fit() fits each transform on the output of the previous one.
+    transform() applies them left-to-right; inverse_transform() reverses order.
+
+    Example
+    -------
+    >>> t = ComposedTransform([LogTransform(), DeseasonalisingTransform(period=48)])
+    >>> y_transformed = t.fit_transform(y_train)
+    >>> y_reconstructed = t.inverse_transform(y_pred)
+    """
+
+    def __init__(self, transforms: list[BaseTransform]) -> None:
+        if not transforms:
+            raise ValueError("transforms list must not be empty")
+        self.transforms = transforms
+        self._fitted = False
+
+    def fit(self, series: pd.Series) -> "ComposedTransform":
+        out = series
+        for t in self.transforms:
+            t.fit(out)
+            out = t.transform(out)
+        self._fitted = True
+        return self
+
+    def transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        out = series
+        for t in self.transforms:
+            out = t.transform(out)
+        return out
+
+    def inverse_transform(self, series: pd.Series) -> pd.Series:
+        self._check_fitted()
+        out = series
+        for t in reversed(self.transforms):
+            out = t.inverse_transform(out)
+        return out
+
+
 class BoxCoxTransform(BaseTransform):
     """Variance-stabilising Box-Cox transform with training-only lambda estimate.
 

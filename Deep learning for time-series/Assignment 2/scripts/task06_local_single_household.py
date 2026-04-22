@@ -12,8 +12,6 @@ Pipeline:
 MASE denominator: mean |y_t − y_{t−48}| on training data only.
 """
 
-# TODO: Apply transforsm from task 4. Probably log transform and de-seasoning.
-
 # %%
 import json
 import logging
@@ -41,7 +39,7 @@ from src.pipeline import (
     save_fig, save_csv,
 )
 from src.forecasting import MLForecast
-from src.transforms.transforms import DeseasonalisingTransform
+from src.transforms.transforms import ComposedTransform, DeseasonalisingTransform, LogTransform
 
 # %%
 
@@ -49,7 +47,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 FEATURES_DIR  = PROJECT_ROOT / "data" / "features"
-ARTIFACTS_DIR = PROJECT_ROOT / "results" / "artifacts"
+ARTIFACTS_DIR = PROJECT_ROOT / "report" / "artifacts"
 ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Run mode ──────────────────────────────────────────────────────────────────
@@ -63,7 +61,10 @@ DT_DEPTHS     = [5, 8]                   if QUICK_RUN else [3, 5, 8, 12]
 RF_DEPTHS     = [5, None]                if QUICK_RUN else [5, 10, 20, None]
 LGBM_LEAVES   = [31, 63]                 if QUICK_RUN else [15, 31, 63, 127]
 
-TARGET_TRANSFORM = DeseasonalisingTransform(period=48)
+# Task 4 diagnostics: White test detected heteroskedasticity (→ log) and strong
+# ACF at lag-48 (→ deseasonalise).  Log is applied first to stabilise variance,
+# then seasonal means are removed on the log-scale series.
+TARGET_TRANSFORM = ComposedTransform([LogTransform(), DeseasonalisingTransform(period=48)])
 
 # %%
 # --- Step 1: Household selection ----------------------------------------------
@@ -73,18 +74,22 @@ TARGET_TRANSFORM = DeseasonalisingTransform(period=48)
 _quality_path = ARTIFACTS_DIR / "task04_household_quality_good.csv"
 if _quality_path.exists():
     _quality = pd.read_csv(_quality_path, index_col="LCLid")
+    # Prefer fully-observed households (imputed_frac == 0); break ties by
+    # most training slots to maximise information for fitting.
     _best = (
         _quality
-        .query("imputed_frac == 0 and max_zero_run == 0")
+        .query("imputed_frac == 0")
         .sort_values("n_slots", ascending=False)
     )
     LCLID = _best.index[0] if len(_best) else _quality.sort_values("imputed_frac").index[0]
     logger.info(
-        "Selected household: %s  (imputed=%.2f%%  zero_run=%d  n_slots=%d)",
+        "Selected household: %s  "
+        "(imputed=%.2f%%  n_slots=%d  val_mean=%.3f kWh/hh  test_mean=%.3f kWh/hh)",
         LCLID,
         _quality.loc[LCLID, "imputed_frac"] * 100,
-        _quality.loc[LCLID, "max_zero_run"],
         _quality.loc[LCLID, "n_slots"],
+        _quality.loc[LCLID, "val_mean_energy"],
+        _quality.loc[LCLID, "test_mean_energy"],
     )
 else:
     LCLID = "MAC000002"

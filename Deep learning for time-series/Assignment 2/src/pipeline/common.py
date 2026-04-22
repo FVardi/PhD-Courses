@@ -191,7 +191,7 @@ def load_cohort(artifacts_dir: Path, max_households: int) -> list[str]:
     quality = pd.read_csv(path, index_col="LCLid")
     cohort = (
         quality
-        .sort_values(["imputed_frac", "max_zero_run"])
+        .sort_values("imputed_frac")
         .head(max_households)
         .index.tolist()
     )
@@ -200,6 +200,27 @@ def load_cohort(artifacts_dir: Path, max_households: int) -> list[str]:
         len(cohort), len(quality), max_households,
     )
     return cohort
+
+
+def build_transform(name: str, params: dict):
+    """Reconstruct a target transform from its serialised name and params dict.
+
+    Supported names:
+        "DeseasonalisingTransform" — period-based seasonal mean subtraction
+        "LogDeseasonalising"       — LogTransform then DeseasonalisingTransform
+    Returns None if name is unrecognised (no transform applied).
+    """
+    from src.transforms.transforms import (
+        ComposedTransform, DeseasonalisingTransform, LogTransform,
+    )
+    if name == "DeseasonalisingTransform":
+        return DeseasonalisingTransform(**params)
+    if name == "LogDeseasonalising":
+        return ComposedTransform([
+            LogTransform(),
+            DeseasonalisingTransform(period=params.get("period", 48)),
+        ])
+    return None
 
 
 def load_splits(
@@ -211,6 +232,17 @@ def load_splits(
     Splits respect the shared time boundaries; no future data leaks into train.
     """
     data = pd.read_parquet(features_dir, filters=[("LCLid", "in", cohort_ids)])
+
+    if not data.index.is_unique:
+        n_dups = int(data.index.duplicated().sum())
+        logger.warning(
+            "features parquet contains %d duplicate (LCLid, tstp) rows — "
+            "keeping first occurrence. Re-run task03 after clearing data/features/ "
+            "to regenerate clean feature files.",
+            n_dups,
+        )
+        data = data[~data.index.duplicated(keep="first")]
+
     tstp = data.index.get_level_values("tstp")
     train = data.loc[tstp < TRAIN_END].copy()
     val   = data.loc[(tstp >= VAL_START) & (tstp < VAL_END)].copy()

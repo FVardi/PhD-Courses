@@ -13,6 +13,7 @@ from .common import (
     load_cohort,
     load_splits,
     add_lclid_enc,
+    build_transform,
     save_fig,
     save_csv,
 )

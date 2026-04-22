@@ -1,0 +1,22 @@
+{
+  "variant": "c_count",
+  "val_mae": 0.134,
+  "val_mase": 0.7351,
+  "test_mae": 0.1302,
+  "test_mase": 0.7198,
+  "meta_cols": [
+    "stdorToU",
+    "Acorn",
+    "Acorn_grouped"
+  ],
+  "lgbm_defaults": {
+    "num_leaves": 31,
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "min_child_samples": 20,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "random_state": 42,
+    "verbose": -1
+  }
+}
