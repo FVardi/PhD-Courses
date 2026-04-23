@@ -11,5 +11,5 @@
     "min_child_samples": 20,
     "subsample": 0.8
   },
-  "val_mase": 0.57985100835105
+  "val_mase": 0.5808377381436174
 }

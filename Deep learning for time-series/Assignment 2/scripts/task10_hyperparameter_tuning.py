@@ -46,7 +46,7 @@ from src.pipeline import (
 )
 from src.configs import ModelConfig
 from src.forecasting import MLForecast
-from src.transforms.transforms import DeseasonalisingTransform
+from src.transforms.transforms import ComposedTransform, DeseasonalisingTransform, LogTransform
 from lightgbm import LGBMRegressor
 from sklearn.preprocessing import OneHotEncoder
 
@@ -175,7 +175,7 @@ def _build_wrapper(search_params: dict) -> MLForecast:
         encode_categoricals = True,
         categorical_encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore"),
     )
-    return MLForecast(mc, FEATURE_CONFIG, MISSING_CONFIG, DeseasonalisingTransform(period=48))
+    return MLForecast(mc, FEATURE_CONFIG, MISSING_CONFIG, ComposedTransform([LogTransform(), DeseasonalisingTransform(period=48)]))
 
 
 # Precompute per-household MASE denominators once — reused by every trial.

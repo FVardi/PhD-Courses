@@ -9,7 +9,7 @@
   },
   "model_name": "LightGBM(l=63)",
   "val_mae": 0.0852,
-  "transform": "LogDeseasonalising",
+  "transform": "DeseasonalisingTransform",
   "transform_params": {
     "period": 48
   }

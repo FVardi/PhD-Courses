@@ -38,7 +38,7 @@ from src.pipeline import (
     save_fig, save_csv,
 )
 from src.forecasting import MLForecast
-from src.transforms.transforms import DeseasonalisingTransform
+from src.transforms.transforms import ComposedTransform, DeseasonalisingTransform, LogTransform
 
 # %%
 
@@ -95,7 +95,7 @@ wrapper = MLForecast(
     model_config         = model_config,
     feature_config       = feature_config,
     missing_value_config = missing_config,
-    target_transformer   = DeseasonalisingTransform(period=48),
+    target_transformer   = ComposedTransform([LogTransform(), DeseasonalisingTransform(period=48)]),
 )
 logger.info("Fitting global model on pooled training set (%d rows) …", len(train_pool))
 wrapper.fit(train_pool)

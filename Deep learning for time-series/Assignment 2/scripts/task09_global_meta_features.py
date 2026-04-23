@@ -41,7 +41,7 @@ from src.pipeline import (
     save_fig, save_csv,
 )
 from src.forecasting import MLForecast
-from src.transforms.transforms import DeseasonalisingTransform
+from src.transforms.transforms import ComposedTransform, DeseasonalisingTransform, LogTransform
 
 # %%
 
@@ -115,7 +115,7 @@ def _fit_and_eval(
         model_config         = make_lgbm_model_config(),
         feature_config       = feature_config,
         missing_value_config = make_missing_config(),
-        target_transformer   = DeseasonalisingTransform(period=48),
+        target_transformer   = ComposedTransform([LogTransform(), DeseasonalisingTransform(period=48)]),
     )
     wrapper.fit(train)
     yv_hat = wrapper.predict(val)
@@ -280,15 +280,15 @@ Interpretation
 ==============
 Meta-features: %s
 
-(a) Baseline   — no meta-features; only household_id as a categorical feature. No generalization across households; unseen households in val/test → "Unknown" bin. Seems to overfit a little or not catch shared patterns.
+(a) Baseline   — no meta-features; only household_id as a categorical feature. No generalization across households; unseen households in val/test → "Unknown" bin. Worst in all cases.
 
-(b) OHE        — generalizes across households of the same category but applied no weights. Seems to be the most robust variant, improving over baseline without overfitting.
+(b) OHE        — generalizes across households of the same category but applied no weights. Seems to be the most robust and most accurate variant, improving over baseline without overfitting.
 
-(c) Count enc  — generalizes across households of the same category, weighted by training frequency. Similar to OHE but slightly better on validation, less better on test → possible overfitting to training frequencies.
+(c) Count enc  — generalizes across households of the same category, weighted by training frequency. Similar to OHE but slightly worse.
 
-(d) Target enc — generalizes across households of the same category, weighted by training target mean. Good on validation but seems to overfit and not generalize as well as count and ohe enc.
+(d) Target enc — generalizes across households of the same category, weighted by training target mean. Almost as good as OHE and count in everything but MASE.
 
-Count encoding is deemed best for its low validation MASE and test MASE as well as its generalization strength (second to OHE).
+OHE encoding is deemed best for its low validation MASE and test MASE as well as its generalization strength. Since there is not a lot of variance between groups (Kruskall-Wallis test) there is not a big difference in the encoding of the groups.
 
 The chosen meta features procide useful information beyond household_id alone.
 
