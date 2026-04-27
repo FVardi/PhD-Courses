@@ -21,7 +21,11 @@
 \section{FD001: Single Condition, Single Fault Mode}
 
 \subsection{Problem understanding}
-The RUL task is a regression problem since the 
+The RUL task is a regression problem since the target variable is a time period. The variable in this task is in a unit of cycles, which are strictly discrete, but there are no predefined classed and the range has no upper bound, so regression is more fitting.
+
+One row in the dataset represents one cycle, the unit of time. Each row contains info on engine value, operation settings, time and sensor values.
+
+
 
 
 
