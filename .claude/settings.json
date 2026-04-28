@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat)",
+      "Bash(/c/Users/Bruger/Documents/Repos/PhD-Courses/.venv/Scripts/python /tmp/inspect_data.py)",
+      "Bash(/c/Users/Bruger/Documents/Repos/PhD-Courses/.venv/Scripts/python /tmp/full_inspect.py)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

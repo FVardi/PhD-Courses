@@ -1,0 +1,25 @@
+dataset: FD001
+rul_cap: 125
+random_seed: 42
+val_fraction: 0.2
+window_size: 30
+stride: 1
+
+training:
+  batch_size: 64
+  lr: 0.001
+  epochs: 50
+  hidden_size: 64
+  num_layers: 2
+  dropout: 0.2
+
+tcn:
+  num_channels: [64, 64, 64]
+  kernel_size: 3
+  dropout: 0.2
+
+eda:
+  n_sample_engines: 3
+  lifetime_hist_bins: 20
+  spearman_mean_threshold: 0.5    # |mean Spearman| across engines
+  spearman_std_threshold: 0.3     # max allowed std of Spearman across engines

@@ -25,6 +25,13 @@ The RUL task is a regression problem since the target variable is a time period.
 
 One row in the dataset represents one cycle, the unit of time. Each row contains info on engine value, operation settings, time and sensor values.
 
+RUL labels must be constructed from the given failure time in cycle number.
+\begin{itemize}
+\item The train series run until failure, so the labels will be the total number of cycles minus the current cycle number.
+\item The test series do not unr until failure but the number of cycles until failure wheh the series ends is given so the labels will be the length of the test series plus the RUL at the end of the series minus the the current cycle number.
+\end{itemize}
+
+
 
 
 

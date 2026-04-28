@@ -1,0 +1,15 @@
+selected_sensors:
+- sensor_11
+- sensor_12
+- sensor_4
+- sensor_7
+- sensor_15
+- sensor_20
+- sensor_21
+- sensor_13
+- sensor_8
+- sensor_17
+- sensor_2
+- sensor_3
+spearman_mean_threshold: 0.5
+spearman_std_threshold: 0.3
