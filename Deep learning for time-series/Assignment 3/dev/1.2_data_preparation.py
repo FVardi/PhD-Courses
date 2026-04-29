@@ -12,7 +12,7 @@ with open(SRC_DIR / "config.yaml") as f:
 
 DATASET      = cfg["dataset"]
 RUL_CAP      = cfg["rul_cap"]
-RANDOM_SEED  = cfg["random_seed"]
+RANDOM_SEED  = cfg["split_seed"]
 VAL_FRACTION = cfg["val_fraction"]
 
 COLUMNS = (
@@ -84,8 +84,9 @@ test = pd.read_csv(
     index_col=False,
 )
 last_cycle = test.groupby("unit")["cycle"].max()
+rul_map    = dict(enumerate(rul_true["RUL"], start=1))  # unit is 1-indexed
 test["RUL"] = (
-    test["unit"].map(last_cycle) - test["cycle"] + test["unit"].map(rul_true["RUL"])
+    test["unit"].map(last_cycle) - test["cycle"] + test["unit"].map(rul_map)
 ).clip(upper=RUL_CAP)
 
 test = normalise(test)

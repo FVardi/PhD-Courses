@@ -1,6 +1,7 @@
 dataset: FD001
 rul_cap: 125
-random_seed: 42
+split_seed: 42
+train_seeds: [42, 123, 456, 789, 1011]
 val_fraction: 0.2
 window_size: 30
 stride: 1
@@ -8,13 +9,14 @@ stride: 1
 training:
   batch_size: 64
   lr: 0.001
-  epochs: 50
-  hidden_size: 64
+  epochs: 200
+  hidden_size: 128
   num_layers: 2
   dropout: 0.2
+  early_stopping_patience: 10
 
 tcn:
-  num_channels: [64, 64, 64]
+  num_channels: [64, 64, 64, 64]   # 4 layers → dilations 1, 2, 4, 8
   kernel_size: 3
   dropout: 0.2
 

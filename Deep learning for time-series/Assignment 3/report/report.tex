@@ -5,18 +5,20 @@
 \usepackage{geometry}
 \usepackage{amsmath, amssymb}
 \usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
 
 % Page setup
 \geometry{margin=2.5cm}
 
 % Title info
-\title{Title of Report}
-\author{Your Name}
+\title{Assignment 3: Machine Learning for Time Series}
+\author{Frederik Appel Vardinghus-Nielsen}
 \date{\today}
 
 \begin{document}
 
 \maketitle
+\listoftodos
 
 \section{FD001: Single Condition, Single Fault Mode}
 
@@ -31,8 +33,61 @@ RUL labels must be constructed from the given failure time in cycle number.
 \item The test series do not unr until failure but the number of cycles until failure wheh the series ends is given so the labels will be the length of the test series plus the RUL at the end of the series minus the the current cycle number.
 \end{itemize}
 
+\subsection{Exploratory data analysis}
+The sensor channels were chosen based upon their Spearman correlation with the cycle number. The Spearman correlation was calculated individually for each sensor for each engine and then aggregated across engines by mean. The sensor channels with mean Spearman correlation above 0.5 and standard deviation below 0.3 were selected. This results in 12 sensors.
 
+\subsection{Data preparation}
+\begin{itemize}
+\item \textbf{RUL label contruction:} constructed as piecewise-linear with a cap of 125 cycles. RUL beyond 125 is not expected to show sensor values that are much different from other healthy data points, so capping prevents the model from attempting to learn less relevant patterns and focus of the part where health deterioration is more evident.
+\item \textbf{Train/validation split:} A classic 80/20 split by engines for train/val is used.
+\item \textbf{Normalization:} The sensor values are normalized by subtracting the mean and dividing by the standard deviation of each sensor channel across engines in the training set.
+\item \textbf{Fixed random seed:} A fixed random seed (\todo{Check seed and write here}) for the train/validation split is used to ensure reproducibility.
+\end{itemize}
+\subsection{Feature engineering -- raw fixed-window pipeline}
+A window length $w=30$ is used and treated as hyperparameter in the later tuning task.
 
+\subsection{Feature engineering-- feature-sequence pipeline}
+The feature sequence pipeline is based on the raw fixed-window pipeline but with additional feature engineering. For each window, the following suggested features are calculated for each sensor channel:
+\begin{itemize}
+    \item Rolling mean
+    \item Rolling standard deviation
+    \item Linear OLS slope
+    \item Rolling mean deviation from baseline (first window) value
+\end{itemize}
+
+To handle variable-length sequences for the feature approach the pack\_padded\_sequence and pad\_packed\_sequence functions from PyTorch are used. The MSE loss is masked to ignore the padded values.
+
+\subsection{Models}
+The three models RNN, LSTM and TCN are configured with the default suggestions:
+\begin{itemize}
+    \item RNN/LSTM: \todo{Check number of layers, hidden size, dropout}
+    \item TCN: \todo{Check number of layers, kernel size, dropout}
+    \item ADAM optimiser
+    \item MSE loss
+    \item Epochs: \todo{Check number of epochs and early stopping patience}
+    \item Batch size: \todo{Check batch size}
+\end{itemize}
+
+\subsection{XGBoost baseline}
+XGBoost is tuned with Optuna with the following hyperparameters: \todo{Check hyperparameters to tune and their ranges}
+\todo{Check RMSE and NASA score to report here.}
+
+\section{Evaluation protocol}
+
+\subsection{Metrics}
+NASA score is not used for training loss.
+
+\subsection{Multiple seeds}
+Five fixed random seeds (\todo{Check seeds and write here}) are used for model initialization when training to probe the model sensitivity to intial conditions. The mean and standard deviation of the RMSE and NASA scores across seeds for each model and data approach can be seen in Table \todo{Create table and refer to it}.
+
+\subsection{Fair comparison}
+No deviations from the suggested setup made.
+
+\section{Focused hyperparameter study}
+
+\subsection{Setup}
+
+\subsection{Analysis}
 
 
 

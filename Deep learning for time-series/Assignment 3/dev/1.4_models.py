@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 class RNNModel(nn.Module):
@@ -13,8 +14,12 @@ class RNNModel(nn.Module):
         )
         self.fc = nn.Linear(hidden_size, 1)
 
-    def forward(self, x):
-        out, _ = self.rnn(x)    # (batch, T, hidden_size)
+    def forward(self, x, lengths=None):
+        if lengths is not None:
+            x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=True)
+        out, _ = self.rnn(x)
+        if lengths is not None:
+            out, _ = pad_packed_sequence(out, batch_first=True)
         return self.fc(out)     # (batch, T, 1)
 
 
@@ -28,8 +33,12 @@ class LSTMModel(nn.Module):
         )
         self.fc = nn.Linear(hidden_size, 1)
 
-    def forward(self, x):
-        out, _ = self.lstm(x)   # (batch, T, hidden_size)
+    def forward(self, x, lengths=None):
+        if lengths is not None:
+            x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=True)
+        out, _ = self.lstm(x)
+        if lengths is not None:
+            out, _ = pad_packed_sequence(out, batch_first=True)
         return self.fc(out)     # (batch, T, 1)
 
 
@@ -67,11 +76,7 @@ class _TCNBlock(nn.Module):
 
 
 class TCNModel(nn.Module):
-    """Temporal Convolutional Network with exponentially growing dilations.
-
-    Receptive field per block i (0-indexed): 2 * (kernel_size - 1) * 2^i.
-    Total receptive field = 1 + sum over blocks.
-    """
+    """Temporal Convolutional Network with exponentially growing dilations."""
 
     def __init__(self, input_size, num_channels, kernel_size, dropout=0.0):
         super().__init__()
@@ -83,8 +88,8 @@ class TCNModel(nn.Module):
         self.network = nn.Sequential(*blocks)
         self.fc      = nn.Linear(num_channels[-1], 1)
 
-    def forward(self, x):
-        # x: (batch, T, input_size)
+    def forward(self, x, lengths=None):
+        # lengths unused — TCN is not recurrent, padding does not affect valid positions
         out = self.network(x.transpose(1, 2))   # (batch, channels, T)
         out = out.transpose(1, 2)               # (batch, T, channels)
         return self.fc(out)                     # (batch, T, 1)
@@ -95,13 +100,6 @@ class TCNModel(nn.Module):
 # ---------------------------------------------------------------------------
 
 def get_model(name: str, input_size: int, cfg: dict) -> nn.Module:
-    """Instantiate a model by name using config values.
-
-    Args:
-        name: 'rnn', 'lstm', or 'tcn'
-        input_size: number of input features per timestep
-        cfg: full config dict (reads cfg['training'] and cfg['tcn'])
-    """
     t = cfg["training"]
     if name == "rnn":
         return RNNModel(input_size, t["hidden_size"], t["num_layers"], t["dropout"])
