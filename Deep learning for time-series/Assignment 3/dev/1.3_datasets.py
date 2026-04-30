@@ -11,8 +11,9 @@ class SlidingWindowDataset(Dataset):
     Input shape: (window_size, n_sensors).
     """
 
-    def __init__(self, parquet_path, selected_sensors, window_size):
+    def __init__(self, parquet_path, selected_sensors, window_size, extra_cols=None):
         df = pd.read_parquet(parquet_path)
+        extra_cols = extra_cols or []
         windows, labels = [], []
 
         for _, group in df.groupby("unit"):
@@ -25,8 +26,12 @@ class SlidingWindowDataset(Dataset):
 
             n_valid = T - window_size + 1
             idx = np.arange(window_size)[None, :] + np.arange(n_valid)[:, None]
-            windows.append(data[idx])             # (n_valid, W, n_sensors)
-            labels.append(rul[window_size - 1:])  # (n_valid,)
+            win = data[idx]                                            # (n_valid, W, n_sensors)
+            if extra_cols:
+                extra = group[extra_cols].values.astype(np.float32)   # (T, n_extra)
+                win   = np.concatenate([win, extra[idx]], axis=2)      # (n_valid, W, n_sensors+n_extra)
+            windows.append(win)
+            labels.append(rul[window_size - 1:])                      # (n_valid,)
 
         self.windows = torch.tensor(np.concatenate(windows, axis=0))  # (N, W, n_sensors)
         self.labels  = torch.tensor(np.concatenate(labels,  axis=0))  # (N,)
@@ -53,8 +58,9 @@ class FeatureSequenceDataset(Dataset):
     Use sequence_collate_fn with the DataLoader to pad per-batch and get lengths.
     """
 
-    def __init__(self, parquet_path, selected_sensors, window_size):
+    def __init__(self, parquet_path, selected_sensors, window_size, extra_cols=None):
         df = pd.read_parquet(parquet_path)
+        extra_cols = extra_cols or []
         x     = np.arange(window_size, dtype=np.float32)
         x_c   = x - x.mean()
         x_var = (x_c ** 2).sum()
@@ -83,6 +89,10 @@ class FeatureSequenceDataset(Dataset):
             feats = np.concatenate(
                 [rolling_mean, rolling_std, slope, deviation], axis=1
             ).astype(np.float32)                            # (n_valid, n_sensors * 4)
+
+            if extra_cols:
+                extra = group[extra_cols].values.astype(np.float32)   # (T, n_extra)
+                feats = np.concatenate([feats, extra[window_size - 1:]], axis=1)
 
             self.features.append(torch.tensor(feats))
             self.rul.append(torch.tensor(rul[window_size - 1:]))

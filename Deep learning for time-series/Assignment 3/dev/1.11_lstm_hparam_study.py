@@ -10,8 +10,10 @@ is selected on mean validation RMSE, then evaluated on the test set.
 
 Usage:
     python 1.11_lstm_hparam_study.py
+    python 1.11_lstm_hparam_study.py --dataset FD002
 """
 
+import argparse
 import copy
 import importlib.util
 import itertools
@@ -22,6 +24,11 @@ from pathlib import Path
 
 SRC_DIR = Path(__file__).parents[1] / "src"
 DEV_DIR = Path(__file__).parent
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--dataset", default="FD001")
+args, _ = parser.parse_known_args()
+DATASET = args.dataset
 
 STUDY_SEEDS  = [42, 123, 456]
 WINDOW_SIZES = [20, 30, 50]
@@ -56,17 +63,19 @@ def ckpt_name(approach, w, h, lr, seed):
 # =============================================================================
 # Training sweep
 # =============================================================================
+prefix    = "" if DATASET == "FD001" else f"{DATASET}_"
 ckpt_dir  = SRC_DIR / "results" / "checkpoints"
 grid      = list(itertools.product(APPROACHES, WINDOW_SIZES, HIDDEN_SIZES, LR_VALUES))
 n_total   = len(grid) * len(STUDY_SEEDS)
 
+print(f"Dataset: {DATASET}")
 print(f"Grid: {len(grid)} configs × {len(STUDY_SEEDS)} seeds = {n_total} runs\n")
 
 records = []
 for approach, w, h, lr in grid:
     cid = config_id(w, h, lr)
     for seed in STUDY_SEEDS:
-        cname = ckpt_name(approach, w, h, lr, seed)
+        cname = f"{prefix}{ckpt_name(approach, w, h, lr, seed)}"
         ckpt_path = ckpt_dir / cname
 
         if ckpt_path.exists():
@@ -81,7 +90,7 @@ for approach, w, h, lr in grid:
             cfg["training"]["lr"]          = lr
 
             val_rmse = _train_mod.train(
-                approach, "lstm", seed=seed, cfg=cfg, ckpt_name=cname
+                approach, "lstm", seed=seed, cfg=cfg, ckpt_name=cname, dataset=DATASET
             )
 
         records.append({
@@ -95,7 +104,7 @@ for approach, w, h, lr in grid:
         })
 
 val_df = pd.DataFrame(records)
-val_df.to_csv(SRC_DIR / "results" / "lstm_study_val.csv", index=False)
+val_df.to_csv(SRC_DIR / "results" / f"{prefix}lstm_study_val.csv", index=False)
 
 # =============================================================================
 # Select best config per approach (lowest mean val RMSE across seeds)
@@ -134,8 +143,8 @@ for approach in APPROACHES:
 
     rmses, scores = [], []
     for seed in STUDY_SEEDS:
-        cpath = ckpt_dir / ckpt_name(approach, w, h, lr, seed)
-        rmse, score = _eval_mod.evaluate(approach, "lstm", seed=seed, ckpt_path=cpath)
+        cpath = ckpt_dir / f"{prefix}{ckpt_name(approach, w, h, lr, seed)}"
+        rmse, score = _eval_mod.evaluate(approach, "lstm", seed=seed, ckpt_path=cpath, dataset=DATASET)
         rmses.append(rmse)
         scores.append(score)
         test_records.append({
@@ -147,5 +156,5 @@ for approach in APPROACHES:
     print(f"  NASA score: {np.mean(scores):.2f} ± {np.std(scores):.2f}")
 
 pd.DataFrame(test_records).to_csv(
-    SRC_DIR / "results" / "lstm_study_test.csv", index=False
+    SRC_DIR / "results" / f"{prefix}lstm_study_test.csv", index=False
 )

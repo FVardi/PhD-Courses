@@ -75,6 +75,7 @@ cluster_stats[std_cols] = cluster_stats[std_cols].replace(0, 1)
 
 def normalise_by_cluster(df, stats):
     out = df.copy()
+    out[SENSOR_COLS] = out[SENSOR_COLS].astype(float)
     for cluster in df["op_condition"].unique():
         mask = df["op_condition"] == cluster
         for sensor in SENSOR_COLS:
@@ -139,3 +140,54 @@ joblib.dump(kmeans, SPLITS_DIR / "kmeans.pkl")
 cluster_stats.to_csv(SPLITS_DIR / "cluster_stats.csv")
 
 print(f"Saved train / val / test, kmeans model, and cluster stats to {SPLITS_DIR}")
+
+# =============================================================================
+# VISUALISATION — raw vs normalised sensor trajectories
+# =============================================================================
+
+# %%
+import matplotlib.pyplot as plt
+
+FIGS_DIR = RESULTS_DIR / "figures"
+FIGS_DIR.mkdir(exist_ok=True)
+
+# reload raw training data
+raw_train = pd.read_csv(
+    DATA_DIR / f"train_{DATASET}.txt",
+    sep=r"\s+", header=None, names=COLUMNS, index_col=False,
+)
+
+N_SAMPLE     = cfg["eda"]["n_sample_engines"]
+sample_units = train["unit"].unique()[:N_SAMPLE]
+
+# %%  one figure per sample engine — raw (left) vs normalised (right)
+for unit in sample_units:
+    raw_eng  = raw_train[raw_train["unit"] == unit].sort_values("cycle")
+    norm_eng = train[train["unit"] == unit].sort_values("cycle")
+    cycles   = raw_eng["cycle"].values
+
+    fig, axes = plt.subplots(
+        len(SENSOR_COLS), 2,
+        figsize=(12, 1.8 * len(SENSOR_COLS)),
+        sharex=True,
+    )
+    axes[0, 0].set_title("Raw")
+    axes[0, 1].set_title("Normalised")
+
+    for i, sensor in enumerate(SENSOR_COLS):
+        axes[i, 0].plot(cycles, raw_eng[sensor].values,  linewidth=0.8)
+        axes[i, 1].plot(cycles, norm_eng[sensor].values, linewidth=0.8)
+        axes[i, 1].axhline(0, color="k", linewidth=0.4, linestyle="--")
+        for col in (0, 1):
+            axes[i, col].set_ylabel(sensor, fontsize=7)
+
+    axes[-1, 0].set_xlabel("cycle")
+    axes[-1, 1].set_xlabel("cycle")
+
+    fig.suptitle(f"Engine {unit} — raw vs normalised sensors (FD002)", y=1.002)
+    plt.tight_layout()
+    plt.savefig(
+        FIGS_DIR / f"FD002_engine{unit}_raw_vs_norm.png",
+        dpi=150, bbox_inches="tight",
+    )
+    plt.show()

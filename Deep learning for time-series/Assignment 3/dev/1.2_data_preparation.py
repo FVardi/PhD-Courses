@@ -97,7 +97,7 @@ print(f"Test  — engines: {test['unit'].nunique()}  rows: {len(test)}")
 # =============================================================================
 
 # %%
-SPLITS_DIR = RESULTS_DIR / "splits"
+SPLITS_DIR = RESULTS_DIR / f"splits_{DATASET}"
 SPLITS_DIR.mkdir(exist_ok=True)
 
 train.to_parquet(SPLITS_DIR / "train.parquet", index=False)
@@ -108,3 +108,5 @@ normalisation = pd.DataFrame({"mean": sensor_mean, "std": sensor_std})
 normalisation.to_csv(SPLITS_DIR / "normalisation.csv")
 
 print(f"Saved train / val / test and normalisation stats to {SPLITS_DIR}")
+
+# %%

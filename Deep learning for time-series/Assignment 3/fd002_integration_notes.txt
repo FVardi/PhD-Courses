@@ -1,0 +1,78 @@
+FD002 dataset integration — summary of changes
+================================================
+
+All scripts in the 1.x pipeline now support FD002 in addition to FD001.
+Run any script with --dataset FD002 (where applicable) to target FD002.
+Data preparation for FD002 is handled separately by 2.2_data_preparation.py,
+which saves splits to src/results/splits_FD002/.
+
+
+1.3_datasets.py
+---------------
+Both SlidingWindowDataset and FeatureSequenceDataset now accept an
+extra_cols=None parameter.
+
+- Window approach: extra_cols values are concatenated to the sensor
+  features inside each window, giving shape (window_size, n_sensors + n_extra).
+- Sequence approach: extra_cols values at the last timestep of each window
+  position are appended to the engineered features, giving shape
+  (n_valid, n_sensors*4 + n_extra).
+
+For FD002, extra_cols=["op_condition"] is passed automatically, adding
+the KMeans cluster label as an input feature at each timestep.
+
+
+1.5_train.py, 1.6_evaluate.py, 1.8_xgboost_baseline.py
+--------------------------------------------------------
+_dataset_cfg() updated in all three files:
+
+- Now loads selected_features.yaml for all datasets (the 12 sensors
+  selected from FD001 are reused for FD002).
+- Returns a third value: extra_cols=["op_condition"] for FD002,
+  [] for FD001.
+- All dataset constructors updated to forward extra_cols.
+
+Return signature changed from (splits_dir, sensor_cols)
+                           to (splits_dir, sensor_cols, extra_cols).
+
+Callers updated to unpack three values accordingly.
+
+
+1.7_xgboost_tune.py
+--------------------
+- Added --dataset CLI argument (default: FD001).
+- Data loading refactored into _load_data(dataset), which applies the
+  same sensor selection and extra_cols logic as the other scripts.
+- Best hyperparameters saved to {dataset_prefix}xgboost_best_params.yaml
+  (e.g. FD002_xgboost_best_params.yaml for FD002).
+
+Usage:
+    python 1.7_xgboost_tune.py --dataset FD002 --trials 100
+
+
+1.11_lstm_hparam_study.py
+--------------------------
+- Added --dataset CLI argument (default: FD001).
+- Checkpoint filenames prefixed with dataset name for non-FD001 datasets
+  (e.g. FD002_study_lstm_window_w30_h128_lr1e3_seed42.pt).
+- train() and evaluate() calls now pass dataset= argument.
+- Output CSV files (lstm_study_val.csv, lstm_study_test.csv) prefixed
+  with dataset name.
+
+Usage:
+    python 1.11_lstm_hparam_study.py --dataset FD002
+
+
+1.9_run_all.py, 1.10_aggregate_results.py
+------------------------------------------
+Already supported --dataset FD002 before these changes. No modifications
+needed.
+
+
+Cluster column (op_condition)
+------------------------------
+The op_condition column in splits_FD002/*.parquet contains the KMeans
+cluster label (integer 0-5) assigned to each cycle based on operating
+conditions. It is included as an input feature for FD002 runs via
+extra_cols=["op_condition"]. FD001 splits do not have this column and
+extra_cols remains empty for that dataset.

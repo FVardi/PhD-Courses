@@ -11,6 +11,7 @@ Usage (cells): set APPROACH and MODEL in the config cell, then run all cells.
 import argparse
 import importlib.util
 import random
+import time
 import yaml
 import numpy as np
 import torch
@@ -79,14 +80,11 @@ def run_epoch(model, loader, approach, optimizer, device):
 
 def _dataset_cfg(dataset, cfg):
     results_dir = SRC_DIR / "results"
-    if dataset == "FD001":
-        splits_dir = results_dir / "splits"
-        with open(results_dir / "selected_features.yaml") as f:
-            sensor_cols = yaml.safe_load(f)["selected_sensors"]
-    else:
-        splits_dir  = results_dir / f"splits_{dataset}"
-        sensor_cols = [f"sensor_{i}" for i in range(1, 22)]
-    return splits_dir, sensor_cols
+    splits_dir  = results_dir / f"splits_{dataset}"
+    with open(results_dir / "selected_features.yaml") as f:
+        sensor_cols = yaml.safe_load(f)["selected_sensors"]
+    extra_cols = ["op_condition"] if dataset != "FD001" else []
+    return splits_dir, sensor_cols, extra_cols
 
 
 def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD001"):
@@ -99,7 +97,7 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
         with open(SRC_DIR / "config.yaml") as f:
             cfg = yaml.safe_load(f)
 
-    splits_dir, selected_sensors = _dataset_cfg(dataset, cfg)
+    splits_dir, selected_sensors, extra_cols = _dataset_cfg(dataset, cfg)
     prefix   = "" if dataset == "FD001" else f"{dataset}_"
     ckpt_dir = SRC_DIR / "results" / "checkpoints"
     ckpt_dir.mkdir(exist_ok=True)
@@ -110,13 +108,13 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
     print(f"Device: {device}  |  Dataset: {dataset}  |  Approach: {approach}  |  Model: {model_name}  |  Seed: {seed}")
 
     if approach == "window":
-        train_ds = SlidingWindowDataset(splits_dir / "train.parquet", selected_sensors, window_size)
-        val_ds   = SlidingWindowDataset(splits_dir / "val.parquet",   selected_sensors, window_size)
+        train_ds = SlidingWindowDataset(splits_dir / "train.parquet", selected_sensors, window_size, extra_cols)
+        val_ds   = SlidingWindowDataset(splits_dir / "val.parquet",   selected_sensors, window_size, extra_cols)
         train_loader = DataLoader(train_ds, batch_size=t_cfg["batch_size"], shuffle=True,  num_workers=0)
         val_loader   = DataLoader(val_ds,   batch_size=t_cfg["batch_size"], shuffle=False, num_workers=0)
     else:
-        train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", selected_sensors, window_size)
-        val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   selected_sensors, window_size)
+        train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", selected_sensors, window_size, extra_cols)
+        val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   selected_sensors, window_size, extra_cols)
         train_loader = DataLoader(train_ds, batch_size=t_cfg["batch_size"], shuffle=True,
                                   collate_fn=sequence_collate_fn, num_workers=0)
         val_loader   = DataLoader(val_ds,   batch_size=t_cfg["batch_size"], shuffle=False,
@@ -146,7 +144,7 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
         if val_rmse < best_val_rmse:
             best_val_rmse     = val_rmse
             epochs_no_improve = 0
-            torch.save({
+            ckpt_data = {
                 "epoch":       epoch,
                 "model_state": model.state_dict(),
                 "val_rmse":    val_rmse,
@@ -154,7 +152,13 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
                 "model_name":  model_name,
                 "input_size":  input_size,
                 "cfg":         cfg,
-            }, ckpt_path)
+            }
+            for _attempt in range(5):
+                try:
+                    torch.save(ckpt_data, ckpt_path)
+                    break
+                except RuntimeError:
+                    time.sleep(0.5)
             print(f"  → checkpoint saved (val RMSE {val_rmse:.4f})")
         else:
             epochs_no_improve += 1

@@ -65,19 +65,16 @@ def predict(model, loader, approach, device):
 
 def _dataset_cfg(dataset):
     results_dir = SRC_DIR / "results"
-    if dataset == "FD001":
-        splits_dir = results_dir / "splits"
-        with open(results_dir / "selected_features.yaml") as f:
-            sensor_cols = yaml.safe_load(f)["selected_sensors"]
-    else:
-        splits_dir  = results_dir / f"splits_{dataset}"
-        sensor_cols = [f"sensor_{i}" for i in range(1, 22)]
-    return splits_dir, sensor_cols
+    splits_dir  = results_dir / f"splits_{dataset}"
+    with open(results_dir / "selected_features.yaml") as f:
+        sensor_cols = yaml.safe_load(f)["selected_sensors"]
+    extra_cols = ["op_condition"] if dataset != "FD001" else []
+    return splits_dir, sensor_cols, extra_cols
 
 
 def evaluate(approach, model_name, seed=42, ckpt_path=None, dataset="FD001"):
     prefix     = "" if dataset == "FD001" else f"{dataset}_"
-    splits_dir, selected_sensors = _dataset_cfg(dataset)
+    splits_dir, selected_sensors, extra_cols = _dataset_cfg(dataset)
     if ckpt_path is None:
         ckpt_path = SRC_DIR / "results" / "checkpoints" / f"{prefix}{approach}_{model_name}_seed{seed}.pt"
 
@@ -89,10 +86,10 @@ def evaluate(approach, model_name, seed=42, ckpt_path=None, dataset="FD001"):
     batch_size  = cfg["training"]["batch_size"]
 
     if approach == "window":
-        test_ds = SlidingWindowDataset(splits_dir / "test.parquet", selected_sensors, window_size)
+        test_ds = SlidingWindowDataset(splits_dir / "test.parquet", selected_sensors, window_size, extra_cols)
         loader  = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=0)
     else:
-        test_ds = FeatureSequenceDataset(splits_dir / "test.parquet", selected_sensors, window_size)
+        test_ds = FeatureSequenceDataset(splits_dir / "test.parquet", selected_sensors, window_size, extra_cols)
         loader  = DataLoader(test_ds, batch_size=batch_size, shuffle=False,
                              collate_fn=sequence_collate_fn, num_workers=0)
 
@@ -109,7 +106,7 @@ def evaluate(approach, model_name, seed=42, ckpt_path=None, dataset="FD001"):
         # sequence approach already returns one prediction per engine
         final_preds, final_targets = preds, targets
 
-    rmse  = float(np.sqrt(((preds - targets) ** 2).mean()))
+    rmse  = float(np.sqrt(((final_preds - final_targets) ** 2).mean()))
     score = nasa_score(final_preds, final_targets)
     print(f"Approach: {approach} | Model: {model_name}")
     print(f"  Test RMSE:       {rmse:.4f}")

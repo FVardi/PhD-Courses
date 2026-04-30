@@ -1,7 +1,0 @@
-Why would i apply global average pooling? Doesn't this collapse the whole sequence into a single "timestamp" and defeat the purpose of the seq2seq architecture?
-
-In he "Multiple seeds" section it says to run 3-5 seed for each configuration (understood as model/data structure). It then says that "If two configurations differ by less than one standard deviation in both metrics...". Should configurations be compared or should different seeds for a single configuration be compared?
-
-Should i sort sensors out for the FD002 dataset?
-
-Should all models for FD002 be regime aware? Also the simple raw window method?

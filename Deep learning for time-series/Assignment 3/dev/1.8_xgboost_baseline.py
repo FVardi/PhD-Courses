@@ -47,14 +47,11 @@ def nasa_score(preds, targets):
 
 def _dataset_cfg(dataset):
     results_dir = SRC_DIR / "results"
-    if dataset == "FD001":
-        splits_dir = results_dir / "splits"
-        with open(results_dir / "selected_features.yaml") as f:
-            sensor_cols = yaml.safe_load(f)["selected_sensors"]
-    else:
-        splits_dir  = results_dir / f"splits_{dataset}"
-        sensor_cols = [f"sensor_{i}" for i in range(1, 22)]
-    return splits_dir, sensor_cols
+    splits_dir  = results_dir / f"splits_{dataset}"
+    with open(results_dir / "selected_features.yaml") as f:
+        sensor_cols = yaml.safe_load(f)["selected_sensors"]
+    extra_cols = ["op_condition"] if dataset != "FD001" else []
+    return splits_dir, sensor_cols, extra_cols
 
 
 def run(seed=42, dataset="FD001"):
@@ -64,13 +61,13 @@ def run(seed=42, dataset="FD001"):
     with open(SRC_DIR / "config.yaml") as f:
         cfg = yaml.safe_load(f)
 
-    splits_dir, selected_sensors = _dataset_cfg(dataset)
+    splits_dir, selected_sensors, extra_cols = _dataset_cfg(dataset)
     prefix      = "" if dataset == "FD001" else f"{dataset}_"
     window_size = cfg["window_size"]
 
-    train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", selected_sensors, window_size)
-    val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   selected_sensors, window_size)
-    test_ds  = FeatureSequenceDataset(splits_dir / "test.parquet",  selected_sensors, window_size)
+    train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", selected_sensors, window_size, extra_cols)
+    val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   selected_sensors, window_size, extra_cols)
+    test_ds  = FeatureSequenceDataset(splits_dir / "test.parquet",  selected_sensors, window_size, extra_cols)
 
     X_train, y_train = dataset_to_arrays(train_ds)
     X_val,   y_val   = dataset_to_arrays(val_ds)

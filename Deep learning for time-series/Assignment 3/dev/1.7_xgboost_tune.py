@@ -40,28 +40,37 @@ def dataset_to_arrays(ds):
     return X, y
 
 
-# %%  load data
+# %%  config
 with open(SRC_DIR / "config.yaml") as f:
     cfg = yaml.safe_load(f)
-with open(SRC_DIR / "results" / "selected_features.yaml") as f:
-    selected_sensors = yaml.safe_load(f)["selected_sensors"]
 
-splits_dir  = SRC_DIR / "results" / "splits"
-window_size = cfg["window_size"]
+DATASET  = "FD001"   # edit when running as cells
+N_TRIALS = 100       # edit when running as cells
 
-train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", selected_sensors, window_size)
-val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   selected_sensors, window_size)
+# %%  load data
+def _load_data(dataset):
+    results_dir = SRC_DIR / "results"
+    splits_dir  = results_dir / f"splits_{dataset}"
+    with open(results_dir / "selected_features.yaml") as f:
+        sensor_cols = yaml.safe_load(f)["selected_sensors"]
+    extra_cols  = ["op_condition"] if dataset != "FD001" else []
+    window_size = cfg["window_size"]
+    train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", sensor_cols, window_size, extra_cols)
+    val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   sensor_cols, window_size, extra_cols)
+    X_train = np.concatenate([seq.numpy() for seq, _ in train_ds], axis=0)
+    y_train = np.concatenate([rul.numpy() for _, rul in train_ds], axis=0)
+    X_val   = np.concatenate([seq.numpy() for seq, _ in val_ds],   axis=0)
+    y_val   = np.concatenate([rul.numpy() for _, rul in val_ds],   axis=0)
+    return X_train, y_train, X_val, y_val
 
-X_train, y_train = dataset_to_arrays(train_ds)
-X_val,   y_val   = dataset_to_arrays(val_ds)
-
-print(f"Train: {X_train.shape}  Val: {X_val.shape}")
+X_train, y_train, X_val, y_val = _load_data(DATASET)
+print(f"Dataset: {DATASET}  Train: {X_train.shape}  Val: {X_val.shape}")
 
 
 # %%  objective
 def objective(trial):
     params = {
-        "n_estimators":      1000,   # controlled by early stopping
+        "n_estimators":      1000,
         "learning_rate":     trial.suggest_float("learning_rate",    1e-3, 0.3,  log=True),
         "max_depth":         trial.suggest_int(  "max_depth",        3,    10),
         "subsample":         trial.suggest_float("subsample",        0.5,  1.0),
@@ -81,9 +90,10 @@ def objective(trial):
 
 
 # %%  run study
-N_TRIALS = 100   # edit when running as cells
+def tune(dataset, n_trials):
+    global X_train, y_train, X_val, y_val
+    X_train, y_train, X_val, y_val = _load_data(dataset)
 
-def tune(n_trials):
     optuna.logging.set_verbosity(optuna.logging.WARNING)
     sampler = optuna.samplers.TPESampler(seed=cfg["split_seed"])
     study   = optuna.create_study(direction="minimize", sampler=sampler)
@@ -94,7 +104,8 @@ def tune(n_trials):
     for k, v in study.best_params.items():
         print(f"  {k}: {v}")
 
-    out_path = SRC_DIR / "results" / "xgboost_best_params.yaml"
+    prefix   = "" if dataset == "FD001" else f"{dataset}_"
+    out_path = SRC_DIR / "results" / f"{prefix}xgboost_best_params.yaml"
     with open(out_path, "w") as f:
         yaml.dump(study.best_params, f, default_flow_style=False)
     print(f"\nSaved to {out_path}")
@@ -105,6 +116,8 @@ def tune(n_trials):
 # %%  run
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--trials", type=int, default=N_TRIALS)
+    parser.add_argument("--dataset", default=DATASET)
+    parser.add_argument("--trials",  type=int, default=N_TRIALS)
     args, _ = parser.parse_known_args()
-    study = tune(args.trials)
+    study = tune(args.dataset, args.trials)
+

@@ -46,33 +46,33 @@ for _, row in summary.iterrows():
     nasa_s = f"{row['nasa_mean']:.2f} ± {row['nasa_std']:.2f}"
     print(f"{config:<22} {rmse_s:<22} {nasa_s:<22}  {int(row['n_seeds'])}")
 
-# --- pairwise significance check ---
+# --- pairwise seed consistency check ---
 print("\n" + "=" * 72)
-print("Pairwise significance (|mean_A − mean_B| < max(std_A, std_B) in BOTH metrics)")
+print("Seed consistency check (within each approach/model combination)")
+print("Flags seed pairs where |seed_A − seed_B| > std of that configuration")
 print("=" * 72)
 
-configs = summary.set_index(["approach", "model"])
-keys    = list(configs.index)
+outliers = []
+for (approach, model), group in df.groupby(["approach", "model"]):
+    if len(group) < 2:
+        continue
+    rmse_std = group["rmse"].std()
+    nasa_std = group["nasa"].std()
 
-not_significant = []
-for (a1, m1), (a2, m2) in combinations(keys, 2):
-    r1, r2 = configs.loc[(a1, m1)], configs.loc[(a2, m2)]
+    for (i1, row1), (i2, row2) in combinations(group.iterrows(), 2):
+        rmse_diff = abs(row1["rmse"] - row2["rmse"])
+        nasa_diff = abs(row1["nasa"] - row2["nasa"])
 
-    rmse_diff  = abs(r1["rmse_mean"] - r2["rmse_mean"])
-    rmse_thr   = max(r1["rmse_std"],  r2["rmse_std"])
-    nasa_diff  = abs(r1["nasa_mean"]  - r2["nasa_mean"])
-    nasa_thr   = max(r1["nasa_std"],  r2["nasa_std"])
+        if rmse_diff > rmse_std or nasa_diff > nasa_std:
+            outliers.append(
+                f"  {approach}/{model}  seed {int(row1['seed'])} vs seed {int(row2['seed'])}"
+                f"  (ΔRMSE={rmse_diff:.4f} > {rmse_std:.4f},"
+                f"  ΔNASA={nasa_diff:.2f} > {nasa_std:.2f})"
+            )
 
-    if rmse_diff < rmse_thr and nasa_diff < nasa_thr:
-        not_significant.append(
-            f"  {a1}/{m1}  vs  {a2}/{m2}"
-            f"  (ΔRMSE={rmse_diff:.4f} < {rmse_thr:.4f},"
-            f"  ΔNASA={nasa_diff:.2f} < {nasa_thr:.2f})"
-        )
-
-if not_significant:
-    print("The following pairs are NOT significantly different given the seed budget:")
-    for line in not_significant:
+if outliers:
+    print("The following seed pairs deviate by more than one std within their configuration:")
+    for line in outliers:
         print(line)
 else:
-    print("All pairwise differences exceed one standard deviation in at least one metric.")
+    print("All seed pairs within each configuration are consistent (differences ≤ one std).")

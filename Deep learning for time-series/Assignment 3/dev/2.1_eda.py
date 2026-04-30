@@ -63,26 +63,12 @@ plt.tight_layout()
 plt.savefig(FIGS_DIR / f"{DATASET}_op_settings.png", dpi=150)
 plt.show()
 
-# %%  2-D scatter coloured by op_setting_3
-fig, ax = plt.subplots(figsize=(7, 5))
-sc = ax.scatter(
-    train["op_setting_1"], train["op_setting_2"],
-    c=train["op_setting_3"], cmap="tab10", s=100, alpha=0.5,
-)
-plt.colorbar(sc, ax=ax, label="op_setting_3")
-ax.set_xlabel("op_setting_1")
-ax.set_ylabel("op_setting_2")
-ax.set_title(f"{DATASET} — Operating conditions (coloured by op_setting_3)")
-plt.tight_layout()
-plt.savefig(FIGS_DIR / f"{DATASET}_op_conditions_scatter.png", dpi=150)
-plt.show()
-
 # %%  3-D scatter
 fig = plt.figure(figsize=(8, 6))
 ax  = fig.add_subplot(111, projection="3d")
 ax.scatter(
     train["op_setting_1"], train["op_setting_2"], train["op_setting_3"],
-    s=2, alpha=0.4,
+    s=200, alpha=1,
 )
 ax.set_xlabel("op_setting_1")
 ax.set_ylabel("op_setting_2")
