@@ -159,7 +159,7 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
                     break
                 except RuntimeError:
                     time.sleep(0.5)
-            print(f"  → checkpoint saved (val RMSE {val_rmse:.4f})")
+            print(f"  -> checkpoint saved (val RMSE {val_rmse:.4f})")
         else:
             epochs_no_improve += 1
             if epochs_no_improve >= patience:
