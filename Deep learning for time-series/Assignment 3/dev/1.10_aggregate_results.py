@@ -49,7 +49,7 @@ for _, row in summary.iterrows():
 # --- pairwise seed consistency check ---
 print("\n" + "=" * 72)
 print("Seed consistency check (within each approach/model combination)")
-print("Flags seed pairs where |seed_A − seed_B| > std of that configuration")
+print("Flags seed pairs where |seed_A - seed_B| > std of that configuration")
 print("=" * 72)
 
 outliers = []
@@ -66,8 +66,8 @@ for (approach, model), group in df.groupby(["approach", "model"]):
         if rmse_diff > rmse_std or nasa_diff > nasa_std:
             outliers.append(
                 f"  {approach}/{model}  seed {int(row1['seed'])} vs seed {int(row2['seed'])}"
-                f"  (ΔRMSE={rmse_diff:.4f} > {rmse_std:.4f},"
-                f"  ΔNASA={nasa_diff:.2f} > {nasa_std:.2f})"
+                f"  (dRMSE={rmse_diff:.4f} > {rmse_std:.4f},"
+                f"  dNASA={nasa_diff:.2f} > {nasa_std:.2f})"
             )
 
 if outliers:

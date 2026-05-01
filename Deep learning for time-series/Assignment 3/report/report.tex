@@ -90,6 +90,43 @@ The searched hyperparameters and their ranges are listed in Table~\ref{tab:xgb_h
     \label{tab:xgb_hparams}
 \end{table}
 
+\section{FD002: Multi-Condition, Single Fault Mode}
+
+\subsection{Problem understanding}
+FD002 shares the same turbofan degradation task as FD001 but contains six distinct operating conditions rather than one.
+Engines in FD002 switch between conditions within a single run, so a raw global normalisation would conflate sensor variation due to condition with genuine degradation signal.
+
+\subsection{Data preparation}
+Operating conditions are identified by clustering the three operation setting columns with KMeans ($k=6$) on the training set.
+The cluster assignment is added as a column \texttt{op\_condition} and used to normalise each sensor separately within each cluster (per-cluster z-score).
+The \texttt{op\_condition} column is appended as an additional input feature so the models can condition their predictions on the current regime.
+All other preparation steps (RUL cap, train/val split, fixed random seed) are identical to FD001.
+The same set of 12 sensors selected for FD001 is reused for FD002.
+
+\subsection{Multi-seed results}
+
+The same five seeds and model configurations as in the FD001 evaluation are used.
+Results are shown in Table~\ref{tab:multi_seed_results_fd002}.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{llrr}
+        \hline
+        \textbf{Approach} & \textbf{Model} & \textbf{RMSE (mean $\pm$ std)} & \textbf{NASA (mean $\pm$ std)} \\
+        \hline
+        window   & RNN     & $15.44 \pm 0.86$ & $1120 \pm 118$ \\
+        window   & LSTM    & $14.78 \pm 0.60$ & $1132 \pm 169$ \\
+        window   & TCN     & $16.45 \pm 0.42$ & $1217 \pm 117$ \\
+        sequence & RNN     & $43.18 \pm 0.02$ & $51705 \pm 780$ \\
+        sequence & LSTM    & $43.20 \pm 0.02$ & $51826 \pm 545$ \\
+        sequence & TCN     & $16.73 \pm 0.53$ & $1104 \pm 40$  \\
+        sequence & XGBoost & $14.10 \pm 0.01$ & $775 \pm 7$    \\
+        \hline
+    \end{tabular}
+    \caption{Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD002 test set.}
+    \label{tab:multi_seed_results_fd002}
+\end{table}
+
 \section{Evaluation protocol}
 
 \subsection{Metrics}
@@ -100,17 +137,17 @@ Five fixed random seeds (42, 123, 456, 789, 1011) are used for model initializat
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{llrrrr}
+    \begin{tabular}{llrr}
         \hline
-        \textbf{Approach} & \textbf{Model} & \textbf{RMSE mean} & \textbf{RMSE std} & \textbf{NASA mean} & \textbf{NASA std} \\
+        \textbf{Approach} & \textbf{Model} & \textbf{RMSE (mean $\pm$ std)} & \textbf{NASA (mean $\pm$ std)} \\
         \hline
-        window   & RNN     & -- & -- & -- & -- \\
-        window   & LSTM    & -- & -- & -- & -- \\
-        window   & TCN     & -- & -- & -- & -- \\
-        sequence & RNN     & -- & -- & -- & -- \\
-        sequence & LSTM    & -- & -- & -- & -- \\
-        sequence & TCN     & -- & -- & -- & -- \\
-        sequence & XGBoost & -- & -- & -- & -- \\
+        window   & RNN     & $15.82 \pm 0.57$ & $502 \pm 100$ \\
+        window   & LSTM    & $14.88 \pm 0.36$ & $444 \pm 65$  \\
+        window   & TCN     & $16.55 \pm 0.32$ & $477 \pm 37$  \\
+        sequence & RNN     & $43.80 \pm 0.19$ & $5847 \pm 79$ \\
+        sequence & LSTM    & $43.74 \pm 0.26$ & $5827 \pm 108$ \\
+        sequence & TCN     & $17.60 \pm 0.24$ & $508 \pm 24$  \\
+        sequence & XGBoost & $14.46 \pm 0.06$ & $386 \pm 15$  \\
         \hline
     \end{tabular}
     \caption{Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD001 test set.}
