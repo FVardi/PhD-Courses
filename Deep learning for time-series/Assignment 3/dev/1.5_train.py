@@ -115,9 +115,10 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
     else:
         train_ds = FeatureSequenceDataset(splits_dir / "train.parquet", selected_sensors, window_size, extra_cols)
         val_ds   = FeatureSequenceDataset(splits_dir / "val.parquet",   selected_sensors, window_size, extra_cols)
-        train_loader = DataLoader(train_ds, batch_size=t_cfg["batch_size"], shuffle=True,
+        seq_bs   = t_cfg.get("sequence_batch_size", t_cfg["batch_size"])
+        train_loader = DataLoader(train_ds, batch_size=seq_bs, shuffle=True,
                                   collate_fn=sequence_collate_fn, num_workers=0)
-        val_loader   = DataLoader(val_ds,   batch_size=t_cfg["batch_size"], shuffle=False,
+        val_loader   = DataLoader(val_ds,   batch_size=seq_bs, shuffle=False,
                                   collate_fn=sequence_collate_fn, num_workers=0)
 
     input_size = train_ds[0][0].shape[-1]
