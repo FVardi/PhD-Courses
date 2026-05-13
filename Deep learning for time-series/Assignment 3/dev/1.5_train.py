@@ -46,7 +46,7 @@ def masked_mse(pred, target, lengths):
     return ((pred - target) ** 2 * mask).sum() / mask.sum()
 
 
-def run_epoch(model, loader, approach, optimizer, device):
+def run_epoch(model, loader, approach, optimizer, device, max_norm=1.0):
     is_train = optimizer is not None
     model.train() if is_train else model.eval()
     total_loss, total_weight = 0.0, 0.0
@@ -69,7 +69,7 @@ def run_epoch(model, loader, approach, optimizer, device):
             if is_train:
                 optimizer.zero_grad()
                 loss.backward()
-                nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=max_norm)
                 optimizer.step()
 
             total_loss   += loss.item() * weight
@@ -124,19 +124,26 @@ def train(approach, model_name, seed=42, cfg=None, ckpt_name=None, dataset="FD00
     input_size = train_ds[0][0].shape[-1]
     print(f"Input size: {input_size}  |  Train samples: {len(train_ds)}  |  Val samples: {len(val_ds)}")
 
-    model     = get_model(model_name, input_size, cfg).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=t_cfg["lr"])
+    model = get_model(model_name, input_size, cfg).to(device)
+    lr    = t_cfg.get("sequence_lr", t_cfg["lr"]) if approach == "sequence" else t_cfg["lr"]
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
 
     best_val_rmse     = float("inf")
     epochs_no_improve = 0
-    patience          = t_cfg["early_stopping_patience"]
+    patience = (
+        t_cfg.get("sequence_patience", t_cfg["early_stopping_patience"])
+        if approach == "sequence"
+        else t_cfg["early_stopping_patience"]
+    )
     _default_name = f"{prefix}{approach}_{model_name}_seed{seed}.pt"
     ckpt_path     = ckpt_dir / (ckpt_name if ckpt_name else _default_name)
 
-    for epoch in range(1, t_cfg["epochs"] + 1):
-        train_mse = run_epoch(model, train_loader, approach, optimizer, device)
-        val_mse   = run_epoch(model, val_loader,   approach, None,      device)
+    epochs = t_cfg.get("sequence_epochs", t_cfg["epochs"]) if approach == "sequence" else t_cfg["epochs"]
+    for epoch in range(1, epochs + 1):
+        max_norm  = t_cfg.get("sequence_max_norm", 1.0) if approach == "sequence" else 1.0
+        train_mse = run_epoch(model, train_loader, approach, optimizer, device, max_norm)
+        val_mse   = run_epoch(model, val_loader,   approach, None,      device, max_norm)
         val_rmse  = val_mse ** 0.5
         scheduler.step(val_rmse)
 

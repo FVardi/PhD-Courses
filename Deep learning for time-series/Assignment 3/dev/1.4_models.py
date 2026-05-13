@@ -12,6 +12,8 @@ class RNNModel(nn.Module):
             batch_first=True,
             dropout=dropout if num_layers > 1 else 0.0,
         )
+        for i in range(num_layers):
+            nn.init.orthogonal_(getattr(self.rnn, f"weight_hh_l{i}"))
         self.fc = nn.Linear(hidden_size, 1)
 
     def forward(self, x, lengths=None):
@@ -31,6 +33,8 @@ class LSTMModel(nn.Module):
             batch_first=True,
             dropout=dropout if num_layers > 1 else 0.0,
         )
+        for i in range(num_layers):
+            nn.init.orthogonal_(getattr(self.lstm, f"weight_hh_l{i}"))
         self.fc = nn.Linear(hidden_size, 1)
 
     def forward(self, x, lengths=None):
