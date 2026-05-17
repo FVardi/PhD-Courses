@@ -22,6 +22,8 @@
 - [x] Training — LSTM grid search on FD002 (running on other machine)
 - [ ] 3.1 Setup — write up in report: architecture choice (LSTM), grid axes, seed budget
 - [ ] 3.2 Analysis — write up in report (see outline below)
+- [ ] ⚠ Re-run sequence hyperparameter study for FD001 with corrected training protocol — the original grid (12 configs, 3 seeds) produced val RMSE 45–87 which reflects training failure, not hyperparameter effects; results are not interpretable until re-run with sequence-specific fixes applied
+- [ ] ⚠ Run LSTM hyperparameter study for FD002 — planned but never completed; note that the sequence LSTM on FD002 has a stability problem (4/5 seeds collapse) that should be resolved before the sequence part of this study is attempted
 
 ## Part 4 — FD002 Extension
 

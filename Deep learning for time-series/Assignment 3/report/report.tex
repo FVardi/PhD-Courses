@@ -34,13 +34,34 @@ RUL labels must be constructed from the given failure time in cycle number.
 \end{itemize}
 
 \subsection{Exploratory data analysis}
-The sensor channels were chosen based upon their Spearman correlation with the cycle number. The Spearman correlation was calculated individually for each sensor for each engine and then aggregated across engines by mean. The sensor channels with mean Spearman correlation above 0.5 and standard deviation below 0.3 were selected. This results in 12 sensors.
+
+Figure~\ref{fig:lifetime_dist} shows the distribution of engine lifetimes in the FD001 training set.
+The lifetimes range from roughly 130 to 360 cycles with most engines failing between 150 and 250 cycles.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../src/results/figures/lifetime_distribution.png}
+    \caption{Distribution of engine lifetimes in the FD001 training set.}
+    \label{fig:lifetime_dist}
+\end{figure}
+
+Figure~\ref{fig:sensor_traj} shows the raw sensor trajectories for a sample of engines.
+Many sensors are constant (e.g.\ \texttt{sensor\_1}, \texttt{sensor\_5}) and carry no degradation signal, while others (e.g.\ \texttt{sensor\_2}, \texttt{sensor\_11}) show a clear monotonic trend over the engine lifetime.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../src/results/figures/sensor_trajectories.png}
+    \caption{Per-sensor trajectories for a sample of engines in the FD001 training set.}
+    \label{fig:sensor_traj}
+\end{figure}
+
+The sensor channels were chosen based upon their Spearman correlation with the cycle number. The Spearman correlation was calculated individually for each sensor for each engine and then aggregated across engines by mean. The sensor channels with mean Spearman correlation above 0.5 and standard deviation below 0.3 were selected. This resulted in 12 sensors: \texttt{sensor\_2}, \texttt{sensor\_3}, \texttt{sensor\_4}, \texttt{sensor\_7}, \texttt{sensor\_8}, \texttt{sensor\_11}, \texttt{sensor\_12}, \texttt{sensor\_13}, \texttt{sensor\_15}, \texttt{sensor\_17}, \texttt{sensor\_20}, and \texttt{sensor\_21}.
 
 \subsection{Data preparation}
 \begin{itemize}
 \item \textbf{RUL label construction:} constructed as piecewise-linear with a cap of 125 cycles. RUL beyond 125 is not expected to show sensor values that are much different from other healthy data points, so capping prevents the model from attempting to learn less relevant patterns and focus of the part where health deterioration is more evident.
 \item \textbf{Train/validation split:} A classic 80/20 split by engines for train/val is used.
-\item \textbf{Normalization:} The sensor values are normalized by subtracting the mean and dividing by the standard deviation of each sensor channel across engines in the training set.
+\item \textbf{Normalization:} The sensor values are normalized by subtracting the mean and dividing by the standard deviation of each sensor channel across engines in the training set. This is classic Z-score normalization, which ensures that all sensor channels are on a comparable scale and prevents any single channel from dominating the learning process due to larger numeric values.
 \item \textbf{Fixed random seed:} A fixed random seed (42) for the train/validation split is used to ensure reproducibility.
 \end{itemize}
 \subsection{Feature engineering -- raw fixed-window pipeline}
