@@ -3,25 +3,46 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Problem understanding}{1}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Exploratory data analysis}{1}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Data preparation}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Feature engineering -- raw fixed-window pipeline}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Feature engineering -- raw fixed-window pipeline}{2}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Feature engineering-- feature-sequence pipeline}{2}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.6}Models}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}XGBoost baseline}{2}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Optuna hyperparameter search space for XGBoost. \texttt  {n\_estimators} is fixed at 1000 and controlled by early stopping (patience = 30 rounds).}}{2}{}\protected@file@percent }
-\newlabel{tab:xgb_hparams}{{1}{2}{}{table.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}FD002: Multi-Condition, Single Fault Mode}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Problem understanding}{2}{}\protected@file@percent }
+\newlabel{sec:models}{{1.6}{2}{}{subsection.1.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Sequence-approach training protocol.}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Weight initialisation for long sequences.}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.7}XGBoost baseline}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Optuna hyperparameter search space for XGBoost. \texttt  {n\_estimators} is fixed at 1000 and controlled by early stopping (patience = 30 rounds).}}{3}{}\protected@file@percent }
+\newlabel{tab:xgb_hparams}{{1}{3}{}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}FD002: Multi-Condition, Single Fault Mode}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Problem understanding}{3}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Data preparation}{3}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Multi-seed results}{3}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD002 test set.}}{3}{}\protected@file@percent }
-\newlabel{tab:multi_seed_results_fd002}{{2}{3}{}{table.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}Evaluation protocol}{3}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Metrics}{3}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Multiple seeds}{3}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD001 test set.}}{3}{}\protected@file@percent }
-\newlabel{tab:multi_seed_results}{{3}{3}{}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD002 test set. $^{*}$Sequence LSTM results are bimodal: one of five seeds converges while four collapse to constant-output predictors; see Table~\ref {tab:multi_seed_results} footnote.}}{4}{}\protected@file@percent }
+\newlabel{tab:multi_seed_results_fd002}{{2}{4}{}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Multiple seeds}{4}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD001 test set. $^{*}$Sequence LSTM results are bimodal: one of five seeds converges to $\approx $14 RMSE while four collapse to constant-output predictors ($\approx $40 RMSE); the mean and standard deviation therefore do not represent a single underlying performance level.}}{4}{}\protected@file@percent }
+\newlabel{tab:multi_seed_results}{{3}{4}{}{table.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Fair comparison}{4}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4}Focused hyperparameter study}{4}{}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Setup}{4}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Analysis}{4}{}\protected@file@percent }
-\gdef \@abspage@last{4}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Analysis}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Window approach.}{5}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Window-approach LSTM hyperparameter grid on FD001, sorted by mean validation RMSE across 3 seeds.}}{5}{}\protected@file@percent }
+\newlabel{tab:hparam_window}{{4}{5}{}{table.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Feature-sequence approach.}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Comparative Analysis}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Within-approach comparison}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Raw window approach.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Feature-sequence approach.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Between-approach comparison}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{RNN.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{LSTM.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{TCN.}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Deep learning vs.\ XGBoost}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}FD001 vs.\ FD002}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{RMSE.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{NASA score.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Sequence RNN and LSTM on FD002.}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}RMSE vs.\ NASA score}{7}{}\protected@file@percent }
+\gdef \@abspage@last{8}

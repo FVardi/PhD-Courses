@@ -35,6 +35,9 @@ class LSTMModel(nn.Module):
         )
         for i in range(num_layers):
             nn.init.orthogonal_(getattr(self.lstm, f"weight_hh_l{i}"))
+            # initialise forget gate bias to 1 to preserve gradient flow on long sequences
+            nn.init.ones_(getattr(self.lstm, f"bias_ih_l{i}")[hidden_size:2*hidden_size])
+            nn.init.ones_(getattr(self.lstm, f"bias_hh_l{i}")[hidden_size:2*hidden_size])
         self.fc = nn.Linear(hidden_size, 1)
 
     def forward(self, x, lengths=None):
