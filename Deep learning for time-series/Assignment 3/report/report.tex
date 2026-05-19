@@ -64,10 +64,68 @@ The sensor channels were chosen based upon their Spearman correlation with the c
 \item \textbf{Normalization:} The sensor values are normalized by subtracting the mean and dividing by the standard deviation of each sensor channel across engines in the training set. This is classic Z-score normalization, which ensures that all sensor channels are on a comparable scale and prevents any single channel from dominating the learning process due to larger numeric values.
 \item \textbf{Fixed random seed:} A fixed random seed (42) for the train/validation split is used to ensure reproducibility.
 \end{itemize}
+\section{FD002: Multi-Condition, Single Fault Mode}
+
+\subsection{Problem understanding}
+FD002 shares the same turbofan degradation task as FD001 but contains six distinct operating conditions rather than one.
+Engines in FD002 switch between conditions within a single run, so a raw global normalisation would conflate sensor variation due to condition with genuine degradation signal.
+
+\subsection{Exploratory data analysis}
+
+Figure~\ref{fig:fd002_lifetime_dist} shows the distribution of engine lifetimes in the FD002 training set.
+Lifetimes span a wider range than FD001, reflecting the additional variability introduced by multi-condition operation.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../src/results/figures/FD002_lifetime_distribution.png}
+    \caption{Distribution of engine lifetimes in the FD002 training set.}
+    \label{fig:fd002_lifetime_dist}
+\end{figure}
+
+Figure~\ref{fig:fd002_sensor_traj} shows raw sensor trajectories for a sample of FD002 engines.
+Compared to FD001, the trajectories are noisier due to condition switching within each run, motivating the per-cluster normalisation described below.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../src/results/figures/FD002_sensor_trajectories.png}
+    \caption{Per-sensor trajectories for a sample of engines in the FD002 training set.}
+    \label{fig:fd002_sensor_traj}
+\end{figure}
+
+Figure~\ref{fig:fd002_cluster_means} shows the mean value of each operating setting per cluster.
+The six clusters are well separated: \texttt{op\_setting\_1} and \texttt{op\_setting\_3} each span roughly 10--15 distinct levels, while \texttt{op\_setting\_2} (altitude-like, range $\approx$0--0.84) also varies meaningfully across clusters.
+This confirms that the operating conditions are discrete and that a cluster-specific normalisation is appropriate.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../src/results/figures/FD002_cluster_op_means.png}
+    \caption{Mean value of each operating setting per KMeans cluster ($k=6$) for the FD002 training set.}
+    \label{fig:fd002_cluster_means}
+\end{figure}
+
+Figure~\ref{fig:fd002_norm_traj} shows per-cluster normalised sensor trajectories for the same 12 sensors used as model inputs.
+After normalisation, trajectories from different operating conditions are aligned around zero, making degradation trends visible across the full engine lifetime.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../src/results/figures/FD002_normalised_sensor_trajectories.png}
+    \caption{Per-cluster normalised sensor trajectories for a sample of FD002 engines.}
+    \label{fig:fd002_norm_traj}
+\end{figure}
+
+\subsection{Data preparation}
+Operating conditions are identified by clustering the three operation setting columns with KMeans ($k=6$) on the training set.
+The cluster assignment is added as a column \texttt{op\_condition} and used to normalise each sensor separately within each cluster (per-cluster z-score).
+The \texttt{op\_condition} column is appended as an additional input feature so the models can condition their predictions on the current regime.
+All other preparation steps (RUL cap, train/val split, fixed random seed) are identical to FD001.
+The same set of 12 sensors selected for FD001 is reused for FD002.
+
+\section{Methods}
+
 \subsection{Feature engineering -- raw fixed-window pipeline}
 A window length $w=30$ is used. This is treated as a hyperparameter in a later part of the assignment.
 
-\subsection{Feature engineering-- feature-sequence pipeline}
+\subsection{Feature engineering -- feature-sequence pipeline}
 The feature sequence pipeline is based on the raw fixed-window pipeline but with additional feature engineering. For each window, the following suggested features are calculated for each sensor channel:
 \begin{itemize}
     \item Rolling mean
@@ -76,7 +134,7 @@ The feature sequence pipeline is based on the raw fixed-window pipeline but with
     \item Rolling mean deviation from baseline (first window) value
 \end{itemize}
 
-To handle variable-length sequences for the feature approach the pack\_padded\_sequence and pad\_packed\_sequence functions from PyTorch are used. The MSE loss is masked to ignore the padded values.
+To handle variable-length sequences for the feature approach the \texttt{pack\_padded\_sequence} and \texttt{pad\_packed\_sequence} functions from PyTorch are used. The MSE loss is masked to ignore the padded values.
 
 \subsection{Models}
 \label{sec:models}
@@ -131,68 +189,59 @@ The searched hyperparameters and their ranges are listed in Table~\ref{tab:xgb_h
     \label{tab:xgb_hparams}
 \end{table}
 
-\section{FD002: Multi-Condition, Single Fault Mode}
+\section{Results}
 
-\subsection{Problem understanding}
-FD002 shares the same turbofan degradation task as FD001 but contains six distinct operating conditions rather than one.
-Engines in FD002 switch between conditions within a single run, so a raw global normalisation would conflate sensor variation due to condition with genuine degradation signal.
+\subsection{Metrics}
+Two metrics are reported. RMSE measures average prediction error symmetrically.
+The NASA score is an asymmetric exponential penalty that penalises late predictions (overestimating RUL) more heavily than early ones, reflecting the higher operational cost of missing an impending failure.
+NASA score is not used as a training loss.
+Five fixed random seeds (42, 123, 456, 789, 1011) are used for model initialisation to probe sensitivity to initial conditions; mean and standard deviation are reported across seeds.
 
-\subsection{Data preparation}
-Operating conditions are identified by clustering the three operation setting columns with KMeans ($k=6$) on the training set.
-The cluster assignment is added as a column \texttt{op\_condition} and used to normalise each sensor separately within each cluster (per-cluster z-score).
-The \texttt{op\_condition} column is appended as an additional input feature so the models can condition their predictions on the current regime.
-All other preparation steps (RUL cap, train/val split, fixed random seed) are identical to FD001.
-The same set of 12 sensors selected for FD001 is reused for FD002.
+\subsection{FD001}
 
-\subsection{Multi-seed results}
+Results are shown in Table~\ref{tab:multi_seed_results}.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{llrrr}
+        \hline
+        \textbf{Approach} & \textbf{Model} & \textbf{RMSE (mean $\pm$ std)} & \textbf{NASA (mean $\pm$ std)} & \textbf{NASA/engine} \\
+        \hline
+        window   & RNN     & $15.82 \pm 0.57$ & $502 \pm 100$ & $5.0$ \\
+        window   & LSTM    & $14.88 \pm 0.36$ & $444 \pm 65$  & $4.4$ \\
+        window   & TCN     & $16.55 \pm 0.32$ & $477 \pm 37$  & $4.8$ \\
+        sequence & RNN     & $20.66 \pm 3.72$ & $646 \pm 171$ & $6.5$ \\
+        sequence & LSTM    & $35.65 \pm 10.80^{*}$ & $13\,881 \pm 7\,554^{*}$ & $139^{*}$ \\
+        sequence & TCN     & $17.60 \pm 0.24$ & $508 \pm 24$  & $5.1$ \\
+        sequence & XGBoost & $14.46 \pm 0.05$ & $386 \pm 15$  & $3.9$ \\
+        \hline
+    \end{tabular}
+    \caption{Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD001 test set ($N=100$ test engines). NASA/engine is the mean NASA total divided by $N$ and enables cross-dataset comparison. $^{*}$Sequence LSTM results are bimodal: one of five seeds converges to $\approx$14 RMSE while four collapse to constant-output predictors ($\approx$40 RMSE); the mean and standard deviation therefore do not represent a single underlying performance level.}
+    \label{tab:multi_seed_results}
+\end{table}
+
+\subsection{FD002}
 
 The same five seeds and model configurations as in the FD001 evaluation are used.
 Results are shown in Table~\ref{tab:multi_seed_results_fd002}.
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{llrr}
+    \begin{tabular}{llrrr}
         \hline
-        \textbf{Approach} & \textbf{Model} & \textbf{RMSE (mean $\pm$ std)} & \textbf{NASA (mean $\pm$ std)} \\
+        \textbf{Approach} & \textbf{Model} & \textbf{RMSE (mean $\pm$ std)} & \textbf{NASA (mean $\pm$ std)} & \textbf{NASA/engine} \\
         \hline
-        window   & RNN     & $15.44 \pm 0.86$ & $1120 \pm 118$ \\
-        window   & LSTM    & $14.78 \pm 0.60$ & $1132 \pm 169$ \\
-        window   & TCN     & $16.45 \pm 0.42$ & $1217 \pm 117$ \\
-        sequence & RNN     & $14.59 \pm 0.71$ & $834 \pm 62$ \\
-        sequence & LSTM    & $37.18 \pm 13.43^{*}$ & $41\,344 \pm 22\,688^{*}$ \\
-        sequence & TCN     & $16.73 \pm 0.53$ & $1104 \pm 40$  \\
-        sequence & XGBoost & $14.10 \pm 0.01$ & $775 \pm 7$    \\
+        window   & RNN     & $15.44 \pm 0.86$ & $1120 \pm 118$ & $4.3$ \\
+        window   & LSTM    & $14.78 \pm 0.60$ & $1132 \pm 169$ & $4.4$ \\
+        window   & TCN     & $16.45 \pm 0.42$ & $1217 \pm 117$ & $4.7$ \\
+        sequence & RNN     & $14.59 \pm 0.71$ & $834 \pm 62$   & $3.2$ \\
+        sequence & LSTM    & $37.18 \pm 13.43^{*}$ & $41\,344 \pm 22\,688^{*}$ & $160^{*}$ \\
+        sequence & TCN     & $16.73 \pm 0.53$ & $1104 \pm 40$  & $4.3$ \\
+        sequence & XGBoost & $14.10 \pm 0.01$ & $775 \pm 7$    & $3.0$ \\
         \hline
     \end{tabular}
-    \caption{Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD002 test set. $^{*}$Sequence LSTM results are bimodal: one of five seeds converges while four collapse to constant-output predictors; see Table~\ref{tab:multi_seed_results} footnote.}
+    \caption{Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD002 test set ($N=259$ test engines). NASA/engine is the mean NASA total divided by $N$ and enables cross-dataset comparison. $^{*}$Sequence LSTM results are bimodal: one of five seeds converges while four collapse to constant-output predictors; see Table~\ref{tab:multi_seed_results} footnote.}
     \label{tab:multi_seed_results_fd002}
-\end{table}
-
-\section{Evaluation protocol}
-
-\subsection{Metrics}
-NASA score is not used for training loss.
-
-\subsection{Multiple seeds}
-Five fixed random seeds (42, 123, 456, 789, 1011) are used for model initialization when training to probe the model sensitivity to initial conditions. The mean and standard deviation of the RMSE and NASA scores across seeds for each model and data approach can be seen in Table~\ref{tab:multi_seed_results}.
-
-\begin{table}[h]
-    \centering
-    \begin{tabular}{llrr}
-        \hline
-        \textbf{Approach} & \textbf{Model} & \textbf{RMSE (mean $\pm$ std)} & \textbf{NASA (mean $\pm$ std)} \\
-        \hline
-        window   & RNN     & $15.82 \pm 0.57$ & $502 \pm 100$ \\
-        window   & LSTM    & $14.88 \pm 0.36$ & $444 \pm 65$  \\
-        window   & TCN     & $16.55 \pm 0.32$ & $477 \pm 37$  \\
-        sequence & RNN     & $20.66 \pm 3.72$ & $646 \pm 171$ \\
-        sequence & LSTM    & $35.65 \pm 10.80^{*}$ & $13\,881 \pm 7\,554^{*}$ \\
-        sequence & TCN     & $17.60 \pm 0.24$ & $508 \pm 24$  \\
-        sequence & XGBoost & $14.46 \pm 0.05$ & $386 \pm 15$  \\
-        \hline
-    \end{tabular}
-    \caption{Mean and standard deviation of RMSE and NASA score across five seeds per model and data approach on FD001 test set. $^{*}$Sequence LSTM results are bimodal: one of five seeds converges to $\approx$14 RMSE while four collapse to constant-output predictors ($\approx$40 RMSE); the mean and standard deviation therefore do not represent a single underlying performance level.}
-    \label{tab:multi_seed_results}
 \end{table}
 
 \subsection{Fair comparison}
@@ -201,25 +250,28 @@ The feature-sequence approach deviates from the defaults on batch size, learning
 These deviations are confined to the sequence approach and are motivated by the substantially smaller number of gradient updates per epoch that arises from engine-level batching; they do not affect the window approach or XGBoost and are applied identically across all sequence models and both datasets.
 
 \section{Focused hyperparameter study}
+\label{sec:hparam}
 
 \subsection{Setup}
 
 LSTM is selected as the architecture for the hyperparameter study, as it achieves the best mean RMSE among the three deep learning architectures in the window approach on FD001.
-The study covers both the window and feature-sequence approaches and searches over three axes:
+The study covers both the window and feature-sequence approaches on both FD001 and FD002, and searches over three axes:
 \begin{itemize}
     \item \textbf{Window size} $w \in \{20,\ 30,\ 50\}$ — controls the temporal context available to the model per prediction.
     \item \textbf{Hidden size} $h \in \{64,\ 128\}$ — controls model capacity.
     \item \textbf{Learning rate} $\eta \in \{10^{-4},\ 10^{-3}\}$ — controls optimisation step size.
 \end{itemize}
 All other hyperparameters are fixed at the defaults described in Section~\ref{sec:models}.
-Each of the $3 \times 2 \times 2 = 12$ configurations per approach is trained with 3 fixed seeds (42, 123, 456), giving 72 total runs.
+Each of the $3 \times 2 \times 2 = 12$ configurations per approach is trained with 3 fixed seeds (42, 123, 456), giving 72 runs per dataset.
 Validation RMSE averaged across seeds is used to rank configurations; the best configuration per approach is subsequently evaluated on the test set with the same 3 seeds.
-The study is conducted on FD001 only; a corresponding FD002 study was planned but not completed.
+
+One methodological limitation applies to the sequence approach: the training loop uses a dedicated \texttt{sequence\_lr} override ($3 \times 10^{-4}$) that takes precedence over \texttt{cfg["training"]["lr"]}, so the learning rate axis has no effect on sequence runs.
+The sequence grid therefore reduces to $3 \times 2 = 6$ distinct configurations ($w \times h$), with the $\eta$ dimension being redundant.
 
 \subsection{Analysis}
 
-\paragraph{Window approach.}
-Table~\ref{tab:hparam_window} reports validation RMSE for all 12 window-approach configurations.
+\paragraph{Window approach — FD001.}
+Table~\ref{tab:hparam_window} reports validation RMSE for all 12 window-approach configurations on FD001.
 The best configuration is $w{=}50$, $h{=}128$, $\eta{=}10^{-3}$ with a mean validation RMSE of $12.15 \pm 0.11$, achieving a test RMSE of $15.21 \pm 0.49$ across the three evaluation seeds.
 
 \begin{table}[h]
@@ -255,13 +307,72 @@ This indicates that longer context consistently helps the model and that the sen
 \textit{Grid-edge check}: the best configuration lies at the boundary of the search grid on window size ($w{=}50$).
 This suggests that further gains may be available with larger windows, and a follow-up search extending to $w \in \{70, 100\}$ would be warranted.
 
-\textit{Default configuration retrospective}: the Part 1 default ($w{=}30$, $h{=}128$, $\eta{=}10^{-3}$) ranks third overall with a validation RMSE of $12.96$.
+\textit{Default configuration retrospective}: the default ($w{=}30$, $h{=}128$, $\eta{=}10^{-3}$) ranks third overall with a validation RMSE of $12.96$.
 It was a reasonable starting point — the hidden size and learning rate choices were optimal — but using $w{=}50$ would have improved results by approximately 0.8 RMSE points with no other changes.
 
+\paragraph{Window approach — FD002.}
+Table~\ref{tab:hparam_window_fd002} reports validation RMSE for the FD002 window grid.
+The best configuration is again $w{=}50$, $h{=}128$, $\eta{=}10^{-3}$ with a mean validation RMSE of $14.08 \pm 0.26$, achieving a test RMSE of $13.62 \pm 0.86$.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{rrrr}
+        \hline
+        $w$ & $h$ & $\eta$ & Val RMSE (mean $\pm$ std) \\
+        \hline
+        50 & 128 & $10^{-3}$ & $14.08 \pm 0.26$ \\
+        50 & 64  & $10^{-3}$ & $14.69 \pm 0.18$ \\
+        30 & 128 & $10^{-3}$ & $15.51 \pm 0.25$ \\
+        50 & 64  & $10^{-4}$ & $15.51 \pm 0.13$ \\
+        50 & 128 & $10^{-4}$ & $16.22 \pm 0.10$ \\
+        30 & 64  & $10^{-3}$ & $16.30 \pm 0.20$ \\
+        30 & 64  & $10^{-4}$ & $16.69 \pm 0.42$ \\
+        30 & 128 & $10^{-4}$ & $17.21 \pm 0.44$ \\
+        20 & 128 & $10^{-3}$ & $18.02 \pm 0.46$ \\
+        20 & 64  & $10^{-3}$ & $18.56 \pm 0.12$ \\
+        20 & 64  & $10^{-4}$ & $18.78 \pm 0.35$ \\
+        20 & 128 & $10^{-4}$ & $18.91 \pm 0.16$ \\
+        \hline
+    \end{tabular}
+    \caption{Window-approach LSTM hyperparameter grid on FD002, sorted by mean validation RMSE across 3 seeds.}
+    \label{tab:hparam_window_fd002}
+\end{table}
+
+The same ranking of axes holds on FD002: window size dominates, hidden size has a smaller consistent effect, and $\eta{=}10^{-3}$ outperforms $\eta{=}10^{-4}$.
+The best configuration is identical to FD001 ($w{=}50$, $h{=}128$, $\eta{=}10^{-3}$), confirming that the optimal window-approach hyperparameters generalise across operating conditions.
+
 \paragraph{Feature-sequence approach.}
-All 12 sequence-approach configurations produced validation RMSE values of 45--87, which are not interpretable.
-These runs were completed before the sequence-specific training fixes (reduced learning rate, smaller batch size, tighter gradient clipping, orthogonal initialisation) were identified and applied; the models were undertrained and the results reflect the training failure rather than the effect of the hyperparameters.
-A meaningful sequence hyperparameter study would require re-running the grid with the corrected training protocol, which is left for future work.
+Because the learning rate axis is ineffective for the sequence approach (see Setup), only the $w \times h$ sub-grid of 6 configurations is informative.
+Table~\ref{tab:hparam_seq} summarises the 6 distinct sequence configurations on both datasets.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{rrrrr}
+        \hline
+        $w$ & $h$ & \multicolumn{2}{c}{Val RMSE (mean $\pm$ std)} \\
+             &      & FD001 & FD002 \\
+        \hline
+        20 & 128 & $13.34 \pm 1.80$ & $\mathbf{11.81 \pm 0.13}$ \\
+        20 & 64  & $23.06 \pm 0.44$ & $13.86 \pm 0.82$ \\
+        30 & 64  & $22.82 \pm 0.56$ & $13.68 \pm 0.49$ \\
+        30 & 128 & $33.01 \pm 15.42$ & $32.00 \pm 16.95$ \\
+        50 & 64  & $30.12 \pm 9.80$  & $32.66 \pm 14.65$ \\
+        50 & 128 & $41.44 \pm 0.00$  & $31.81 \pm 16.11$ \\
+        \hline
+    \end{tabular}
+    \caption{Sequence-approach LSTM hyperparameter grid (6 distinct configurations, sorted by FD001 val RMSE). High means reflect bimodal instability: some seeds converge while others collapse to constant predictors. Bold marks the best configuration.}
+    \label{tab:hparam_seq}
+\end{table}
+
+Two findings stand out.
+\textit{Smaller windows are better for sequence LSTM}, in direct contrast to the window approach where $w{=}50$ dominated.
+With $w{=}20$, each engine sequence has fewer timesteps, reducing the risk of vanishing gradients during backpropagation through time.
+Larger windows ($w{=}50$) produce near-complete collapse on FD001 and high instability on FD002.
+
+\textit{FD002 is substantially more stable than FD001} under the sequence approach.
+The best configuration ($w{=}20$, $h{=}128$) achieves a validation RMSE of $11.81 \pm 0.13$ on FD002 — low variance, all three seeds converging — and a test RMSE of $12.59 \pm 0.68$.
+On FD001 the same configuration is more erratic (val RMSE $13.34 \pm 1.80$, test RMSE $15.85 \pm 0.80$).
+The larger FD002 training set ($\approx$208 engines vs $\approx$80) provides a stronger gradient signal that keeps more seeds from collapsing.
 
 
 
@@ -314,9 +425,9 @@ Window model RMSE is stable across datasets (RNN: $15.82 \to 15.44$; LSTM: $14.8
 Sequence TCN shows a small improvement on FD002 ($17.60 \to 16.73$), consistent with the appended \texttt{op\_condition} cluster label providing a useful conditioning signal under multi-condition data.
 
 \paragraph{NASA score.}
-Despite similar RMSE, NASA scores roughly double on FD002 for window models (window RNN: $502 \to 1\,120$; window LSTM: $444 \to 1\,132$).
-Because the NASA score penalises late predictions more heavily than early ones, this inflation indicates a systematic shift toward overestimating RUL under multi-condition data -- a conservative bias that arises when condition uncertainty increases prediction variance.
-XGBoost is similarly affected (NASA: $386 \to 775$), suggesting the bias is not architecture-specific.
+The raw NASA totals are roughly 2.5 times higher on FD002 than FD001 for all models (e.g.\ window LSTM: $444 \to 1\,132$; XGBoost: $386 \to 775$).
+This is largely a dataset-size effect: FD002 has 259 test engines versus 100 for FD001, and the NASA score is a sum over engines, so the total scales with $N$ even at identical per-engine accuracy.
+The NASA/engine column in the results tables corrects for this: per-engine NASA scores are almost identical across datasets for window models (e.g.\ window LSTM: $4.4$ on both FD001 and FD002), confirming that the per-cluster normalisation keeps prediction quality stable across operating conditions.
 
 \paragraph{Sequence RNN and LSTM on FD002.}
 Sequence RNN converges reliably on FD002 ($14.59 \pm 0.71$ RMSE), outperforming sequence TCN ($16.73$), window RNN ($15.44$), and matching XGBoost ($14.10$) — making it the best deep learning model on FD002 overall.
@@ -333,5 +444,17 @@ The collapsed seeds predict a near-constant value of approximately 79 cycles for
 The FD002 NASA inflation for otherwise well-performing models highlights a limitation of using RMSE as the sole selection criterion.
 A model may achieve acceptable RMSE while carrying a systematic bias toward late predictions that is operationally costly in contexts where overestimating remaining useful life has safety consequences.
 Jointly monitoring RMSE and NASA score exposes this asymmetry in a way that RMSE alone does not.
+
+\subsection{Revised picture from the hyperparameter study}
+
+The main results above use the default window size $w{=}30$ for all models and approaches.
+The hyperparameter study (Section~\ref{sec:hparam}) reveals that this choice is particularly unfavourable for sequence LSTM: the bimodal instability and high mean RMSE observed in Tables~\ref{tab:multi_seed_results} and~\ref{tab:multi_seed_results_fd002} are largely a consequence of $w{=}30$ being too large for stable sequence training.
+
+With $w{=}20$ and $h{=}128$, sequence LSTM converges reliably on FD002 (test RMSE $12.59 \pm 0.68$ across 3 seeds), outperforming window LSTM ($14.78 \pm 0.60$) by more than 2 RMSE points.
+On FD001 the same configuration is less stable ($15.85 \pm 0.80$) but still competitive with the window approach.
+The conclusion that sequence LSTM is unreliable should therefore be qualified: it is unreliable at $w{=}30$, but the hyperparameter study shows a configuration exists where it is both stable and the best-performing model on FD002.
+
+The between-approach gap for LSTM is thus partly a hyperparameter artefact rather than an inherent architectural limitation.
+For RNN and TCN the hparam study does not change the conclusions: sequence RNN was already competitive at the default $w{=}30$, and sequence TCN's insensitivity to sequence length makes the window size effect smaller.
 
 \end{document}
