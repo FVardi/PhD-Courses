@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(pip install *)",
-      "Bash(python -c \"import pypdf; reader = pypdf.PdfReader\\('c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 2/Assignment 2_ML for Time Series.pdf'\\); [print\\(p.extract_text\\(\\)\\) for p in reader.pages]\")"
+      "Bash(python -c \"import pypdf; reader = pypdf.PdfReader\\('c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 2/Assignment 2_ML for Time Series.pdf'\\); [print\\(p.extract_text\\(\\)\\) for p in reader.pages]\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Bruger\\\\Documents\\\\Repos\\\\PhD-Courses\\\\Deep learning for time-series\\\\Assignment 3\\\\\" -Recurse -Force | Select-Object FullName, PSIsContainer | Sort-Object FullName | Format-Table -AutoSize)"
     ]
   }
 }

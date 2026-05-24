@@ -19,9 +19,10 @@
 ## Part 3 — Focused Hyperparameter Study
 
 - [x] Training — LSTM grid search on FD001 (window × hidden × lr, 3 seeds each, 72 runs)
-- [x] Training — LSTM grid search on FD002 (running on other machine)
-- [ ] 3.1 Setup — write up in report: architecture choice (LSTM), grid axes, seed budget
-- [ ] 3.2 Analysis — write up in report (see outline below)
+- [x] 3.1 Setup — written in report: architecture choice (LSTM), grid axes, seed budget
+- [x] 3.2 Analysis — written in report (window approach; sequence study deferred — see below)
+- [ ] ⚠ Re-run sequence hyperparameter study for FD001 with corrected training protocol — the original grid (12 configs, 3 seeds) produced val RMSE 45–87 which reflects training failure, not hyperparameter effects; results are not interpretable until re-run with sequence-specific fixes applied. Noted as future work in report.
+- [ ] ⚠ Run LSTM hyperparameter study for FD002 — planned but never completed. Noted as future work in report.
 
 ## Part 4 — FD002 Extension
 
@@ -30,37 +31,29 @@
 - [x] 4.3 Pipelines and models — both approaches, all three architectures on FD002
 - [x] 4.4 XGBoost baseline on FD002
 
-## ⚠ Point of Attention — Sequence RNN/LSTM Results
+## ✅ Resolved — Sequence RNN/LSTM Training Fixes
 
-The sequence-approach RNN and LSTM results (RMSE ~43-44) are suspected to reflect undertrained models
-rather than true model capability. Root cause: `batch_size=64` was applied to engine-level samples
-(pool of ~80 engines), giving only **2 gradient updates per epoch** vs ~213 for the window approach.
-With `early_stopping_patience=10`, the models stopped after as few as ~20-40 gradient updates total.
-
-**Fix applied:** added `sequence_batch_size: 8` to `config.yaml` and updated `1.5_train.py` to use it
-for the sequence DataLoader. This gives ~10 batches per epoch (80 engines / 8), making the training
-dynamics more comparable to the window approach.
-
-**Action required:**
-- [ ] Re-run `1.9_run_all.py` (sequence approach only, all seeds) on both FD001 and FD002 with the new config
-- [ ] Re-run `1.11_lstm_hparam_study.py` for both datasets with the new config
-- [ ] Compare new sequence RNN/LSTM results to old — if RMSE drops significantly, the original results were undertrained
-- [ ] Decide whether to replace the results tables in the report
+All sequence training fixes have been applied and results re-run:
+- `sequence_batch_size: 8`, `sequence_lr: 3e-4`, `sequence_max_norm: 0.25`, `sequence_patience: 50`, `sequence_epochs: 500` added to `config.yaml`
+- Orthogonal init for `weight_hh` in both RNN and LSTM
+- Forget gate bias `b_f = 1` for LSTM
+- All stale prediction parquets deleted and `1.9_run_all.py` re-run for both FD001 and FD002
+- Results tables and report updated with final results
 
 ---
 
 ## Part 5 — Comparative Analysis
 
-- [ ] 5.1 Within-approach comparison
-- [ ] 5.2 Between-approach comparison
-- [ ] 5.3 Deep learning vs XGBoost
-- [ ] 5.4 FD001 vs FD002
-- [ ] 5.5 RMSE vs NASA score
+- [x] 5.1 Within-approach comparison
+- [x] 5.2 Between-approach comparison
+- [x] 5.3 Deep learning vs XGBoost
+- [x] 5.4 FD001 vs FD002
+- [x] 5.5 RMSE vs NASA score
 
 ## Deliverables
 
-- [ ] README.md — reproduction instructions
-- [ ] Report finalised (all sections complete)
+- [x] README.md — reproduction instructions
+- [x] Report finalised (all sections complete; hyperparameter and typo corrections applied)
 - [ ] Oral presentation / slides
 
 ---

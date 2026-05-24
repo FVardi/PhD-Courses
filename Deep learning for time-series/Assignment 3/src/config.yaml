@@ -15,6 +15,10 @@ training:
   num_layers: 2
   dropout: 0.2
   early_stopping_patience: 10
+  sequence_patience: 50
+  sequence_lr: 0.0003
+  sequence_max_norm: 0.25
+  sequence_epochs: 500
 
 tcn:
   num_channels: [64, 64, 64, 64]   # 4 layers → dilations 1, 2, 4, 8
