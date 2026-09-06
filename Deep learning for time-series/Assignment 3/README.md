@@ -39,19 +39,19 @@ src/
     lstm_study_val.csv     # Hyperparameter study validation results
     lstm_study_test.csv    # Hyperparameter study test results
 dev/
-  1.1_eda.py               # FD001 exploratory data analysis
-  1.2_data_preparation.py  # FD001 preprocessing and splits
-  1.3_datasets.py          # Dataset classes (SlidingWindow, FeatureSequence)
-  1.4_models.py            # Model definitions (RNN, LSTM, TCN)
-  1.5_train.py             # Training loop
-  1.6_evaluate.py          # Test evaluation and prediction saving
-  1.7_xgboost_tune.py      # Optuna hyperparameter tuning for XGBoost
-  1.8_xgboost_baseline.py  # XGBoost training and evaluation
-  1.9_run_all.py           # Run all (approach, model, seed) combinations
-  1.10_aggregate_results.py# Aggregate results CSVs into summary tables
-  1.11_lstm_hparam_study.py# LSTM hyperparameter grid search
-  2.1_eda.py               # FD002 exploratory data analysis
-  2.2_data_preparation.py  # FD002 preprocessing (clustering + per-cluster normalisation)
+  1_eda_fd001.py               # FD001 exploratory data analysis
+  2_data_preparation_fd001.py  # FD001 preprocessing and splits
+  3_eda_fd002.py               # FD002 exploratory data analysis
+  4_data_preparation_fd002.py  # FD002 preprocessing (clustering + per-cluster normalisation)
+  5_datasets.py                # Dataset classes (SlidingWindow, FeatureSequence)
+  6_models.py                  # Model definitions (RNN, LSTM, TCN)
+  7_train.py                   # Training loop
+  8_evaluate.py                # Test evaluation and prediction saving
+  9_run_all.py                 # Run all (approach, model, seed) combinations
+  10_aggregate_results.py      # Aggregate results CSVs into summary tables
+  11_xgboost_tune.py           # Optuna hyperparameter tuning for XGBoost
+  12_xgboost_baseline.py       # XGBoost training and evaluation
+  13_lstm_hparam_study.py      # LSTM hyperparameter grid search
 report/
   report.tex               # LaTeX report
 ```
@@ -64,27 +64,27 @@ All scripts are run from the `dev/` directory. The dataset files must be present
 
 ```bash
 cd "Deep learning for time-series/Assignment 3/dev"
-python 1.1_eda.py
-python 1.2_data_preparation.py
+python 1_eda_fd001.py
+python 2_data_preparation_fd001.py
 ```
 
-`1.1_eda.py` computes sensor correlations and writes `src/results/selected_features.yaml`.
-`1.2_data_preparation.py` produces the normalised train/val/test splits under `src/results/splits_FD001/`.
+`1_eda_fd001.py` computes sensor correlations and writes `src/results/selected_features.yaml`.
+`2_data_preparation_fd001.py` produces the normalised train/val/test splits under `src/results/splits_FD001/`.
 
 ### Step 2 — FD002 preprocessing and EDA
 
 ```bash
-python 2.1_eda.py
-python 2.2_data_preparation.py
+python 3_eda_fd002.py
+python 4_data_preparation_fd002.py
 ```
 
-`2.2_data_preparation.py` fits KMeans ($k=6$) on FD002 operating settings, assigns cluster labels, applies per-cluster z-score normalisation, and saves splits to `src/results/splits_FD002/`.
+`4_data_preparation_fd002.py` fits KMeans (k=6) on FD002 operating settings, assigns cluster labels, applies per-cluster z-score normalisation, and saves splits to `src/results/splits_FD002/`.
 
 ### Step 3 — XGBoost tuning
 
 ```bash
-python 1.7_xgboost_tune.py                  # FD001
-python 1.7_xgboost_tune.py --dataset FD002  # FD002
+python 11_xgboost_tune.py                  # FD001
+python 11_xgboost_tune.py --dataset FD002  # FD002
 ```
 
 Runs 100 Optuna trials and saves the best parameters to `src/results/xgboost_best_params.yaml` and `src/results/FD002_xgboost_best_params.yaml`.
@@ -92,8 +92,8 @@ Runs 100 Optuna trials and saves the best parameters to `src/results/xgboost_bes
 ### Step 4 — Train and evaluate all models
 
 ```bash
-python 1.9_run_all.py                  # FD001
-python 1.9_run_all.py --dataset FD002  # FD002
+python 9_run_all.py                  # FD001
+python 9_run_all.py --dataset FD002  # FD002
 ```
 
 Trains every `(approach, model, seed)` combination — 6 deep learning configurations × 5 seeds plus XGBoost — and saves results to `src/results/all_results_{DATASET}.csv`. Completed runs are skipped automatically (resumable). Delete the corresponding `.parquet` file under `src/results/predictions/` to force a re-run for a specific configuration.
@@ -101,10 +101,11 @@ Trains every `(approach, model, seed)` combination — 6 deep learning configura
 ### Step 5 — Hyperparameter study
 
 ```bash
-python 1.11_lstm_hparam_study.py
+python 13_lstm_hparam_study.py                  # FD001
+python 13_lstm_hparam_study.py --dataset FD002  # FD002
 ```
 
-Runs a grid search over window size, hidden size, and learning rate for the LSTM model on FD001. Results are written to `src/results/lstm_study_val.csv` and `src/results/lstm_study_test.csv`.
+Runs a grid search over window size, hidden size, and learning rate for the LSTM model. Results are written to `src/results/lstm_study_val.csv` and `src/results/lstm_study_test.csv`.
 
 ## Configuration
 
