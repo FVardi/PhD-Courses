@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.12.3)  17 MAY 2026 20:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.12.3)  18 MAY 2026 20:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -363,7 +363,8 @@ LaTeX Info: Redefining \addtolength on input line 87.
 ) (c:/texlive/2025/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count324
-) (./report.aux)
+)
+No file report.aux.
 \openout1 = `report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
@@ -380,7 +381,6 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
 LaTeX Font Info:    ... okay on input line 18.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
 LaTeX Font Info:    ... okay on input line 18.
-
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -448,38 +448,87 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@tdo=\write4
 \openout4 = `report.tdo'.
 
+
+
+LaTeX Warning: Reference `fig:lifetime_dist' on page 1 undefined on input line 38.
+
 <../src/results/figures/lifetime_distribution.png, id=4, 578.16pt x 289.08pt>
 File: ../src/results/figures/lifetime_distribution.png Graphic file (type png)
 <use ../src/results/figures/lifetime_distribution.png>
 Package pdftex.def Info: ../src/results/figures/lifetime_distribution.png  used on input line 43.
 (pdftex.def)             Requested size: 318.66948pt x 159.33412pt.
+
+LaTeX Warning: Reference `fig:sensor_traj' on page 1 undefined on input line 48.
+
 <../src/results/figures/sensor_trajectories.png, id=6, 1011.78pt x 1517.67pt>
 File: ../src/results/figures/sensor_trajectories.png Graphic file (type png)
 <use ../src/results/figures/sensor_trajectories.png>
 Package pdftex.def Info: ../src/results/figures/sensor_trajectories.png  used on input line 53.
 (pdftex.def)             Requested size: 273.14923pt x 409.73006pt.
 
-
 LaTeX Warning: `h' float specifier changed to `ht'.
+
+c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 3/report/report.tex:58: Undefined control sequence.
+l.58 ...ensor\_13}, \texttt{sensor\_15}, \texgittt
+                                                  {sensor\_17}, \texttt{sens...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
 
 [1
 
-{c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <../src/results/figures/lifetime_distribution.png>] [2 <../src/results/figures/sensor_trajectories.png>] [3] [4] [5] [6] [7] [8] [9] (./report.aux)
+{c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <../src/results/figures/lifetime_distribution.png>] [2 <../src/results/figures/sensor_trajectories.png>] [3]
+
+LaTeX Warning: Reference `tab:xgb_hparams' on page 4 undefined on input line 114.
+
+
+LaTeX Warning: Reference `tab:multi_seed_results_fd002' on page 4 undefined on input line 150.
+
+
+LaTeX Warning: Reference `tab:multi_seed_results' on page 4 undefined on input line 167.
+
+
+LaTeX Warning: Reference `tab:multi_seed_results' on page 4 undefined on input line 167.
+
+[4]
+
+LaTeX Warning: Reference `tab:multi_seed_results' on page 5 undefined on input line 177.
+
+
+LaTeX Warning: Reference `sec:models' on page 5 undefined on input line 200.
+
+[5]
+
+LaTeX Warning: Reference `sec:models' on page 6 undefined on input line 214.
+
+
+LaTeX Warning: Reference `tab:hparam_window' on page 6 undefined on input line 222.
+
+[6] [7] [8] [9] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-14>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 14274 strings out of 467538
- 284150 string characters out of 5423725
- 677049 words of memory out of 5000000
- 42921 multiletter control sequences out of 15000+600000
+ 14271 strings out of 467538
+ 284105 string characters out of 5423725
+ 676900 words of memory out of 5000000
+ 42920 multiletter control sequences out of 15000+600000
  636288 words of font info for 72 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 99i,10n,108p,747b,292s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 99i,10n,108p,749b,292s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on report.pdf (9 pages, 1439868 bytes).
+Output written on report.pdf (9 pages, 1440139 bytes).
 PDF statistics:
  108 PDF objects out of 1000 (max. 8388607)
  66 compressed objects within 1 object stream

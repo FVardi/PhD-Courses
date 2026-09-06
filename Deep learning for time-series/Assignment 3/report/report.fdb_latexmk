@@ -1,8 +1,8 @@
 # Fdb version 4
-["pdflatex"] 1779042171.52638 "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 3/report/report.tex" "report.pdf" "report" 1779042173.39603 0
+["pdflatex"] 1779128047.63958 "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 3/report/report.tex" "report.pdf" "report" 1779128049.83082 2
   "../src/results/figures/lifetime_distribution.png" 1777395281 27426 a9db50a5ec28fd5c8d5eca5fbfee85af ""
   "../src/results/figures/sensor_trajectories.png" 1777395289 1123821 9249b50db96999c70a7bd2fc873cc6b5 ""
-  "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 3/report/report.tex" 1779042170 25620 56199ebbb83c00869e977cf831289b84 ""
+  "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 3/report/report.tex" 1779128043 25622 8b7bb120aa59386c794803fdb6f5c3c9 ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1764817323 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1764818414 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1764817923 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -143,9 +143,9 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1764790676 5587484 30eee748fa419a911c40b0c750dd21ba ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1764790790 3635704 cfe86ccc3f51b2e248635b855298a7b7 ""
   "c:/texlive/2025/texmf.cnf" 1764790650 713 e69b156964470283e0530f5060668171 ""
-  "report.aux" 1779042173 6020 2436ee4be544d7bab7ffde9d7076a305 "pdflatex"
-  "report.tdo" 1779042172 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "report.tex" 1779042170 25620 56199ebbb83c00869e977cf831289b84 ""
+  "report.aux" 1779128049 6020 2436ee4be544d7bab7ffde9d7076a305 "pdflatex"
+  "report.tdo" 1779128048 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "report.tex" 1779128043 25622 8b7bb120aa59386c794803fdb6f5c3c9 ""
   (generated)
   "report.aux"
   "report.log"
