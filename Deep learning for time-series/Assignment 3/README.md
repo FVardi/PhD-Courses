@@ -123,14 +123,17 @@ RNN and LSTM hidden-to-hidden weights are initialised orthogonally. The LSTM for
 
 ## Key results
 
+Rows marked † are from the LSTM hyperparameter study (`13_lstm_hparam_study.py`, 3 seeds); all other rows use 5 seeds at the default window size w=30.
+
 ### FD001
 
 | Approach | Model | RMSE (mean ± std) | NASA (mean ± std) |
 |---|---|---|---|
+| sequence | XGBoost | 14.46 ± 0.05 | 386 ± 15 |
 | window | LSTM | 14.88 ± 0.36 | 444 ± 65 |
+| sequence | LSTM † (w=20, h=64, η=1e-3) | 15.05 ± 0.68 | 316 ± 38 |
 | window | RNN | 15.82 ± 0.57 | 502 ± 100 |
 | window | TCN | 16.55 ± 0.32 | 477 ± 37 |
-| sequence | XGBoost | 14.46 ± 0.05 | 386 ± 15 |
 | sequence | TCN | 17.60 ± 0.24 | 508 ± 24 |
 | sequence | RNN | 20.66 ± 3.72 | 646 ± 171 |
 
@@ -138,11 +141,13 @@ RNN and LSTM hidden-to-hidden weights are initialised orthogonally. The LSTM for
 
 | Approach | Model | RMSE (mean ± std) | NASA (mean ± std) |
 |---|---|---|---|
+| sequence | LSTM † (w=20, h=128, η=1e-3) | 11.34 ± 0.47 | 668 ± 55 |
+| window | LSTM † (w=50, h=128, η=1e-3) | 13.62 ± 0.86 | 740 ± 164 |
 | sequence | XGBoost | 14.10 ± 0.01 | 775 ± 7 |
 | sequence | RNN | 14.59 ± 0.71 | 834 ± 62 |
 | window | LSTM | 14.78 ± 0.60 | 1132 ± 169 |
 | window | RNN | 15.44 ± 0.86 | 1120 ± 118 |
-| sequence | TCN | 16.73 ± 0.53 | 1104 ± 40 |
 | window | TCN | 16.45 ± 0.42 | 1217 ± 117 |
+| sequence | TCN | 16.73 ± 0.53 | 1104 ± 40 |
 
-Sequence LSTM is excluded from the summary tables due to training instability (bimodal results: 1 of 5 seeds converges, 4 collapse to a constant predictor). See the report for full details.
+Sequence LSTM at default w=30 is excluded from the default-hyperparameter rows due to training instability (bimodal results: 1 of 5 seeds converges, 4 collapse to a constant predictor). With tuned hyperparameters (w=20 on FD001, w=20 on FD002) sequence LSTM is the best model on FD002 overall. See the report for full details.
