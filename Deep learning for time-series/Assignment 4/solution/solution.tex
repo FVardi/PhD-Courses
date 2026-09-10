@@ -8,6 +8,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{siunitx}
+\setlength{\marginparwidth}{2.5cm}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[hidelinks]{hyperref}
 
@@ -37,10 +38,15 @@
 \subsection{The three learning ideas}
 
 \subsubsection{T-Loss (Franceschi et al., NeurIPS 2019)}
+The general idea is that sub-series of a reference series (which may be a sub-series of a larger time series) is a positiv sample, which sub-series of another series are negative samples. They use a CNN with dilation for increased receptive field of view. The series are left padded with zero if they are too short for the dilation of the network. If the series are long, more time stamps have representations in the end which is fixed with a max pool.
 
+- Positive samples: a positive example $x^{pos}$ is a sub-series of the reference series $x^{ref}$, which itself is randomly sampled in length and location.
+- Objective: triple loss with one anchor, one positive, and $K\geq1$ negative samples $x_{k}^{neg}$. The objective is to have the distance between $x^{pos}$ and $x^{ref}$ be smaller than the sum of the distances between $x^{ref}$ and $x_k^{neg}$.
+- Fixed length: the convolutional network ends with a representation $Y\in\mathbb{R}^{160 \times L}$ which is max pooled into $z\in\mathbb{R}^{160}$ and thereafter transformed through $f(x)=Wz+b$ where $W\in\mathbb{R}^{320\times160}$. The final dot product are therefore always between vectors of length 320. If the time series chosen in the beginning are too short for the full CNN they are left zero padded.
+- Classification: an SVM with a radial basis function is trained on the features with their labels now avalable. It is evaluated in a train/test split.
 
 \subsubsection{TS2Vec (Yue et al., AAAI 2022)}
-\TODOfill
+
 
 \subsubsection{TF-C (Zhang et al., NeurIPS 2022)}
 They seek to enforce that
@@ -53,14 +59,14 @@ This encourages that the time domain is robust to augmentation, the frequency do
 
 \subsection{Comparison of the three objectives}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{p{3.2cm} p{3.4cm} p{3.4cm} p{3.4cm}}
         \toprule
         & \textbf{T-Loss} & \textbf{TS2Vec} & \textbf{TF-C} \\
         \midrule
-        Related views / positives & Pos: sub-series of reference series. Neg: another series. &  & \\[1.2cm]
+        Related views & Pos: sub-series of reference series. Neg: another sub-series. &  & \\[1.2cm]
         Information preserved & & & \\[1.2cm]
         Fixed-length representation & & & \\[1.2cm]
         Use for classification & & & \\[1.2cm]
@@ -207,7 +213,7 @@ Hyperparameters selected on training data only.
 
 \subsection{Results}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l l l c c}
@@ -252,7 +258,7 @@ The probe treated as the principal representation test is: \TODOfill
 
 \subsection{Results}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l l l l c c}
@@ -296,7 +302,7 @@ The probe treated as the principal representation test is: \TODOfill
 
 \subsection{Training time and representation dimensionality}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l l c c}
@@ -326,7 +332,7 @@ any result, plus a brief justification. The same corrupted inputs are applied to
 
 \subsection{Results (100\%-label models)}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l l c c c c}
@@ -371,7 +377,7 @@ training budget, downstream probe, label regime and the three seeds matched.
 
 \subsection{Results}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l c c c c}
@@ -394,12 +400,12 @@ Does continuous masking change (i) clean performance, (ii) corrupted performance
 \TODOfill
 
 %======================================================================
-\section{Part F: TF-C for industrial bearing fault classification (FD-A $\rightarrow$ FD-B)}
+\section{Part F: TF-C for industrial bearing fault classification (\texorpdfstring{FD-A $\rightarrow$ FD-B}{FD-A to FD-B})}
 %======================================================================
 
 \subsection{Execution record}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l p{9.5cm}}
@@ -422,7 +428,7 @@ Does continuous masking change (i) clean performance, (ii) corrupted performance
 
 \subsection{Classification result}
 
-\begin{table}[h]
+\begin{table}[htbp]
     \centering
     \small
     \begin{tabular}{l c c}
