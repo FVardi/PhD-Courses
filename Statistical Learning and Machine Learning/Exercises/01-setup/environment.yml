@@ -1,0 +1,62 @@
+# SLML 2026 — Conda environment for Weeks 1–13
+# ─────────────────────────────────────────────
+# Create:    conda env create -f environment.yml
+# Activate:  conda activate slml
+# Update:    conda env update -f environment.yml --prune
+#
+# Platform notes (read before creating the environment):
+#   macOS Apple Silicon (M1/M2/M3/M4):
+#     PyTorch is installed via pip (see pip section below) to get MPS support.
+#     The pytorch conda channel does not ship Metal builds.
+#
+#   Windows with NVIDIA GPU:
+#     After creating the environment, replace the torch/torchvision pip entries with:
+#       pip install "torch>=2.0,<2.12" "torchvision>=0.15,<0.27" --index-url https://download.pytorch.org/whl/cu121
+#     (adjust cu121 to match your installed CUDA version)
+#
+#   Linux or Windows CPU-only:
+#     After creating the environment, replace the torch/torchvision pip entries with:
+#       pip install "torch>=2.0,<2.12" "torchvision>=0.15,<0.27" --index-url https://download.pytorch.org/whl/cpu
+#     This downloads a smaller CPU-only build (~250 MB instead of ~2 GB).
+#
+#   All other platforms (macOS Intel, CPU-only Linux):
+#     The pip entries below install the default (CPU) build — no changes needed.
+
+name: slml
+
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  # ── Python ──────────────────────────────────────────────────────────────
+  - python=3.11
+
+  # ── Scientific stack ─────────────────────────────────────────────────────
+  - numpy>=1.24,<2.0          # numpy 2.x compatibility not yet verified for all notebooks
+  - pandas>=2.0
+  - scipy>=1.10
+  - scikit-learn>=1.2
+
+  # ── Visualisation ────────────────────────────────────────────────────────
+  - matplotlib>=3.7,<3.10     # cap retained until matplotlib >=3.10 is separately validated
+  - seaborn>=0.12
+  - pillow>=9.0                # PIL — used in test.ipynb and Week 10/11 (torchvision dep, now explicit)
+
+  # ── Jupyter ──────────────────────────────────────────────────────────────
+  - jupyterlab>=4.0
+  - ipywidgets>=8.0
+  - ipykernel>=6.0             # needed to register the slml kernel in Jupyter
+
+  # ── Media / animation ────────────────────────────────────────────────────
+  - ffmpeg>=6.0                # required for matplotlib FuncAnimation.to_html5_video() in Weeks 4–5
+  - nodejs                     # required for some JupyterLab extensions
+
+  # ── pip-installed packages ───────────────────────────────────────────────
+  # PyTorch is installed via pip on all platforms (see platform notes above).
+  # Upper bounds avoid a torch 2.12 / torchvision 0.27 OpenMP abort observed
+  # on a fresh macOS Apple Silicon conda-forge environment.
+  - pip
+  - pip:
+    - torch>=2.0,<2.12
+    - torchvision>=0.15,<0.27

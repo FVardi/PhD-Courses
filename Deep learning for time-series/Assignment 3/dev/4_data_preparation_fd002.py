@@ -161,18 +161,20 @@ N_SAMPLE     = cfg["eda"]["n_sample_engines"]
 sample_units = train["unit"].unique()[:N_SAMPLE]
 
 # %%  cluster means bar chart — operating settings per cluster
-cluster_op_means = (
+_cluster_df = (
     pd.read_csv(DATA_DIR / f"train_{DATASET}.txt",
                 sep=r"\s+", header=None, names=COLUMNS, index_col=False)
     .assign(op_condition=lambda df: kmeans.predict(df[OP_COLS]))
-    .groupby("op_condition")[OP_COLS]
-    .mean()
 )
+cluster_op_means = _cluster_df.groupby("op_condition")[OP_COLS].mean()
+cluster_op_stds  = _cluster_df.groupby("op_condition")[OP_COLS].std()
 
 fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=False)
 fig.suptitle("FD002 — Mean operating setting value per cluster")
 for ax, col in zip(axes, OP_COLS):
-    ax.bar(cluster_op_means.index, cluster_op_means[col], edgecolor="black")
+    ax.bar(cluster_op_means.index, cluster_op_means[col],
+           yerr=cluster_op_stds[col], capsize=4,
+           edgecolor="black", error_kw={"elinewidth": 1.2, "ecolor": "black"})
     ax.set_xlabel("Cluster")
     ax.set_ylabel("Mean value")
     ax.set_title(col)

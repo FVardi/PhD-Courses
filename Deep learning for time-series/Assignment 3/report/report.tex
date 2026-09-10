@@ -265,14 +265,11 @@ All other hyperparameters are fixed at the defaults described in Section~\ref{se
 Each of the $3 \times 2 \times 2 = 12$ configurations per approach is trained with 3 fixed seeds (42, 123, 456), giving 72 runs per dataset.
 Validation RMSE averaged across seeds is used to rank configurations; the best configuration per approach is subsequently evaluated on the test set with the same 3 seeds.
 
-One methodological limitation applies to the sequence approach: the training loop uses a dedicated \texttt{sequence\_lr} override ($3 \times 10^{-4}$) that takes precedence over \texttt{cfg["training"]["lr"]}, so the learning rate axis has no effect on sequence runs.
-The sequence grid therefore reduces to $3 \times 2 = 6$ distinct configurations ($w \times h$), with the $\eta$ dimension being redundant.
-
 \subsection{Analysis}
 
 \paragraph{Window approach — FD001.}
 Table~\ref{tab:hparam_window} reports validation RMSE for all 12 window-approach configurations on FD001.
-The best configuration is $w{=}50$, $h{=}128$, $\eta{=}10^{-3}$ with a mean validation RMSE of $12.15 \pm 0.11$, achieving a test RMSE of $15.21 \pm 0.49$ across the three evaluation seeds.
+The best configuration is $w=50$, $h=128$, $\eta=10^{-3}$ with a mean validation RMSE of $12.15 \pm 0.11$, achieving a test RMSE of $15.21 \pm 0.49$ across the three evaluation seeds.
 
 \begin{table}[h]
     \centering
@@ -299,20 +296,20 @@ The best configuration is $w{=}50$, $h{=}128$, $\eta{=}10^{-3}$ with a mean vali
 \end{table}
 
 Three clear patterns emerge.
-\textit{Window size is the dominant axis}: $w{=}50$ outperforms $w{=}30$ which outperforms $w{=}20$ at every combination of $h$ and $\eta$, with an improvement of approximately 2.5 RMSE points from the smallest to the largest window.
+\textit{Window size is the dominant axis}: $w=50$ outperforms $w=30$ which outperforms $w=20$ at every combination of $h$ and $\eta$, with an improvement of approximately 2.5 RMSE points from the smallest to the largest window.
 This indicates that longer context consistently helps the model and that the sensor degradation signal is not fully captured within 20 or 30 cycles.
-\textit{Hidden size has a smaller but consistent effect}: $h{=}128$ beats $h{=}64$ at every $(w, \eta)$ pair, suggesting the model benefits from additional capacity, but the gap ($\approx$0.5 RMSE) is small relative to the window size effect.
-\textit{Learning rate}: $\eta{=}10^{-3}$ is consistently better than $\eta{=}10^{-4}$, indicating the default learning rate is well suited to this task and that a slower rate undertrains within the allowed epoch budget.
+\textit{Hidden size has a smaller effect}: $h=128$ outperforms $h=64$ at every combination of $w$ and $\eta$ except for when $w=50$, $h=128$ and $\eta=10^{-4}$, which however has a smaller std.
+\textit{Learning rate}: $\eta=10^{-3}$ is consistently better than $\eta=10^{-4}$, indicating the default learning rate is well suited to this task and that a slower rate undertrains within the allowed epoch budget.
 
-\textit{Grid-edge check}: the best configuration lies at the boundary of the search grid on window size ($w{=}50$).
+\textit{Grid-edge check}: the best configuration lies at the boundary of the search grid on window size ($w=50$).
 This suggests that further gains may be available with larger windows, and a follow-up search extending to $w \in \{70, 100\}$ would be warranted.
 
-\textit{Default configuration retrospective}: the default ($w{=}30$, $h{=}128$, $\eta{=}10^{-3}$) ranks third overall with a validation RMSE of $12.96$.
-It was a reasonable starting point — the hidden size and learning rate choices were optimal — but using $w{=}50$ would have improved results by approximately 0.8 RMSE points with no other changes.
+\textit{Default configuration retrospective}: the default ($w=30$, $h=128$, $\eta=10^{-3}$) ranks third overall with a validation RMSE of $12.96$.
+It was a reasonable starting point — the hidden size and learning rate choices were optimal — but using $w=50$ would have improved results by approximately 0.8 RMSE points with no other changes.
 
 \paragraph{Window approach — FD002.}
 Table~\ref{tab:hparam_window_fd002} reports validation RMSE for the FD002 window grid.
-The best configuration is again $w{=}50$, $h{=}128$, $\eta{=}10^{-3}$ with a mean validation RMSE of $14.08 \pm 0.26$, achieving a test RMSE of $13.62 \pm 0.86$.
+The best configuration is again $w=50$, $h=128$, $\eta=10^{-3}$ with a mean validation RMSE of $14.08 \pm 0.26$, achieving a test RMSE of $13.62 \pm 0.86$.
 
 \begin{table}[h]
     \centering
@@ -338,42 +335,75 @@ The best configuration is again $w{=}50$, $h{=}128$, $\eta{=}10^{-3}$ with a mea
     \label{tab:hparam_window_fd002}
 \end{table}
 
-The same ranking of axes holds on FD002: window size dominates, hidden size has a smaller consistent effect, and $\eta{=}10^{-3}$ outperforms $\eta{=}10^{-4}$.
-The best configuration is identical to FD001 ($w{=}50$, $h{=}128$, $\eta{=}10^{-3}$), confirming that the optimal window-approach hyperparameters generalise across operating conditions.
+The same ranking of axes holds on FD002: window size dominates, hidden size has a smaller consistent effect, and $\eta=10^{-3}$ outperforms $\eta=10^{-4}$.
+The best configuration is identical to FD001 ($w=50$, $h=128$, $\eta=10^{-3}$), confirming that the optimal window-approach hyperparameters generalise across operating conditions.
 
 \paragraph{Feature-sequence approach.}
-Because the learning rate axis is ineffective for the sequence approach (see Setup), only the $w \times h$ sub-grid of 6 configurations is informative.
-Table~\ref{tab:hparam_seq} summarises the 6 distinct sequence configurations on both datasets.
+Table~\ref{tab:hparam_seq} summarises all 12 sequence configurations on both datasets, grouped by learning rate.
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{rrrrr}
+    \begin{tabular}{rrrcc}
         \hline
-        $w$ & $h$ & \multicolumn{2}{c}{Val RMSE (mean $\pm$ std)} \\
-             &      & FD001 & FD002 \\
+        $w$ & $h$ & $\eta$ & \multicolumn{2}{c}{Val RMSE (mean $\pm$ std)} \\
+             &      &         & FD001 & FD002 \\
         \hline
-        20 & 128 & $13.34 \pm 1.80$ & $\mathbf{11.81 \pm 0.13}$ \\
-        20 & 64  & $23.06 \pm 0.44$ & $13.86 \pm 0.82$ \\
-        30 & 64  & $22.82 \pm 0.56$ & $13.68 \pm 0.49$ \\
-        30 & 128 & $33.01 \pm 15.42$ & $32.00 \pm 16.95$ \\
-        50 & 64  & $30.12 \pm 9.80$  & $32.66 \pm 14.65$ \\
-        50 & 128 & $41.44 \pm 0.00$  & $31.81 \pm 16.11$ \\
+        \multicolumn{5}{l}{\textit{Learning rate $\eta = 10^{-3}$}} \\
+        20 & 64  & $10^{-3}$ & $\mathbf{13.36 \pm 1.76}$ & $11.76 \pm 0.48$ \\
+        30 & 64  & $10^{-3}$ & $13.66 \pm 0.63$ & $11.73 \pm 0.35$ \\
+        50 & 64  & $10^{-3}$ & $24.72 \pm 14.48$ & $31.24 \pm 17.10$ \\
+        20 & 128 & $10^{-3}$ & $31.67 \pm 17.87$ & $\mathbf{10.69 \pm 0.22}$ \\
+        30 & 128 & $10^{-3}$ & $31.81 \pm 17.50$ & $22.86 \pm 16.55$ \\
+        50 & 128 & $10^{-3}$ & $31.94 \pm 16.45$ & $31.23 \pm 17.12$ \\
+        \hline
+        \multicolumn{5}{l}{\textit{Learning rate $\eta = 10^{-4}$}} \\
+        50 & 128 & $10^{-4}$ & $41.79 \pm 0.02$ & $32.79 \pm 14.42$ \\
+        20 & 128 & $10^{-4}$ & $41.81 \pm 3.72$ & $14.09 \pm 1.01$ \\
+        30 & 128 & $10^{-4}$ & $43.17 \pm 0.07$ & $32.97 \pm 15.28$ \\
+        50 & 64  & $10^{-4}$ & $56.23 \pm 0.17$ & $36.48 \pm 8.03$ \\
+        30 & 64  & $10^{-4}$ & $59.77 \pm 0.18$ & $28.73 \pm 0.67$ \\
+        20 & 64  & $10^{-4}$ & $61.61 \pm 0.20$ & $28.67 \pm 0.39$ \\
         \hline
     \end{tabular}
-    \caption{Sequence-approach LSTM hyperparameter grid (6 distinct configurations, sorted by FD001 val RMSE). High means reflect bimodal instability: some seeds converge while others collapse to constant predictors. Bold marks the best configuration.}
+    \caption{Sequence-approach LSTM hyperparameter grid (all 12 configurations), sorted by FD001 val RMSE within each learning rate group. Large standard deviations reflect bimodal instability. Bold marks the best configuration per dataset.}
     \label{tab:hparam_seq}
 \end{table}
 
-Two findings stand out.
-\textit{Smaller windows are better for sequence LSTM}, in direct contrast to the window approach where $w{=}50$ dominated.
-With $w{=}20$, each engine sequence has fewer timesteps, reducing the risk of vanishing gradients during backpropagation through time.
-Larger windows ($w{=}50$) produce near-complete collapse on FD001 and high instability on FD002.
+Three findings stand out.
+\textit{$\eta=10^{-4}$ is universally ineffective}: every configuration in the lower half of the table fails to converge within the 500-epoch budget, producing val RMSE between 42 and 62 on FD001.
+The very low standard deviations for these runs ($\leq 0.20$) indicate consistent behaviour across seeds — but consistently poor.
+On FD002 the slow-convergence pattern is similar, with most $\eta=10^{-4}$ runs sitting between 29 and 37, except $w=20$, $h=128$ which partially converges to $14.09 \pm 1.01$.
+The sequence approach with engine-level batching ($\approx$80--208 gradient steps per epoch) requires a higher learning rate than the window approach to make meaningful progress within the fixed epoch budget.
+
+\textit{Smaller windows are better for sequence LSTM}, in direct contrast to the window approach where $w=50$ dominated.
+With $\eta=10^{-3}$, only $w=20$ and $w=30$ with $h=64$ converge reliably across all three seeds; $h=128$ introduces bimodal instability except on FD002 at $w=20$.
+Larger windows ($w=50$) produce near-complete collapse regardless of hidden size.
 
 \textit{FD002 is substantially more stable than FD001} under the sequence approach.
-The best configuration ($w{=}20$, $h{=}128$) achieves a validation RMSE of $11.81 \pm 0.13$ on FD002 — low variance, all three seeds converging — and a test RMSE of $12.59 \pm 0.68$.
-On FD001 the same configuration is more erratic (val RMSE $13.34 \pm 1.80$, test RMSE $15.85 \pm 0.80$).
-The larger FD002 training set ($\approx$208 engines vs $\approx$80) provides a stronger gradient signal that keeps more seeds from collapsing.
+The best configuration per dataset differs: on FD001 it is ($w=20$, $h=64$, $\eta=10^{-3}$) with val RMSE $13.36 \pm 1.76$ and test RMSE $15.05 \pm 0.68$; on FD002 it is ($w=20$, $h=128$, $\eta=10^{-3}$) with val RMSE $10.69 \pm 0.22$ and test RMSE $11.34 \pm 0.47$ — all three seeds converging cleanly.
+The larger FD002 training set ($\approx$208 engines vs $\approx$80) provides a stronger gradient signal that stabilises training even at higher capacity.
 
+\paragraph{Best-configuration test results.}
+Table~\ref{tab:hparam_best} summarises the test-set performance of the best LSTM configuration identified by the grid search for each approach and dataset.
+The NASA score is the raw asymmetric penalty summed over all test engines, so FD002 scores inflate relative to FD001 simply because the test set is 2.6$\times$ larger (259 vs 100 engines); the NASA/engine column normalises for this.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{llcrrr}
+        \hline
+        Approach & Dataset & Best config & Test RMSE & NASA & NASA/engine \\
+        \hline
+        Window   & FD001 & $w=50$, $h=128$, $\eta=10^{-3}$ & $15.21 \pm 0.49$ & $368 \pm 40$  & 3.68 \\
+        Window   & FD002 & $w=50$, $h=128$, $\eta=10^{-3}$ & $13.62 \pm 0.86$ & $740 \pm 164$ & 2.86 \\
+        Sequence & FD001 & $w=20$, $h=64$,  $\eta=10^{-3}$ & $15.05 \pm 0.68$ & $316 \pm 38$  & 3.16 \\
+        Sequence & FD002 & $w=20$, $h=128$, $\eta=10^{-3}$ & $11.34 \pm 0.47$ & $668 \pm 55$  & 2.58 \\
+        \hline
+    \end{tabular}
+    \caption{Test performance of the best LSTM configuration per approach and dataset (mean $\pm$ std over 3 seeds). FD001 has 100 test engines; FD002 has 259. NASA/engine normalises the raw NASA score for the different test set sizes.}
+    \label{tab:hparam_best}
+\end{table}
+
+The sequence approach matches or slightly outperforms the window approach on FD001 (3.16 vs 3.68 NASA/engine) while showing a larger advantage on FD002 (2.58 vs 2.86 NASA/engine), consistent with the sequence model benefiting from the richer multi-condition training data.
 
 
 \section{Comparative Analysis}
@@ -411,12 +441,17 @@ TCN's local dilated convolutions aggregate information over a bounded receptive 
 
 \subsection{Deep learning vs.\ XGBoost}
 
-XGBoost is the best-performing model overall (FD001: $14.46 \pm 0.05$ RMSE, $386 \pm 15$ NASA score; FD002: $14.10 \pm 0.01$ RMSE, $775 \pm 7$ NASA score), outperforming the best deep learning configuration on both metrics and both datasets.
-The RMSE margin over window LSTM (FD001: $14.88$; FD002: $14.78$) is small and falls within seed variability, but the NASA score advantage is more consistent.
+Among models evaluated at the default window size ($w=30$), XGBoost is the strongest baseline (FD001: $14.46 \pm 0.05$ RMSE, $386 \pm 15$ NASA; FD002: $14.10 \pm 0.01$ RMSE, $775 \pm 7$ NASA), outperforming every deep learning configuration at those settings.
+The margin over window LSTM (FD001: $14.88$; FD002: $14.78$) is small and falls within seed variability, but the NASA advantage is more consistent.
+
+This picture changes once hyperparameters are tuned (Section~\ref{sec:hparam}).
+On FD002 the tuned window LSTM ($w=50$, $h=128$, $\eta=10^{-3}$) already matches XGBoost ($13.62$ vs $14.10$ RMSE), and the tuned sequence LSTM ($w=20$, $h=128$, $\eta=10^{-3}$) surpasses it clearly ($11.34 \pm 0.47$ RMSE, 2.58 NASA/engine vs 2.99 for XGBoost).
+On FD001 XGBoost retains its advantage: the best tuned LSTM achieves $15.05 \pm 0.68$ RMSE versus $14.46 \pm 0.05$ for XGBoost.
+XGBoost therefore wins on FD001 regardless of LSTM tuning, but is overtaken on FD002 once the sequence LSTM is given an appropriate window size and learning rate.
 
 XGBoost receives a single fixed-size window per prediction and treats each window as an independent sample.
-Its competitive performance suggests that the handcrafted window statistics already summarise the relevant degradation signal, and that the additional temporal context provided by processing longer histories or full sequences is not being translated into a meaningful predictive advantage by the deep learning models tested here.
-This is a finding about the data rather than a verdict on deep learning in general: the CMAPSS sensor trajectories may degrade in a sufficiently regular and Markovian fashion that a short local window is sufficient.
+Its competitive performance at default settings suggests that handcrafted window statistics already capture much of the degradation signal.
+On the richer multi-condition FD002 dataset, however, the sequence LSTM — trained end-to-end on full engine histories — extracts additional structure that XGBoost cannot access from a fixed window, and ultimately produces the best predictions.
 
 \subsection{FD001 vs.\ FD002}
 
@@ -447,14 +482,14 @@ Jointly monitoring RMSE and NASA score exposes this asymmetry in a way that RMSE
 
 \subsection{Revised picture from the hyperparameter study}
 
-The main results above use the default window size $w{=}30$ for all models and approaches.
-The hyperparameter study (Section~\ref{sec:hparam}) reveals that this choice is particularly unfavourable for sequence LSTM: the bimodal instability and high mean RMSE observed in Tables~\ref{tab:multi_seed_results} and~\ref{tab:multi_seed_results_fd002} are largely a consequence of $w{=}30$ being too large for stable sequence training.
+The main results above use the default window size $w=30$ for all models and approaches.
+The hyperparameter study (Section~\ref{sec:hparam}) reveals that this choice is particularly unfavourable for sequence LSTM: the bimodal instability and high mean RMSE observed in Tables~\ref{tab:multi_seed_results} and~\ref{tab:multi_seed_results_fd002} are largely a consequence of $w=30$ being too large for stable sequence training.
 
-With $w{=}20$ and $h{=}128$, sequence LSTM converges reliably on FD002 (test RMSE $12.59 \pm 0.68$ across 3 seeds), outperforming window LSTM ($14.78 \pm 0.60$) by more than 2 RMSE points.
-On FD001 the same configuration is less stable ($15.85 \pm 0.80$) but still competitive with the window approach.
-The conclusion that sequence LSTM is unreliable should therefore be qualified: it is unreliable at $w{=}30$, but the hyperparameter study shows a configuration exists where it is both stable and the best-performing model on FD002.
+With $w=20$, $h=128$, and $\eta=10^{-3}$, sequence LSTM converges reliably on FD002 (test RMSE $11.34 \pm 0.47$ across 3 seeds), outperforming window LSTM ($14.78 \pm 0.60$) by more than 3 RMSE points and exceeding XGBoost ($14.10$) as well — making it the best model on FD002 overall.
+On FD001 the best sequence configuration is ($w=20$, $h=64$, $\eta=10^{-3}$), achieving test RMSE $15.05 \pm 0.68$ — competitive with window LSTM ($14.88$) but with higher variance.
+The conclusion that sequence LSTM is unreliable should therefore be qualified: it is unreliable at $w=30$, but with $w=20$ and $\eta=10^{-3}$ a configuration exists where it is both stable and the best-performing model on FD002.
 
 The between-approach gap for LSTM is thus partly a hyperparameter artefact rather than an inherent architectural limitation.
-For RNN and TCN the hparam study does not change the conclusions: sequence RNN was already competitive at the default $w{=}30$, and sequence TCN's insensitivity to sequence length makes the window size effect smaller.
+For RNN and TCN the hparam study does not change the conclusions: sequence RNN was already competitive at the default $w=30$, and sequence TCN's insensitivity to sequence length makes the window size effect smaller.
 
 \end{document}
