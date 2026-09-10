@@ -1,0 +1,506 @@
+\documentclass[a4paper,11pt]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{siunitx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[hidelinks]{hyperref}
+
+% Page setup
+\geometry{margin=2.5cm}
+
+% Convenience macros
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\TODOfill}{\todo[inline]{Fill in.}}
+
+% Title info
+\title{Assignment 4: Self-Supervised Representation Learning\\ for Time Series Classification}
+\author{Frederik Appel Vardinghus-Nielsen}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\listoftodos
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Part A: Understand the methods and connect paper to code}
+%======================================================================
+
+\subsection{The three learning ideas}
+
+\subsubsection{T-Loss (Franceschi et al., NeurIPS 2019)}
+
+
+\subsubsection{TS2Vec (Yue et al., AAAI 2022)}
+\TODOfill
+
+\subsubsection{TF-C (Zhang et al., NeurIPS 2022)}
+They seek to enforce that
+\begin{itemize}
+\item[Time] (1) Encodings of a time series and its augmented view are similar and (2) encodings of two different time series (no augmentations) are dissimilar.
+\item[Frqeuency] (1) Encodings of the Fourier transform of a time series and its agumented view are similar and (2) encodings of two different series (no augmentations) are dissimilar.
+\item[Time-frequency] Time series and their Fourier transform must be similar after first encoding into respective domains and thereafter encoding into common time-frequency domain. Augmented views are dissimilar.
+\end{itemize}
+This encourages that the time domain is robust to augmentation, the frequency domain is robust to augmentation, and the time-frequency domain enforces temporal and spectral consistency.
+
+\subsection{Comparison of the three objectives}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{p{3.2cm} p{3.4cm} p{3.4cm} p{3.4cm}}
+        \toprule
+        & \textbf{T-Loss} & \textbf{TS2Vec} & \textbf{TF-C} \\
+        \midrule
+        Related views / positives & & & \\[1.2cm]
+        Information preserved & & & \\[1.2cm]
+        Fixed-length representation & & & \\[1.2cm]
+        Use for classification & & & \\[1.2cm]
+        \bottomrule
+    \end{tabular}
+    \caption{Comparison of the three self-supervised objectives.}
+    \label{tab:method-comparison}
+\end{table}
+
+\subsection{Paper-to-code map}
+
+For each element: (i) closest paper location, (ii) inputs and outputs, (iii) immediate
+caller or call site, and (iv) role in training or representation extraction.
+Verified checkout commits: T-Loss \code{4aff592}, TS2Vec \code{b0088e1}, TF-C \code{9667582}.
+
+\subsubsection{T-Loss}
+
+\paragraph{\code{losses/triplet\_loss.py: TripletLoss.forward}}
+\TODOfill
+
+\paragraph{\code{networks/causal\_cnn.py: CausalConvolutionBlock.forward}}
+\TODOfill
+
+\paragraph{\code{networks/causal\_cnn.py: CausalCNNEncoder.forward}}
+\TODOfill
+
+\paragraph{\code{scikit\_wrappers.py: TimeSeriesEncoderClassifier.fit\_encoder}}
+\TODOfill
+
+\paragraph{\code{scikit\_wrappers.py: TimeSeriesEncoderClassifier.encode}}
+\TODOfill
+
+\paragraph{Required specifics}
+\begin{itemize}
+    \item How \code{fit\_encoder} selects the fixed-length or varying-length loss: \TODOfill
+    \item How \code{TripletLoss.forward} samples reference, positive and negative intervals: \TODOfill
+    \item How \code{CausalCNNEncoder} produces one fixed-length vector: \TODOfill
+    \item How to call \code{fit\_encoder} without labels: \TODOfill
+\end{itemize}
+
+\subsubsection{TS2Vec}
+
+\paragraph{\code{ts2vec.py: TS2Vec.fit}}
+\TODOfill
+
+\paragraph{\code{ts2vec.py: TS2Vec.\_eval\_with\_pooling}}
+\TODOfill
+
+\paragraph{\code{ts2vec.py: TS2Vec.encode}}
+\TODOfill
+
+\paragraph{\code{models/losses.py: hierarchical\_contrastive\_loss}}
+\TODOfill
+
+\paragraph{\code{models/losses.py: instance\_contrastive\_loss}}
+\TODOfill
+
+\paragraph{\code{models/losses.py: temporal\_contrastive\_loss}}
+\TODOfill
+
+\paragraph{\code{models/encoder.py: TSEncoder.forward}}
+\TODOfill
+
+\paragraph{\code{models/encoder.py: generate\_binomial\_mask}}
+\TODOfill
+
+\paragraph{\code{models/encoder.py: generate\_continuous\_mask}}
+\TODOfill
+
+\paragraph{Required specifics}
+\begin{itemize}
+    \item Overlapping crops in \code{TS2Vec.fit}: \TODOfill
+    \item Where timestamp masking is applied: \TODOfill
+    \item Mapping of the two elementary losses and hierarchical pooling to Equations 1--3 and Algorithm 1: \TODOfill
+    \item The \code{TS2Vec.encode} option returning one vector per complete series: \TODOfill
+\end{itemize}
+
+\subsubsection{TF-C}
+
+\paragraph{\code{code/TFC/dataloader.py: Load\_Dataset.\_\_init\_\_}}
+\TODOfill
+
+\paragraph{\code{code/TFC/dataloader.py: Load\_Dataset.\_\_getitem\_\_}}
+\TODOfill
+
+\paragraph{\code{code/TFC/dataloader.py: data\_generator}}
+\TODOfill
+
+\paragraph{\code{code/TFC/dataloader.py: the \code{fft.fft(...).abs()} operation}}
+\TODOfill
+
+\paragraph{\code{code/TFC/augmentations.py: DataTransform\_TD}, \code{DataTransform\_FD}, \code{remove\_frequency}, \code{add\_frequency}}
+\TODOfill
+
+\paragraph{\code{code/TFC/model.py: TFC.\_\_init\_\_}, \code{TFC.forward}, \code{target\_classifier.forward}}
+\TODOfill
+
+\paragraph{\code{code/TFC/loss.py: NTXentLoss\_poly.forward}}
+\TODOfill
+
+\paragraph{\code{code/TFC/trainer.py: Trainer}, \code{model\_pretrain}, \code{model\_finetune}, \code{model\_test}}
+\TODOfill
+
+\paragraph{\code{code/TFC/main.py: the \code{subset} setting, call to \code{data\_generator}, pretrained-checkpoint loading}}
+\TODOfill
+
+\subsubsection{Following one TF-C batch through the pipeline}
+\TODOfill
+
+\paragraph{FFT dimension, spectrum conversion, \code{fft} vs.\ \code{rfft}}
+\TODOfill
+
+\paragraph{Active time-domain augmentation; the two frequency operations and how they are combined}
+\TODOfill
+
+\paragraph{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \code{TFC.forward} in terms of $h$ and $z$}
+\TODOfill
+
+\paragraph{Loss terms in \code{model\_pretrain} vs.\ Equations 1--4}
+\TODOfill
+
+\paragraph{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}
+\TODOfill
+
+\paragraph{\code{main.py} $\rightarrow$ \code{data\_generator} $\rightarrow$ \code{Trainer} for FD-A $\rightarrow$ FD-B}
+Number of source and target-training samples actually used, whether \code{FD\_B/val.pt} is loaded,
+how often the test loader is evaluated, and whether test results influence the reported best result.
+Discrepancies from the paper's stated protocol are recorded, not repaired.
+\TODOfill
+
+\paragraph{Device-specific tensor construction in \code{remove\_frequency} and \code{add\_frequency}}
+\TODOfill
+
+%======================================================================
+\section{Part B: Raw-signal baselines}
+%======================================================================
+
+\subsection{Protocol}
+Datasets: FordA, ArticularyWordRecognition, Epilepsy. Classifiers: logistic regression and
+RBF-kernel SVM on the vectorised raw signal. Label regimes: 100\% and a stratified 10\% subset.
+Three fixed seeds; the 10\% subset of a given seed is reused by every method.
+Hyperparameters selected on training data only.
+\TODOfill
+
+\subsection{Results}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l l l c c}
+        \toprule
+        Dataset & Model & Labels & Accuracy & Macro-F1 \\
+        \midrule
+        FordA & Logistic regression & 100\% & & \\
+        FordA & Logistic regression & 10\%  & & \\
+        FordA & RBF-SVM             & 100\% & & \\
+        FordA & RBF-SVM             & 10\%  & & \\
+        \midrule
+        AWR & Logistic regression & 100\% & & \\
+        AWR & Logistic regression & 10\%  & & \\
+        AWR & RBF-SVM             & 100\% & & \\
+        AWR & RBF-SVM             & 10\%  & & \\
+        \midrule
+        Epilepsy & Logistic regression & 100\% & & \\
+        Epilepsy & Logistic regression & 10\%  & & \\
+        Epilepsy & RBF-SVM             & 100\% & & \\
+        Epilepsy & RBF-SVM             & 10\%  & & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Raw-signal baselines. Test accuracy and macro-F1 as mean $\pm$ standard deviation over three paired seeds.}
+    \label{tab:baselines}
+\end{table}
+
+\subsection{Comments}
+\TODOfill
+
+%======================================================================
+\section{Part C: Pretrain and evaluate T-Loss and TS2Vec}
+%======================================================================
+
+\subsection{Protocol}
+Per dataset and seed: pretrain on the unlabelled official training series, extract one
+fixed-length representation per series, freeze the encoder, fit the probe on the 10\% and
+100\% labelled training representations, and evaluate once on the official test set.
+\TODOfill
+
+\paragraph{Principal representation test}
+The probe treated as the principal representation test is: \TODOfill
+
+\subsection{Results}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l l l l c c}
+        \toprule
+        Dataset & Method & Probe & Labels & Accuracy & Macro-F1 \\
+        \midrule
+        FordA & T-Loss & Logistic regression & 100\% & & \\
+        FordA & T-Loss & Logistic regression & 10\%  & & \\
+        FordA & T-Loss & RBF-SVM             & 100\% & & \\
+        FordA & T-Loss & RBF-SVM             & 10\%  & & \\
+        FordA & TS2Vec & Logistic regression & 100\% & & \\
+        FordA & TS2Vec & Logistic regression & 10\%  & & \\
+        FordA & TS2Vec & RBF-SVM             & 100\% & & \\
+        FordA & TS2Vec & RBF-SVM             & 10\%  & & \\
+        \midrule
+        AWR & T-Loss & Logistic regression & 100\% & & \\
+        AWR & T-Loss & Logistic regression & 10\%  & & \\
+        AWR & T-Loss & RBF-SVM             & 100\% & & \\
+        AWR & T-Loss & RBF-SVM             & 10\%  & & \\
+        AWR & TS2Vec & Logistic regression & 100\% & & \\
+        AWR & TS2Vec & Logistic regression & 10\%  & & \\
+        AWR & TS2Vec & RBF-SVM             & 100\% & & \\
+        AWR & TS2Vec & RBF-SVM             & 10\%  & & \\
+        \midrule
+        Epilepsy & T-Loss & Logistic regression & 100\% & & \\
+        Epilepsy & T-Loss & Logistic regression & 10\%  & & \\
+        Epilepsy & T-Loss & RBF-SVM             & 100\% & & \\
+        Epilepsy & T-Loss & RBF-SVM             & 10\%  & & \\
+        Epilepsy & TS2Vec & Logistic regression & 100\% & & \\
+        Epilepsy & TS2Vec & Logistic regression & 10\%  & & \\
+        Epilepsy & TS2Vec & RBF-SVM             & 100\% & & \\
+        Epilepsy & TS2Vec & RBF-SVM             & 10\%  & & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Frozen-representation classification. Mean $\pm$ standard deviation over three paired seeds.}
+    \label{tab:ssl-clean}
+\end{table}
+
+\subsection{Comparison with the raw-signal baselines}
+\TODOfill
+
+\subsection{Training time and representation dimensionality}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l l c c}
+        \toprule
+        Dataset & Method & Pretraining time & Representation dimension \\
+        \midrule
+        FordA & T-Loss & & \\
+        FordA & TS2Vec & & \\
+        AWR & T-Loss & & \\
+        AWR & TS2Vec & & \\
+        Epilepsy & T-Loss & & \\
+        Epilepsy & TS2Vec & & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Training time and representation dimensionality.}
+    \label{tab:cost}
+\end{table}
+
+%======================================================================
+\section{Part D: Robustness to contiguous sensor dropout}
+%======================================================================
+
+\subsection{Corruption design}
+Dropout proportion, number of intervals and replacement convention, fixed before inspecting
+any result, plus a brief justification. The same corrupted inputs are applied to all methods.
+\TODOfill
+
+\subsection{Results (100\%-label models)}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l l c c c c}
+        \toprule
+        & & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Macro-F1} \\
+        \cmidrule(lr){3-4} \cmidrule(lr){5-6}
+        Dataset & Method & Clean & Corrupted ($\Delta$) & Clean & Corrupted ($\Delta$) \\
+        \midrule
+        FordA & Logistic regression (raw) & & & & \\
+        FordA & RBF-SVM (raw)             & & & & \\
+        FordA & T-Loss                    & & & & \\
+        FordA & TS2Vec                    & & & & \\
+        \midrule
+        AWR & Logistic regression (raw) & & & & \\
+        AWR & RBF-SVM (raw)             & & & & \\
+        AWR & T-Loss                    & & & & \\
+        AWR & TS2Vec                    & & & & \\
+        \midrule
+        Epilepsy & Logistic regression (raw) & & & & \\
+        Epilepsy & RBF-SVM (raw)             & & & & \\
+        Epilepsy & T-Loss                    & & & & \\
+        Epilepsy & TS2Vec                    & & & & \\
+        \bottomrule
+    \end{tabular}
+    \caption{Clean versus contiguous-dropout test performance for the 100\%-label models.}
+    \label{tab:dropout}
+\end{table}
+
+\subsection{Discussion}
+Whether any apparent robustness comes from the representation, the classifier or the
+preprocessing convention.
+\TODOfill
+
+%======================================================================
+\section{Part E: Focused TS2Vec continuous masking ablation}
+%======================================================================
+
+\subsection{Setup}
+On FordA: standard (binomial) TS2Vec masking versus continuous masking, with encoder,
+training budget, downstream probe, label regime and the three seeds matched.
+\TODOfill
+
+\subsection{Results}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l c c c c}
+        \toprule
+        & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Macro-F1} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+        Masking & Clean & Corrupted ($\Delta$) & Clean & Corrupted ($\Delta$) \\
+        \midrule
+        Binomial (default) & & & & \\
+        Continuous         & & & & \\
+        \bottomrule
+    \end{tabular}
+    \caption{FordA: standard versus continuous TS2Vec masking, clean and contiguous-dropout test sets.}
+    \label{tab:masking-ablation}
+\end{table}
+
+\subsection{Interpretation}
+Does continuous masking change (i) clean performance, (ii) corrupted performance, and
+(iii) sensitivity to corruption relative to the model's own clean score?
+\TODOfill
+
+%======================================================================
+\section{Part F: TF-C for industrial bearing fault classification (FD-A $\rightarrow$ FD-B)}
+%======================================================================
+
+\subsection{Execution record}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l p{9.5cm}}
+        \toprule
+        Item & Value \\
+        \midrule
+        Commands (pretraining) & \\
+        Commands (fine-tuning / testing) & \\
+        Environment (Python, PyTorch, OS) & \\
+        Hardware & \\
+        Seed & \\
+        Data actually consumed & \\
+        Training time & \\
+        Checkpoint used & \\
+        \bottomrule
+    \end{tabular}
+    \caption{TF-C FD-A $\rightarrow$ FD-B execution record.}
+    \label{tab:tfc-record}
+\end{table}
+
+\subsection{Classification result}
+
+\begin{table}[h]
+    \centering
+    \small
+    \begin{tabular}{l c c}
+        \toprule
+        Run & Accuracy & Macro-F1 \\
+        \midrule
+        This run (FD-B test) & & \\
+        TF-C supplement, Table 5 & & \\
+        \bottomrule
+    \end{tabular}
+    \caption{FD-B classification result, compared cautiously with Table 5 of the TF-C supplement. Exact numerical reproduction is not expected.}
+    \label{tab:tfc-result}
+\end{table}
+
+\subsection{What was transferred, where labels entered, and encoder status}
+What was transferred from FD-A, where FD-B labels entered the pipeline, and whether the final
+encoder was frozen or updated.
+\TODOfill
+
+\subsection{Material differences between the paper's protocol and the supplied execution path}
+Subset use, loss composition, validation use and test-set access, based on the Part A inspection.
+\TODOfill
+
+%======================================================================
+\section{Part G: Synthesis}
+%======================================================================
+
+\subsection{When SSL provides a useful representation and when raw nonlinear classification remains competitive}
+\TODOfill
+
+\subsection{Whether the effect of SSL becomes clearer with only 10\% labels}
+\TODOfill
+
+\subsection{Stability of conclusions across the paired seeds}
+\TODOfill
+
+\subsection{Role of dataset size, dimensionality and number of classes}
+\TODOfill
+
+\subsection{Whether continuous masking improves accuracy, robustness, both or neither}
+\TODOfill
+
+\subsection{What the TF-C bearing experiment shows about transfer between operating conditions}
+\TODOfill
+
+\subsection{Implications for future multichannel industrial sensor data}
+\TODOfill
+
+%======================================================================
+\section{Experimental rules: compliance notes}
+%======================================================================
+\begin{itemize}
+    \item Official test sets preserved as held-out data: \TODOfill
+    \item Test inputs not used for SSL pretraining in the required experiments: \TODOfill
+    \item Normalisation, imputation and feature transforms fitted on training data only: \TODOfill
+    \item 10\% label subsets stratified, indices saved: \TODOfill
+    \item Same seeds, label subsets, corruptions and probe settings in paired comparisons: \TODOfill
+    \item Tuning on a training-only validation split or cross-validation: \TODOfill
+    \item Encoder frozen in Parts C--E; Part F follows the supplied TF-C downstream procedure: \TODOfill
+    \item Configurations, software versions, runtime and hardware recorded: \TODOfill
+    \item Implementation departures from the official repositories: \TODOfill
+\end{itemize}
+
+%======================================================================
+\section{Limitations and conclusions}
+%======================================================================
+\TODOfill
+
+%======================================================================
+\appendix
+\section{Optional extension: TF-C on FordA}
+%======================================================================
+\TODOfill
+
+\section{Optional extension: FordB noisy-condition experiments}
+\TODOfill
+
+\section{Per-seed results}
+\TODOfill
+
+\end{document}

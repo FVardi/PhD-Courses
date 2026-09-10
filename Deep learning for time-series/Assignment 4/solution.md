@@ -28,3 +28,8 @@ T-Loss 4aff592, TS2Vec b0088e1 and TF-C 9667582.
 - Classification: they use instance-level representations (the whole segment of time series, not just the overlap). Instances are passed through the encoder and a max pooling is performed over all timestamps, giving a feature vector of dimension $K$, which is the number of representation dimensions in the last layer. SVM is trained on this $K$-dimensional vector for classification.
 
 ## TF C
+
+- Positive samples: there are three examples of positive samples: two views of the same time series after passing through a time encoder, two views of the same frequency representation of a time series after passing through a frequency encoder, and the time-, and frequency-representations of the same time series after passing through time to TF and frequency to TF through respective projectors.
+- Objective: tri-fold loss
+- Fixed length problem:
+- Classification
