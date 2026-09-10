@@ -46,8 +46,8 @@
 They seek to enforce that
 \begin{itemize}
 \item[Time] (1) Encodings of a time series and its augmented view are similar and (2) encodings of two different time series (no augmentations) are dissimilar.
-\item[Frqeuency] (1) Encodings of the Fourier transform of a time series and its agumented view are similar and (2) encodings of two different series (no augmentations) are dissimilar.
-\item[Time-frequency] Time series and their Fourier transform must be similar after first encoding into respective domains and thereafter encoding into common time-frequency domain. Augmented views are dissimilar.
+\item[Frequency] (1) Encodings of the Fourier transform of a time series and its agumented view are similar and (2) encodings of two different series (no augmentations) are dissimilar.
+\item[Time-frequency] (1) Time series and their Fourier transform must be similar after first encoding into respective domains and thereafter encoding into common time-frequency domain, (2), augmented views are dissimilar.
 \end{itemize}
 This encourages that the time domain is robust to augmentation, the frequency domain is robust to augmentation, and the time-frequency domain enforces temporal and spectral consistency.
 
@@ -60,7 +60,7 @@ This encourages that the time domain is robust to augmentation, the frequency do
         \toprule
         & \textbf{T-Loss} & \textbf{TS2Vec} & \textbf{TF-C} \\
         \midrule
-        Related views / positives & & & \\[1.2cm]
+        Related views / positives & Pos: sub-series of reference series. Neg: another series. &  & \\[1.2cm]
         Information preserved & & & \\[1.2cm]
         Fixed-length representation & & & \\[1.2cm]
         Use for classification & & & \\[1.2cm]
