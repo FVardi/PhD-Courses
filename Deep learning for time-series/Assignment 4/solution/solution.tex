@@ -8,6 +8,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{siunitx}
+\usepackage{enumitem}
 \setlength{\marginparwidth}{2.5cm}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[hidelinks]{hyperref}
@@ -38,43 +39,46 @@
 \subsection{The three learning ideas}
 
 \subsubsection{T-Loss (Franceschi et al., NeurIPS 2019)}
-The general idea is that sub-series of a reference series (which may be a sub-series of a larger time series) is a positiv sample, which sub-series of another series are negative samples. They use a CNN with dilation for increased receptive field of view. The series are left padded with zero if they are too short for the dilation of the network. If the series are long, more time stamps have representations in the end which is fixed with a max pool.
+The general idea is that sub-series of a reference series (which may be a sub-series of a larger time series) is a positiv sample, which sub-series of another series are negative samples. They use a CNN with dilation for increased receptive field. The series are left padded with zero if they are too short for the dilation of the network. If the series are long, more time stamps have representations in the end which is fixed with a max pool.
 
-- Positive samples: a positive example $x^{pos}$ is a sub-series of the reference series $x^{ref}$, which itself is randomly sampled in length and location.
-- Objective: triple loss with one anchor, one positive, and $K\geq1$ negative samples $x_{k}^{neg}$. The objective is to have the distance between $x^{pos}$ and $x^{ref}$ be smaller than the sum of the distances between $x^{ref}$ and $x_k^{neg}$.
-- Fixed length: the convolutional network ends with a representation $Y\in\mathbb{R}^{160 \times L}$ which is max pooled into $z\in\mathbb{R}^{160}$ and thereafter transformed through $f(x)=Wz+b$ where $W\in\mathbb{R}^{320\times160}$. The final dot product are therefore always between vectors of length 320. If the time series chosen in the beginning are too short for the full CNN they are left zero padded.
-- Classification: an SVM with a radial basis function is trained on the features with their labels now avalable. It is evaluated in a train/test split.
+\begin{itemize}
+\item Positive/negative samples: a positive example $x^{pos}$ is a sub-series of the reference series $x^{ref}$, which itself is randomly sampled in length and location. A sub-series of another time series is negative.
+\item Objective: triple loss with one anchor, one positive, and $K\geq1$ negative samples $x_{k}^{neg}$. The objective is to have the distance between $x^{pos}$ and $x^{ref}$ be smaller than the sum of the distances between $x^{ref}$ and $x_k^{neg}$.
+\item Fixed length problem: the convolutional network ends with a representation $Y\in\mathbb{R}^{160 \times L}$ which is max pooled into $z\in\mathbb{R}^{160}$ and thereafter transformed through $f(x)=Wz+b$ where $W\in\mathbb{R}^{320\times160}$. The final dot product are therefore always between vectors of length 320. If the time series chosen in the beginning are too short for the full CNN they are left zero padded.
+\item Classification: an SVM with a radial basis function is trained on the features with their labels now avalable. It is evaluated in a train/test split.
+\end{itemize}
 
 \subsubsection{TS2Vec (Yue et al., AAAI 2022)}
+The general idea is to generate related views with masking and random overlapping segments of the representations. The hierarchical loss furthermore lets the encoder learn representations which take into account a spectrum of resolutions (granularity of the series).
 
+\begin{itemize}
+\item Positive/negative samples: two different views of the same time series instance (segment) are achieved through random cropping and timestamp masking. The original time series is cropped to produced two distinct, overlapping time series. After and input projection layer, these are both randomly masked at specific time stamps (single timestamp, all dimensions for multivariate TS) by setting values to zero.
+\item Objective: Dual loss, the sum of two distinct expressions:
+\begin{itemize}
+\item Temporal contrastive loss which compares views of the same overlapping series at the same and different timestamps. Similarity at same timestamp between two different views is positive, self-similarity (same view, no masking) at different timestamps is negative.
+\item Instance-wise contrastive loss compares to other time series. Positives are two views of the same time series at the same timestamp. Negatives are both view from another time series at the same time stamp.
+\end{itemize}
+The loss is calculated recursively at larger and larger granularity with a dilation of 2. The first level compares every single timestamp with all others. The second max pools with kernel size 2 and this continues until the full series are used.
+\item Fixed length problem: only the overlapping timestamps are used after passing the views through the encoder. The loss loops over time stamps and gives a single loss for them all.
+\item Classification: they use instance-level representations (the whole segment of time series, not just the overlap). Instances are passed through the encoder and a max pooling is performed over all timestamps, giving a feature vector of dimension $K$, which is the number of representation dimensions in the last layer. SVM is trained on this $K$-dimensional vector for classification.
+\end{itemize}
 
 \subsubsection{TF-C (Zhang et al., NeurIPS 2022)}
-They seek to enforce that
-\begin{itemize}
-\item[Time] (1) Encodings of a time series and its augmented view are similar and (2) encodings of two different time series (no augmentations) are dissimilar.
-\item[Frequency] (1) Encodings of the Fourier transform of a time series and its agumented view are similar and (2) encodings of two different series (no augmentations) are dissimilar.
-\item[Time-frequency] (1) Time series and their Fourier transform must be similar after first encoding into respective domains and thereafter encoding into common time-frequency domain, (2), augmented views are dissimilar.
-\end{itemize}
+They seek to enforce discrimination in different domains
 This encourages that the time domain is robust to augmentation, the frequency domain is robust to augmentation, and the time-frequency domain enforces temporal and spectral consistency.
 
-\subsection{Comparison of the three objectives}
+\begin{itemize}
+\item Positive/negative samples: 
+\begin{itemize}
+\item Time: (1) Encodings of a time series and its augmented (jittering, scaling, time-shifts, neighborhood segments) view are similar and (2) encodings of two different time series (no augmentations) are dissimilar.
+\item Frequency: (1) Encodings of the Fourier transform of a time series and its agumented view are similar and (2) encodings of two different series (no augmentations) are dissimilar.
+\item Time-frequency: (1) Time series and their Fourier transform must be similar after first encoding into respective domains and thereafter encoding into common time-frequency domain, (2), augmented views are dissimilar.
+\end{itemize}
+\item Objective: Combined loss in time-, frequency-, and time-frequency domain.
+\item Fixed length problem: The training datasets all contain series of same length. When using the model on a tuning dataset and testing, the series are left zero padded. 
+\item Classification: the full architecture of $z_i^T=R_T(G_T(x_i^T))$ and $z_i^F=R_F(G_F(_i^F))$ is used and concatenated into $[z_i^T, z_i^F]$ and this is passed through a 2-layer fully ocnnected network which projects into the number of classes needed. This classifier is jointly trained with the full pipeline on the target dataset as fine tuning.
+\end{itemize}
 
-\begin{table}[htbp]
-    \centering
-    \small
-    \begin{tabular}{p{3.2cm} p{3.4cm} p{3.4cm} p{3.4cm}}
-        \toprule
-        & \textbf{T-Loss} & \textbf{TS2Vec} & \textbf{TF-C} \\
-        \midrule
-        Related views & Pos: sub-series of reference series. Neg: another sub-series. &  & \\[1.2cm]
-        Information preserved & & & \\[1.2cm]
-        Fixed-length representation & & & \\[1.2cm]
-        Use for classification & & & \\[1.2cm]
-        \bottomrule
-    \end{tabular}
-    \caption{Comparison of the three self-supervised objectives.}
-    \label{tab:method-comparison}
-\end{table}
 
 \subsection{Paper-to-code map}
 
@@ -85,16 +89,45 @@ Verified checkout commits: T-Loss \code{4aff592}, TS2Vec \code{b0088e1}, TF-C \c
 \subsubsection{T-Loss}
 
 \paragraph{\code{losses/triplet\_loss.py: TripletLoss.forward}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+    \item Eq. (1)
+    \item
+    \textbf{Input:} tensor \texttt{(B, C, L)}, where \texttt{B} is the batch size, \texttt{C} is the number of channels, and \texttt{L} is the length of the time series (equal length case).\\
+    \textbf{Output:} Loss as a scalar.
+    \item \texttt{TimeSeriesEncoderClassifier.fit\_encoder}
+    \item It is the loss which dictates which time series are supposed to have similar and dissimilar representations.
+\end{enumerate}
 
 \paragraph{\code{networks/causal\_cnn.py: CausalConvolutionBlock.forward}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Figure 2(b) in the paper.
+\item 
+    \textbf{Input:} tensor \texttt{(B, C, L)}, where \texttt{B} is the batch size, \texttt{C} is the number of channels, and \texttt{L} is the length of the time series (equal length case).\\
+    \textbf{Output:} tensor \texttt{(B, C, L)}, where \texttt{B} is the batch size, \texttt{C} is the number of channels, and \texttt{L} is the length of the time series (equal length case). This is the results after passing through the convolutional block.
+\item \texttt{CausalCNN} where is is called for each layer in the full network.
+\item It's the basic block which dictates the neural network achitecture and therefore the inductive bias of the representation learning.
+\end{enumerate}
 
 \paragraph{\code{networks/causal\_cnn.py: CausalCNNEncoder.forward}}
-\TODOfill
+
+\begin{enumerate}[label=(\roman*)]
+\item Section 4 describes the full architecture. Figure 2 illustrates the convolutional blocks and dilation which are repeated in the first part of the encoder.
+\item 
+    \textbf{Input:} tensor \texttt{(B, C, L)}, where \texttt{B} is the batch size, \texttt{C} is the number of channels, and \texttt{L} is the length of the time series (equal length case).\\
+    \textbf{Output:} tensor \texttt{(B, C)}, where \texttt{B} is the batch size and \texttt{C} is the number of channels. The time dimension $L$ is removed with max pooling squeezing the time dimension.
+\item \texttt{TimeSeriesEncoderClassifier.encode}
+\item It wraps the whole classification pipeline of the encoder and calls it on the passed batch.
+\end{enumerate}
 
 \paragraph{\code{scikit\_wrappers.py: TimeSeriesEncoderClassifier.fit\_encoder}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Section 4 on architecture and Section S2 on hyperparameters.
+\item 
+    \textbf{Input:} Training set $X$.
+    \textbf{Output:} The fitted encoder.
+\item \texttt{TimeSeriesEncoderClassifier.fit}
+\item It performs unsupervised/self-supervised fitting of the encoder.
+\end{enumerate}
 
 \paragraph{\code{scikit\_wrappers.py: TimeSeriesEncoderClassifier.encode}}
 \TODOfill

@@ -2,78 +2,77 @@
 \contentsline {subsection}{\numberline {1.1}The three learning ideas}{4}{subsection.1.1}%
 \contentsline {subsubsection}{\numberline {1.1.1}T-Loss (Franceschi et al., NeurIPS 2019)}{4}{subsubsection.1.1.1}%
 \contentsline {subsubsection}{\numberline {1.1.2}TS2Vec (Yue et al., AAAI 2022)}{4}{subsubsection.1.1.2}%
-\contentsline {subsubsection}{\numberline {1.1.3}TF-C (Zhang et al., NeurIPS 2022)}{4}{subsubsection.1.1.3}%
-\contentsline {subsection}{\numberline {1.2}Comparison of the three objectives}{4}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}Paper-to-code map}{4}{subsection.1.3}%
-\contentsline {subsubsection}{\numberline {1.3.1}T-Loss}{4}{subsubsection.1.3.1}%
-\contentsline {paragraph}{\texttt {losses/triplet\_loss.py: TripletLoss.forward}}{4}{section*.3}%
-\contentsline {paragraph}{\texttt {networks/causal\_cnn.py: CausalConvolutionBlock.forward}}{4}{section*.5}%
-\contentsline {paragraph}{\texttt {networks/causal\_cnn.py: CausalCNNEncoder.forward}}{5}{section*.7}%
-\contentsline {paragraph}{\texttt {scikit\_wrappers.py: TimeSeriesEncoderClassifier.fit\_encoder}}{5}{section*.9}%
-\contentsline {paragraph}{\texttt {scikit\_wrappers.py: TimeSeriesEncoderClassifier.encode}}{5}{section*.11}%
-\contentsline {paragraph}{Required specifics}{5}{section*.13}%
-\contentsline {subsubsection}{\numberline {1.3.2}TS2Vec}{5}{subsubsection.1.3.2}%
-\contentsline {paragraph}{\texttt {ts2vec.py: TS2Vec.fit}}{5}{section*.18}%
-\contentsline {paragraph}{\texttt {ts2vec.py: TS2Vec.\_eval\_with\_pooling}}{5}{section*.20}%
-\contentsline {paragraph}{\texttt {ts2vec.py: TS2Vec.encode}}{6}{section*.22}%
-\contentsline {paragraph}{\texttt {models/losses.py: hierarchical\_contrastive\_loss}}{6}{section*.24}%
-\contentsline {paragraph}{\texttt {models/losses.py: instance\_contrastive\_loss}}{6}{section*.26}%
-\contentsline {paragraph}{\texttt {models/losses.py: temporal\_contrastive\_loss}}{6}{section*.28}%
-\contentsline {paragraph}{\texttt {models/encoder.py: TSEncoder.forward}}{6}{section*.30}%
-\contentsline {paragraph}{\texttt {models/encoder.py: generate\_binomial\_mask}}{6}{section*.32}%
-\contentsline {paragraph}{\texttt {models/encoder.py: generate\_continuous\_mask}}{6}{section*.34}%
-\contentsline {paragraph}{Required specifics}{6}{section*.36}%
-\contentsline {subsubsection}{\numberline {1.3.3}TF-C}{6}{subsubsection.1.3.3}%
-\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: Load\_Dataset.\_\_init\_\_}}{6}{section*.41}%
-\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: Load\_Dataset.\_\_getitem\_\_}}{6}{section*.43}%
-\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: data\_generator}}{6}{section*.45}%
-\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: the \texttt {fft.fft(...).abs()} operation}}{7}{section*.47}%
-\contentsline {paragraph}{\texttt {code/TFC/augmentations.py: DataTransform\_TD}, \texttt {DataTransform\_FD}, \texttt {remove\_frequency}, \texttt {add\_frequency}}{7}{section*.49}%
-\contentsline {paragraph}{\texttt {code/TFC/model.py: TFC.\_\_init\_\_}, \texttt {TFC.forward}, \texttt {target\_classifier.forward}}{7}{section*.51}%
-\contentsline {paragraph}{\texttt {code/TFC/loss.py: NTXentLoss\_poly.forward}}{7}{section*.53}%
-\contentsline {paragraph}{\texttt {code/TFC/trainer.py: Trainer}, \texttt {model\_pretrain}, \texttt {model\_finetune}, \texttt {model\_test}}{7}{section*.55}%
-\contentsline {paragraph}{\texttt {code/TFC/main.py: the \texttt {subset} setting, call to \texttt {data\_generator}, pretrained-checkpoint loading}}{7}{section*.57}%
-\contentsline {subsubsection}{\numberline {1.3.4}Following one TF-C batch through the pipeline}{7}{subsubsection.1.3.4}%
-\contentsline {paragraph}{FFT dimension, spectrum conversion, \texttt {fft} vs.\ \texttt {rfft}}{7}{section*.60}%
-\contentsline {paragraph}{Active time-domain augmentation; the two frequency operations and how they are combined}{7}{section*.62}%
-\contentsline {paragraph}{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \texttt {TFC.forward} in terms of $h$ and $z$}{7}{section*.64}%
-\contentsline {paragraph}{Loss terms in \texttt {model\_pretrain} vs.\ Equations 1--4}{7}{section*.66}%
-\contentsline {paragraph}{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}{7}{section*.68}%
-\contentsline {paragraph}{\texttt {main.py} $\rightarrow $ \texttt {data\_generator} $\rightarrow $ \texttt {Trainer} for FD-A $\rightarrow $ FD-B}{8}{section*.70}%
-\contentsline {paragraph}{Device-specific tensor construction in \texttt {remove\_frequency} and \texttt {add\_frequency}}{8}{section*.72}%
-\contentsline {section}{\numberline {2}Part B: Raw-signal baselines}{8}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Protocol}{8}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Results}{8}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Comments}{8}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Part C: Pretrain and evaluate T-Loss and TS2Vec}{8}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Protocol}{8}{subsection.3.1}%
-\contentsline {paragraph}{Principal representation test}{9}{section*.77}%
-\contentsline {subsection}{\numberline {3.2}Results}{9}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Comparison with the raw-signal baselines}{9}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Training time and representation dimensionality}{9}{subsection.3.4}%
-\contentsline {section}{\numberline {4}Part D: Robustness to contiguous sensor dropout}{10}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Corruption design}{10}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Results (100\%-label models)}{10}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Discussion}{10}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Part E: Focused TS2Vec continuous masking ablation}{10}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Setup}{10}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Results}{10}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Interpretation}{10}{subsection.5.3}%
-\contentsline {section}{\numberline {6}Part F: TF-C for industrial bearing fault classification (FD-A $\rightarrow $ FD-B)}{11}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Execution record}{11}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Classification result}{11}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}What was transferred, where labels entered, and encoder status}{11}{subsection.6.3}%
-\contentsline {subsection}{\numberline {6.4}Material differences between the paper's protocol and the supplied execution path}{11}{subsection.6.4}%
-\contentsline {section}{\numberline {7}Part G: Synthesis}{12}{section.7}%
-\contentsline {subsection}{\numberline {7.1}When SSL provides a useful representation and when raw nonlinear classification remains competitive}{12}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Whether the effect of SSL becomes clearer with only 10\% labels}{12}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Stability of conclusions across the paired seeds}{12}{subsection.7.3}%
-\contentsline {subsection}{\numberline {7.4}Role of dataset size, dimensionality and number of classes}{12}{subsection.7.4}%
-\contentsline {subsection}{\numberline {7.5}Whether continuous masking improves accuracy, robustness, both or neither}{12}{subsection.7.5}%
-\contentsline {subsection}{\numberline {7.6}What the TF-C bearing experiment shows about transfer between operating conditions}{12}{subsection.7.6}%
-\contentsline {subsection}{\numberline {7.7}Implications for future multichannel industrial sensor data}{12}{subsection.7.7}%
-\contentsline {section}{\numberline {8}Experimental rules: compliance notes}{12}{section.8}%
-\contentsline {section}{\numberline {9}Limitations and conclusions}{13}{section.9}%
-\contentsline {section}{\numberline {A}Optional extension: TF-C on FordA}{13}{appendix.A}%
-\contentsline {section}{\numberline {B}Optional extension: FordB noisy-condition experiments}{13}{appendix.B}%
-\contentsline {section}{\numberline {C}Per-seed results}{13}{appendix.C}%
+\contentsline {subsubsection}{\numberline {1.1.3}TF-C (Zhang et al., NeurIPS 2022)}{5}{subsubsection.1.1.3}%
+\contentsline {subsection}{\numberline {1.2}Paper-to-code map}{5}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}T-Loss}{5}{subsubsection.1.2.1}%
+\contentsline {paragraph}{\texttt {losses/triplet\_loss.py: TripletLoss.forward}}{5}{section*.3}%
+\contentsline {paragraph}{\texttt {networks/causal\_cnn.py: CausalConvolutionBlock.forward}}{6}{section*.4}%
+\contentsline {paragraph}{\texttt {networks/causal\_cnn.py: CausalCNNEncoder.forward}}{6}{section*.5}%
+\contentsline {paragraph}{\texttt {scikit\_wrappers.py: TimeSeriesEncoderClassifier.fit\_encoder}}{6}{section*.6}%
+\contentsline {paragraph}{\texttt {scikit\_wrappers.py: TimeSeriesEncoderClassifier.encode}}{6}{section*.7}%
+\contentsline {paragraph}{Required specifics}{6}{section*.9}%
+\contentsline {subsubsection}{\numberline {1.2.2}TS2Vec}{7}{subsubsection.1.2.2}%
+\contentsline {paragraph}{\texttt {ts2vec.py: TS2Vec.fit}}{7}{section*.14}%
+\contentsline {paragraph}{\texttt {ts2vec.py: TS2Vec.\_eval\_with\_pooling}}{7}{section*.16}%
+\contentsline {paragraph}{\texttt {ts2vec.py: TS2Vec.encode}}{7}{section*.18}%
+\contentsline {paragraph}{\texttt {models/losses.py: hierarchical\_contrastive\_loss}}{7}{section*.20}%
+\contentsline {paragraph}{\texttt {models/losses.py: instance\_contrastive\_loss}}{7}{section*.22}%
+\contentsline {paragraph}{\texttt {models/losses.py: temporal\_contrastive\_loss}}{7}{section*.24}%
+\contentsline {paragraph}{\texttt {models/encoder.py: TSEncoder.forward}}{7}{section*.26}%
+\contentsline {paragraph}{\texttt {models/encoder.py: generate\_binomial\_mask}}{7}{section*.28}%
+\contentsline {paragraph}{\texttt {models/encoder.py: generate\_continuous\_mask}}{7}{section*.30}%
+\contentsline {paragraph}{Required specifics}{7}{section*.32}%
+\contentsline {subsubsection}{\numberline {1.2.3}TF-C}{8}{subsubsection.1.2.3}%
+\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: Load\_Dataset.\_\_init\_\_}}{8}{section*.37}%
+\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: Load\_Dataset.\_\_getitem\_\_}}{8}{section*.39}%
+\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: data\_generator}}{8}{section*.41}%
+\contentsline {paragraph}{\texttt {code/TFC/dataloader.py: the \texttt {fft.fft(...).abs()} operation}}{8}{section*.43}%
+\contentsline {paragraph}{\texttt {code/TFC/augmentations.py: DataTransform\_TD}, \texttt {DataTransform\_FD}, \texttt {remove\_frequency}, \texttt {add\_frequency}}{8}{section*.45}%
+\contentsline {paragraph}{\texttt {code/TFC/model.py: TFC.\_\_init\_\_}, \texttt {TFC.forward}, \texttt {target\_classifier.forward}}{8}{section*.47}%
+\contentsline {paragraph}{\texttt {code/TFC/loss.py: NTXentLoss\_poly.forward}}{8}{section*.49}%
+\contentsline {paragraph}{\texttt {code/TFC/trainer.py: Trainer}, \texttt {model\_pretrain}, \texttt {model\_finetune}, \texttt {model\_test}}{8}{section*.51}%
+\contentsline {paragraph}{\texttt {code/TFC/main.py: the \texttt {subset} setting, call to \texttt {data\_generator}, pretrained-checkpoint loading}}{8}{section*.53}%
+\contentsline {subsubsection}{\numberline {1.2.4}Following one TF-C batch through the pipeline}{8}{subsubsection.1.2.4}%
+\contentsline {paragraph}{FFT dimension, spectrum conversion, \texttt {fft} vs.\ \texttt {rfft}}{8}{section*.56}%
+\contentsline {paragraph}{Active time-domain augmentation; the two frequency operations and how they are combined}{8}{section*.58}%
+\contentsline {paragraph}{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \texttt {TFC.forward} in terms of $h$ and $z$}{8}{section*.60}%
+\contentsline {paragraph}{Loss terms in \texttt {model\_pretrain} vs.\ Equations 1--4}{9}{section*.62}%
+\contentsline {paragraph}{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}{9}{section*.64}%
+\contentsline {paragraph}{\texttt {main.py} $\rightarrow $ \texttt {data\_generator} $\rightarrow $ \texttt {Trainer} for FD-A $\rightarrow $ FD-B}{9}{section*.66}%
+\contentsline {paragraph}{Device-specific tensor construction in \texttt {remove\_frequency} and \texttt {add\_frequency}}{9}{section*.68}%
+\contentsline {section}{\numberline {2}Part B: Raw-signal baselines}{9}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Protocol}{9}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Results}{9}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Comments}{9}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Part C: Pretrain and evaluate T-Loss and TS2Vec}{10}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Protocol}{10}{subsection.3.1}%
+\contentsline {paragraph}{Principal representation test}{10}{section*.73}%
+\contentsline {subsection}{\numberline {3.2}Results}{10}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Comparison with the raw-signal baselines}{10}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Training time and representation dimensionality}{11}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Part D: Robustness to contiguous sensor dropout}{11}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Corruption design}{11}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Results (100\%-label models)}{11}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Discussion}{11}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Part E: Focused TS2Vec continuous masking ablation}{11}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Setup}{11}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Results}{12}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Interpretation}{12}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Part F: TF-C for industrial bearing fault classification (FD-A $\rightarrow $ FD-B)}{12}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Execution record}{12}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Classification result}{12}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}What was transferred, where labels entered, and encoder status}{13}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Material differences between the paper's protocol and the supplied execution path}{13}{subsection.6.4}%
+\contentsline {section}{\numberline {7}Part G: Synthesis}{13}{section.7}%
+\contentsline {subsection}{\numberline {7.1}When SSL provides a useful representation and when raw nonlinear classification remains competitive}{13}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Whether the effect of SSL becomes clearer with only 10\% labels}{13}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Stability of conclusions across the paired seeds}{13}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Role of dataset size, dimensionality and number of classes}{13}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}Whether continuous masking improves accuracy, robustness, both or neither}{13}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}What the TF-C bearing experiment shows about transfer between operating conditions}{13}{subsection.7.6}%
+\contentsline {subsection}{\numberline {7.7}Implications for future multichannel industrial sensor data}{13}{subsection.7.7}%
+\contentsline {section}{\numberline {8}Experimental rules: compliance notes}{14}{section.8}%
+\contentsline {section}{\numberline {9}Limitations and conclusions}{14}{section.9}%
+\contentsline {section}{\numberline {A}Optional extension: TF-C on FordA}{14}{appendix.A}%
+\contentsline {section}{\numberline {B}Optional extension: FordB noisy-condition experiments}{14}{appendix.B}%
+\contentsline {section}{\numberline {C}Per-seed results}{14}{appendix.C}%
