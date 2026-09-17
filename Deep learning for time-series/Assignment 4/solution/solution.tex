@@ -123,51 +123,133 @@ Verified checkout commits: T-Loss \code{4aff592}, TS2Vec \code{b0088e1}, TF-C \c
 \begin{enumerate}[label=(\roman*)]
 \item Section 4 on architecture and Section S2 on hyperparameters.
 \item 
-    \textbf{Input:} Training set $X$.
+    \textbf{Input:} Training set $X$.\\
     \textbf{Output:} The fitted encoder.
 \item \texttt{TimeSeriesEncoderClassifier.fit}
 \item It performs unsupervised/self-supervised fitting of the encoder.
 \end{enumerate}
 
 \paragraph{\code{scikit\_wrappers.py: TimeSeriesEncoderClassifier.encode}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Paragraph 4 and 5 in Section 4 on encoder architecture.
+\item 
+    \textbf{Input:} The test set $X$. \\
+    \textbf{Output:} Features of $X$.
+\item Depends on the context. In general \texttt{fit()} calls it during training to sue the final encoder to produce features before training SVM, while \texttt{score()} calls is during testing to produce features for SVM classification.
+\begin{itemize}
+\item \texttt{fit\_encoder()} calls it after each training epoch if certain conditions for early stopping are present. This doesn't make sense for fully self-supervised learning, so labels must be 
+provided.
+\item \texttt{fit()} calls it to encode the training set once training is done such that SVM can be training on the training features.
+\item \texttt{encode\_window()} calls it to encode a test set on a sliding window. Useful if temporal features are needed for regression/forecasting.
+\item \texttt{predict()} and \texttt{score()} call it to encode a set and then perform prediction or calculate score of classification. Mostly used for testing.
+\end{itemize}
+\item It uses the final encoder (unless used during early stopping) to encode features from either train or test sets before classification or prediction.
+\end{enumerate}
 
 \paragraph{Required specifics}
 \begin{itemize}
-    \item How \code{fit\_encoder} selects the fixed-length or varying-length loss: \TODOfill
-    \item How \code{TripletLoss.forward} samples reference, positive and negative intervals: \TODOfill
-    \item How \code{CausalCNNEncoder} produces one fixed-length vector: \TODOfill
-    \item How to call \code{fit\_encoder} without labels: \TODOfill
+    \item How \code{fit\_encoder} selects the fixed-length or varying-length loss: It checks wether a \texttt{numpy} sum over the training set yields \texttt{nan}s in some entries, which then indicates unequal lengths.
+    \item How \code{TripletLoss.forward} samples reference, positive and negative intervals: 
+    \begin{itemize}
+    \item Reference/anchor: each time series is used as reference once per epoch. The length is chosen at random between the length of the positive example and the length of the full series. The position is chosen to overlap the positive example.
+    \item Negative: a specified number of random time series are chosen as negatives for each anchor. The anchor itself can contain a negative sample.
+    \item Positive: chosen as a random sub-series of each anchor. In practice the length and position of the positive is chosen first.
+    \end{itemize}
+    \item How \code{CausalCNNEncoder} produces one fixed-length vector: it uses AdaptiveMaxPool1d to max pool over the time dimension. This produces a feature vector which only has length one in the remaining "time" dimension.
+    \item How to call \code{fit\_encoder} without labels: call it without passing training labels \texttt{y}. It defaults to none and performs unsupervised learning without early stopping.
 \end{itemize}
 
 \subsubsection{TS2Vec}
 
 \paragraph{\code{ts2vec.py: TS2Vec.fit}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Section 2.3 on Contextual Consistency which describes the timestamp masking and random cropping which serve as the augmentations for robustness, and Section 2.4 on Hierarchical Contrasting which is described in Algorithm 1. The whole loss is shown in Equations (1), (2), and (3). 
+\item 
+    \textbf{Input:} Train data, number of epochs to train, maximum number of iterations (batches) to train, and whether to print training loss after each epoch. \\
+    \textbf{Output:} Log of losses during training.
+\item It's called in \texttt{train.py}.
+\item It contains the central training loop which includes cropping, augmentation, and loss.
+\end{enumerate}
 
 \paragraph{\code{ts2vec.py: TS2Vec.\_eval\_with\_pooling}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Sections 3.1, 3.2, and 3.3 on applications. The evaluation/representation of the time series varies depending on the downstream task.
+\item 
+    \textbf{Input:} Test data \texttt{x} on which to evaluate the averaged model, whether to use a mask, whether to slice.\\
+    \textbf{Output:} Representations from running the encoder and the chosen pooling strategy.
+\item \texttt{TS2Vec.fit()}
+\item It applies the trained model to a test set and the pooling strategy which is chosen based upon the downstream task.
+\end{enumerate}
 
 \paragraph{\code{ts2vec.py: TS2Vec.encode}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Section 2.2 on Model Architecture and Sections 3.1, 3.2, and 3.3 on downstream tasks.
+\item 
+    \textbf{Input:} Test data to calculate representations from. Masking, sliding length and padding for representation altering, encoding window for restriction before encoding, causal, and batch sizes are additional inputs. \\
+    \textbf{Output:} The representations from encoding the test data.
+\item \texttt{anomaly\_detection.py}, \texttt{classification.py}, and \texttt{forecasting.py} for the three tasks, respectively.
+\item Uses the fitted encoder to encode test data for use in downstream task.
+\end{enumerate}
 
 \paragraph{\code{models/losses.py: hierarchical\_contrastive\_loss}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Equations (1), (2), and (3).
+\item 
+    \textbf{Input:} Two different reprensentation of the same batch to calculate loss between. \\
+    \textbf{Output:} Loss between the representations as defined by Equation (3).
+\item \texttt{TS2Vec.fit()}
+\item Calculates loss which dictates training.
+\end{enumerate}
 
 \paragraph{\code{models/losses.py: instance\_contrastive\_loss}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Equation (2).
+\item
+    \textbf{Input:} Two representations of the same batch after encoding during training. \\
+    \textbf{Output:} The instance contrastive loss between the two representations. Two representations at the same timestamp are positive, while same representation of two different time series are negative.
+\item \texttt{hierarchical\_contrastive\_loss}.
+\item Forces the model to have representations of the same series in different contexts and with different masks to be similar, while keeping reprensentations of other series dissimilar.
+\end{enumerate}
 
 \paragraph{\code{models/losses.py: temporal\_contrastive\_loss}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Equation (2).
+\item 
+    \textbf{Input:} Two representations of the same batch after encoding during training.\\
+    \textbf{Output:} The temporal contrastive loss between the two reprensentations. The same timestamp for the two representations is a positive pair, while different timestamps in both the same and the other representation are negative pairs.
+\item \texttt{hierarchical\_contrastive\_loss}.
+\item Encourages the model to discriminate representations over time. Representations at the same timestamps should have similar representations while temporal differences should be reflected in different representations.
+\end{enumerate}
 
 \paragraph{\code{models/encoder.py: TSEncoder.forward}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Section 2.2, paragraphs 2 and 3.
+\item 
+    \textbf{Input:} Data to be encoded. It has been cropped and augmented before. \\
+    \textbf{Output:} Encoded batch.
+\item \texttt{TS2Vec.fit()} and \texttt{\_eval\_with\_pooling}.
+\item Contains the convolutional part of the model architecture.
+\end{enumerate}
 
 \paragraph{\code{models/encoder.py: generate\_binomial\_mask}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item The paragraph \textbf{Timestamp Masking} in Section 2.3.
+\item 
+    \textbf{Input:} \texttt{B}, \texttt{T}, and \texttt{p}; batch size, time length, and masking probability, respectively.\\
+    \textbf{Output:} A boolean tensor with shape \texttt{(B, T)} with values \texttt{False} and \texttt{True} indicating masking or not, respectively.
+\item \texttt{TSEncoder.forward()}
+\item Performs the timestamp masking which forces robustness and context understanding of the model.
+\end{enumerate}
 
 \paragraph{\code{models/encoder.py: generate\_continuous\_mask}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item Not mentioned in article.
+\item 
+    \textbf{Input:} \texttt{B}, \texttt{T}, \texttt{n}, and \texttt{l}; batch size, time length, number of masked sequences, and length of masked sequences as a fraction of full length, respectively.\\
+    \textbf{Output:} A boolean tensor with shape \texttt{(B, T)} with values \texttt{False} and \texttt{True} indicating masking or not, respectively.
+\item \texttt{TSEncoder.forward()}
+\item Creates continuous runs of masking. They may ovelap.
+\end{enumerate}
 
 \paragraph{Required specifics}
 \begin{itemize}
@@ -180,31 +262,95 @@ Verified checkout commits: T-Loss \code{4aff592}, TS2Vec \code{b0088e1}, TF-C \c
 \subsubsection{TF-C}
 
 \paragraph{\code{code/TFC/dataloader.py: Load\_Dataset.\_\_init\_\_}}
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 \TODOfill
 
 \paragraph{\code{code/TFC/dataloader.py: Load\_Dataset.\_\_getitem\_\_}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/dataloader.py: data\_generator}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/dataloader.py: the \code{fft.fft(...).abs()} operation}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/augmentations.py: DataTransform\_TD}, \code{DataTransform\_FD}, \code{remove\_frequency}, \code{add\_frequency}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/model.py: TFC.\_\_init\_\_}, \code{TFC.forward}, \code{target\_classifier.forward}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/loss.py: NTXentLoss\_poly.forward}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/trainer.py: Trainer}, \code{model\_pretrain}, \code{model\_finetune}, \code{model\_test}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \paragraph{\code{code/TFC/main.py: the \code{subset} setting, call to \code{data\_generator}, pretrained-checkpoint loading}}
-\TODOfill
+\begin{enumerate}[label=(\roman*)]
+\item
+\item 
+    \textbf{Input:} \\
+    \textbf{Output:}
+\item 
+\item 
+\end{enumerate}
 
 \subsubsection{Following one TF-C batch through the pipeline}
 \TODOfill
