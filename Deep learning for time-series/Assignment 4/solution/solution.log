@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.20)  17 SEP 2026 16:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.20)  18 SEP 2026 16:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -639,13 +639,13 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 LaTeX Font Info:    Trying to load font information for U+msb on input line 31.
  (c:/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) (./solution.tdo [1
-
-{c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
+) (./solution.tdo)
 \tf@tdo=\write5
 \openout5 = `solution.tdo'.
 
- (./solution.toc [2])
+ [1
+
+{c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./solution.toc [2])
 \tf@toc=\write6
 \openout6 = `solution.toc'.
 
@@ -653,38 +653,52 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 92.
  [5] [6] [7] [8]
-Package hyperref Info: bookmark level for unknown todo defaults to 0 on input line 256.
- [9] [10]
-Overfull \hbox (26.03603pt too wide) in paragraph at lines 346--346
+Overfull \hbox (84.38797pt too wide) in paragraph at lines 258--259
+\OT1/cmr/m/n/10.95 rithm 1: \OT1/cmtt/m/n/10.95 temporal[]contrastive[]loss\OT1/cmr/m/n/10.95 , \OT1/cmtt/m/n/10.95 instance[]contrastive[]loss\OT1/cmr/m/n/10.95 , and \OT1/cmtt/m/n/10.95 hierarchical[]contastive[]loss
+ []
+
+[9] [10]
+Overfull \hbox (63.23978pt too wide) in paragraph at lines 316--318
+\OT1/cmr/m/n/10.95 trans-forms, and their aug-ment-ments are passed through the en-coders, and \OT1/cmtt/m/n/10.95 target[]classifier.forward
+ []
+
+
+Overfull \hbox (26.03603pt too wide) in paragraph at lines 345--345
  []\OT1/cmtt/m/n/10.95 code/TFC/main.py: the subset setting, call to data[]generator, pretrained-checkpoint
  []
 
-[11] [12] [13] [14]
-Overfull \hbox (1.47412pt too wide) in paragraph at lines 590--604
+[11]
+Package hyperref Info: bookmark level for unknown todo defaults to 0 on input line 355.
+ [12] [13] [14]
+Overfull \hbox (1.47412pt too wide) in paragraph at lines 589--603
  [][] 
  []
 
-[15] [16] [17] (./solution.aux)
+[15] [16] [17] [18] (./solution.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-06>
  ***********
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `solution.out' has not changed.
 (rerunfilecheck)             Checksum: A9B912955E73782334B0E8F74EC50C90;10821.
  ) 
 Here is how much of TeX's memory you used:
- 26092 strings out of 467538
- 526894 string characters out of 5423724
- 927643 words of memory out of 5000000
- 54377 multiletter control sequences out of 15000+600000
+ 26078 strings out of 467538
+ 526631 string characters out of 5423724
+ 927404 words of memory out of 5000000
+ 54367 multiletter control sequences out of 15000+600000
  638888 words of font info for 84 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  99i,10n,108p,733b,1282s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on solution.pdf (17 pages, 216446 bytes).
+Output written on solution.pdf (18 pages, 219172 bytes).
 PDF statistics:
- 655 PDF objects out of 1000 (max. 8388607)
- 603 compressed objects within 7 object streams
- 241 named destinations out of 1000 (max. 500000)
+ 647 PDF objects out of 1000 (max. 8388607)
+ 595 compressed objects within 6 object streams
+ 237 named destinations out of 1000 (max. 500000)
  373 words of extra memory for PDF output out of 10000 (max. 10000000)
 

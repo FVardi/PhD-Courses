@@ -246,80 +246,79 @@ provided.
 \item Not mentioned in article.
 \item 
     \textbf{Input:} \texttt{B}, \texttt{T}, \texttt{n}, and \texttt{l}; batch size, time length, number of masked sequences, and length of masked sequences as a fraction of full length, respectively.\\
-    \textbf{Output:} A boolean tensor with shape \texttt{(B, T)} with values \texttt{False} and \texttt{True} indicating masking or not, respectively.
+    \textbf{Output:} A boolean tensor with shape \texttt{(B, T)} with values \texttt{False} and \texttt{True} indicating masking or not, respectively. The \texttt{while} loop in \texttt{hierarchical\_contrastive\_loss} matches the loop in Algorithm 1.
 \item \texttt{TSEncoder.forward()}
-\item Creates continuous runs of masking. They may ovelap.
+\item Creates continuous runs of masking. They may overlap.
 \end{enumerate}
 
 \paragraph{Required specifics}
 \begin{itemize}
-    \item Overlapping crops in \code{TS2Vec.fit}: \TODOfill
-    \item Where timestamp masking is applied: \TODOfill
-    \item Mapping of the two elementary losses and hierarchical pooling to Equations 1--3 and Algorithm 1: \TODOfill
-    \item The \code{TS2Vec.encode} option returning one vector per complete series: \TODOfill
+    \item Overlapping crops in \code{TS2Vec.fit}: They are created by in sequence determining the length of the overlap of the crops, the start and end of the overlap, the extension of crops 1 to the left, and finally the extension of crop 2 to the right.
+    \item Where timestamp masking is applied: In TSEncoder.forward(). This is only applied during training.
+    \item Mapping of the two elementary losses and hierarchical pooling to Equations 1--3 and Algorithm 1: \texttt{temporal\_contrastive\_loss}, \texttt{instance\_contrastive\_loss}, and \texttt{hierarchical\_contastive\_loss} match Equations (1)--(3), respectively.
+    \item The \code{TS2Vec.encode} option returning one vector per complete series: Set the argument \texttt{encoding\_window="full\_series"}. This causes a max pool of the features over all time stamps after encoding.
 \end{itemize}
 
 \subsubsection{TF-C}
 
 \paragraph{\code{code/TFC/dataloader.py: Load\_Dataset.\_\_init\_\_}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Sections 4.1 and 4.2 on data augmentation in time and frequency domains.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} A dataset with time series and labels, a config, training mode, max size of a debugging dataset, and whether to debug (use a smaller dataset). \\
+    \textbf{Output:} No output. Saves two version of the time series: the augmented version and the Fourier transformed and then agumented.
+\item Three times in \texttt{data\_generator}; once for each of training, fine-tuning, and testing.
+\item Performs the steps of loading and augmenting data before it is passed through the first set of encoders.
 \end{enumerate}
-\TODOfill
 
 \paragraph{\code{code/TFC/dataloader.py: Load\_Dataset.\_\_getitem\_\_}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Has no direct counterpart in the article. It just serves to pop out a single time series, its augmentations, and transforms.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Index of the requested time series.\\
+    \textbf{Output:} The requested time series, its augmentation in time, the Fourier transform, its augmentation in frequency, and the labels. if run at fine tuning or test time, the augmentations are the same as the original representations.
+\item \texttt{model\_pretrain}, \texttt{mode\_finetune}, and \texttt{mode\_test}.
+\item Is a wrapper for providing the augmented and transformed views and labels during training, fine tuning, and test.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/dataloader.py: data\_generator}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item No direct counterpart. Paragraph 4 of Section 1 explains the concept of pre-training, fine-tuning, and then testing. This split is done by this generator. 
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Path to the source data, path to the target (fine tuning and test dataset), configs, training mode (pre-train, fine tuning, or test), and whether to run in debugging mode.\\
+    \textbf{Output:} Loaders for the three different cases and datasets: training, fine tuning, and testing.
+\item \texttt{main.py}
+\item Helps loading the correct datasets with the corresponding augmentations for pre-training, fine tuning, and testing.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/dataloader.py: the \code{fft.fft(...).abs()} operation}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Section 4.2, paragraph 1, where the frequency representation is described as the Fourier transformation of the time series.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} The whole dataset of time series. \\
+    \textbf{Output:} The absolute values of the Fourier transform of the time series.
+\item It is saved in the class instance as the spectral representation of the time series. During training, it is called in \texttt{TFC.forward()}.
+\item Is responsible for the spectral representation which the authors deem valuable for time series representation.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/augmentations.py: DataTransform\_TD}, \code{DataTransform\_FD}, \code{remove\_frequency}, \code{add\_frequency}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Sectio 4.2, paragraph 2 on augmentations of the Fourier transform of the time series.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Fourier transform of a single time series. \\
+    \textbf{Output:} An augmented Fourier transform where frequencies are added and removed at random.
+\item \texttt{Load\_Dataset.\_\_init\_\_()} when augmenting the Fourier transformed time series.
+\item Performs augmentations of the absolute Fourier transform of the raw time series in order to provide positive pairs in the spectral representations. The code is wrongly implemented and does not actually remove frequencies but rather in practice amplifies others.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/model.py: TFC.\_\_init\_\_}, \code{TFC.forward}, \code{target\_classifier.forward}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Calls and structures the overall architecture and data flow in the model. \texttt{init} defines the four encoders, \texttt{forward} defines the four representations when the time series, the Fourier transforms, and their augmentments are passed through the encoders, and \texttt{target\_classifier.forward} is simply a small, fully connected neural network which is training during fine tuning and used for classification during testing.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Training data and its Fourier transform.\\
+    \textbf{Output:} The four representations encoded by the various combinations of the encoders.
+\item \texttt{main.py}
+\item This structures all of the defined architectures into the whole model and defines the flow of data through the various networks and classifiers.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/loss.py: NTXentLoss\_poly.forward}}
