@@ -323,42 +323,52 @@ provided.
 
 \paragraph{\code{code/TFC/loss.py: NTXentLoss\_poly.forward}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Equations (1), (2), and (3).
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Representations $Z$ and $\tilde{Z}$.\\
+    \textbf{Output:} Total loss from postive and negative samples in the two representations.
+\item It is called in \texttt{trainer.py: model\_pretrain} and \texttt{model\_finetune} for use during training and fine tuning.
+\item Implements the well known NT-Xent loss between the various positive and negative samples in the model.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/trainer.py: Trainer}, \code{model\_pretrain}, \code{model\_finetune}, \code{model\_test}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item Sections 5.1 and 5.2 on results from pre-training and fine-tuning.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Model, optimizer, classifier, classifier optimizer, dataloaders, and configuration files.\\
+    \textbf{Output:} No returns. Prints logging during training or fine tuning and saves models and results.
+\item \code{main.py}
+\item \code{Trainer} splits the model in pre-training and fine-tuning and runs the overall logic for pre-training and fine-tuning and saves the models, \code{mode\_pretrain} runs the pre training pipeline and returns the loss, and \code{model\_finetune} does the same for the test datasets and reports statistics on the results.
 \end{enumerate}
 
 \paragraph{\code{code/TFC/main.py: the \code{subset} setting, call to \code{data\_generator}, pretrained-checkpoint loading}}
 \begin{enumerate}[label=(\roman*)]
-\item
+\item No directly corresponding parts of the article.
 \item 
-    \textbf{Input:} \\
-    \textbf{Output:}
-\item 
-\item 
+    \textbf{Input:} Not a function, so no inputs. However, needs configuration files and datasets.\\
+    \textbf{Output:} No outputs but logs progress during pre-training of fine-tuning. The models which are trained are saved to the local machine during this function.
+\item No immediate caller.
+\item Top level file for entry for both pre-training and fine-tuning.
 \end{enumerate}
 
 \subsubsection{Following one TF-C batch through the pipeline}
-\TODOfill
+\begin{enumerate}
+\item Data is loaded by \code{Load\_Dataset} where the FFT and augmentations are created.
+\item \code{data\_generator} calls the loader and creates training datasets.
+\item The loop in \code{model\_pretrain} loads a batch.
+\item The batch is passed through the encoders.
+\item Loss is calculated from the representations of the batch.
+\item The loss is used for backpropagation.
+\end{enumerate}
 
 \paragraph{FFT dimension, spectrum conversion, \code{fft} vs.\ \code{rfft}}
-\TODOfill
+
 
 \paragraph{Active time-domain augmentation; the two frequency operations and how they are combined}
-\TODOfill
+\begin{itemize}
+\item \textbf{Time domain:} the paper mentions a bank of multiple different of which a radnom should be chosen. In practice only jitter is used.
+\item \textbf{Frequency domain: }
+\end{itemize}
 
 \paragraph{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \code{TFC.forward} in terms of $h$ and $z$}
 \TODOfill
