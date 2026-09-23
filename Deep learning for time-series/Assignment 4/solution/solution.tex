@@ -362,16 +362,22 @@ provided.
 \end{enumerate}
 
 \paragraph{FFT dimension, spectrum conversion, \code{fft} vs.\ \code{rfft}}
-
+\begin{itemize}
+\item \textbf{FFT dimension:} over the time dimension, two sided to keep matching length with the time domain part.
+\item \textbf{Spectrum conversion:} absolute value/magnitude is used.
+\item \code{fft} or \code{rfft}: \code{fft} is used. This keeps the same length as the original time series.
+\end{itemize}
 
 \paragraph{Active time-domain augmentation; the two frequency operations and how they are combined}
 \begin{itemize}
 \item \textbf{Time domain:} the paper mentions a bank of multiple different of which a radnom should be chosen. In practice only jitter is used.
-\item \textbf{Frequency domain: }
+\item \textbf{Frequency domain:} Frequencies (bins) are added and removed at random. The two augmentation are added which results in the removed frequencies not actually being removed, more halved.
 \end{itemize}
 
 \paragraph{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \code{TFC.forward} in terms of $h$ and $z$}
-\TODOfill
+\begin{itemize}
+\item \textbf{Time encoder:} length of the time series, dimension of 
+\end{itemize}
 
 \paragraph{Loss terms in \code{model\_pretrain} vs.\ Equations 1--4}
 \TODOfill
