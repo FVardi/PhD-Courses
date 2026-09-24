@@ -376,11 +376,22 @@ provided.
 
 \paragraph{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \code{TFC.forward} in terms of $h$ and $z$}
 \begin{itemize}
-\item \textbf{Time encoder:} length of the time series, dimension of 
+\item \textbf{Time and frequency encoders (same parameters):} length of the time series, dimension of the intermediate layer in the transformer, and number of heads of the attention mechanism.
+\item \textbf{Projectors (same parameters):} Dimension of the first linear layer, dimension of batch normalisation, and dimensions of last linear layer.
+\item \textbf{Relation of outputs to paper notation:}
+\begin{itemize}
+\item \code{h\_time} corresponds to $\mathbf{h}^T$ which is the encoding of the time series by the time encoder, utilizing transformer architecture.
+\item \code{z\_time} corresponds to $\mathbf{z}^T$ which is the projection of $\mathbf{h}^T$ by the time projector, utilizing linear layers and ReLU.
+\item \code{h\_freq} corresponds to $\mathbf{h}^F$ which is the encoding of the Fourier transofmr of the time series by the frequency encoder, utilizing transformer architecture.
+\item \code{z\_freq} corresponds to $\mathbf{z}^F$ which is the projection of $\mathbf{h}^F$ by the frequency projector, utilizing linear layers and ReLU.
+\end{itemize}
 \end{itemize}
 
 \paragraph{Loss terms in \code{model\_pretrain} vs.\ Equations 1--4}
-\TODOfill
+\begin{itemize}
+\item \code{loss_t = nt_xent_criterion(h_t, h_t_aug)} is the within-time loss.
+\item \code{loss_f = nt_xent_criterion(h_f, h_f_aug)} is the within-frequency loss.
+\end{itemize}
 
 \paragraph{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}
 \TODOfill
