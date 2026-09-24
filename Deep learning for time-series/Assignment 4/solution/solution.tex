@@ -76,7 +76,7 @@ This encourages that the time domain is robust to augmentation, the frequency do
 \end{itemize}
 \item Objective: Combined loss in time-, frequency-, and time-frequency domain.
 \item Fixed length problem: The training datasets all contain series of same length. When using the model on a tuning dataset and testing, the series are left zero padded. 
-\item Classification: the full architecture of $z_i^T=R_T(G_T(x_i^T))$ and $z_i^F=R_F(G_F(_i^F))$ is used and concatenated into $[z_i^T, z_i^F]$ and this is passed through a 2-layer fully ocnnected network which projects into the number of classes needed. This classifier is jointly trained with the full pipeline on the target dataset as fine tuning.
+\item Classification: the full architecture of $z_i^T=R_T(G_T(x_i^T))$ and $z_i^F=R_F(G_F(x_i^F))$ is used and concatenated into $[z_i^T, z_i^F]$ and this is passed through a 2-layer fully ocnnected network which projects into the number of classes needed. This classifier is jointly trained with the full pipeline on the target dataset as fine tuning.
 \end{itemize}
 
 
@@ -389,21 +389,33 @@ provided.
 
 \paragraph{Loss terms in \code{model\_pretrain} vs.\ Equations 1--4}
 \begin{itemize}
-\item \code{loss_t = nt_xent_criterion(h_t, h_t_aug)} is the within-time loss.
-\item \code{loss_f = nt_xent_criterion(h_f, h_f_aug)} is the within-frequency loss.
+\item \code{loss\_t = nt\_xent\_criterion(h\_t, h\_t\_aug)} is the within-time loss from Equation (1).
+\item \code{loss\_f = nt\_xent\_criterion(h\_f, h\_f\_aug)} is the within-frequency loss from Equation (2).
+\item \code{l\_TF = nt\_xent\_criterion(z\_t, z\_f)} is the loss between the projection from the frequency- and time-encoders, noted as $S_i^{TF}$ in Equation (3)
+\item \code{l\_1, l\_2}, and \code{l\_3} are the negative time-frequency consistency losses, noted as $S_i^{pair}$ in Equation (3).
+\item \code{loss = lam*(loss\_t + loss\_f) + l\_TF} is the total loss, which should correspond to Equation (4), but \code{l\_1, l\_2}, and \code{l\_3} are missing.
 \end{itemize}
 
 \paragraph{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}
-\TODOfill
+\begin{itemize}
+\item During fine tuning the repesentations $z_T$ and $z_F$ are concatenated and used as features for the classifier. The encoder is fine-tuned, and the classifier is trained.
+\item During testing the repesentations $z_T$ and $z_F$ are concatenated and used as features for the classifier. Both the encoder and classifier are frozen.
+\end{itemize}
 
 \paragraph{\code{main.py} $\rightarrow$ \code{data\_generator} $\rightarrow$ \code{Trainer} for FD-A $\rightarrow$ FD-B}
 Number of source and target-training samples actually used, whether \code{FD\_B/val.pt} is loaded,
 how often the test loader is evaluated, and whether test results influence the reported best result.
 Discrepancies from the paper's stated protocol are recorded, not repaired.
-\TODOfill
+\begin{itemize}
+\item I cannot check the number of samples without loading the files.
+\item \code{FD\_B/val.pt} is never loaded, only \code{train.py} and \code{test.pt} are loaded.
+\item The test loader is evaluated once per fine tuning epoch.
+\item The test influences the best results reported, since the results reported are those which resulted in the best test.
+\item \todo{How does the code deviate from the reported protocol in the paper?}
+\end{itemize}
 
 \paragraph{Device-specific tensor construction in \code{remove\_frequency} and \code{add\_frequency}}
-\TODOfill
+\code{torch.cude.FloatTensor} generates a tensor on the GPU. If no GPU is on the machine on which the code is run, the script will crash.
 
 %======================================================================
 \section{Part B: Raw-signal baselines}
