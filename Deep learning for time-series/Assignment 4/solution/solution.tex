@@ -411,7 +411,17 @@ Discrepancies from the paper's stated protocol are recorded, not repaired.
 \item \code{FD\_B/val.pt} is never loaded, only \code{train.py} and \code{test.pt} are loaded.
 \item The test loader is evaluated once per fine tuning epoch.
 \item The test influences the best results reported, since the results reported are those which resulted in the best test.
-\item \todo{How does the code deviate from the reported protocol in the paper?}
+\begin{itemize}
+\item Consistency loss is excluded from total loss. This is the paper's central claim missing.
+\item The weight $\lambda$ of losses varies from training to tuning.
+\item They use poly loss instead of pure NT-Xent.
+\item Frequency augmentations are summed instead of randomly selected.
+\item The paper says that only one frequency bin is augmented, the code aguments 10\%.
+\item Only jittering augmentation is used in the time domain. There is no augmentation bank.
+\item Pertubations of the Fourier transform are not mirrored and the spectrum is therefore not obtainable from a real signal.
+\item The first set of encoders are specified as 3-layer 1-D ResNets in the paper, while they are 2-layer transformers in the code.
+\item All datasets are reduced to one channel and length 178.
+\end{itemize}
 \end{itemize}
 
 \paragraph{Device-specific tensor construction in \code{remove\_frequency} and \code{add\_frequency}}

@@ -39,29 +39,29 @@
 \contentsline {paragraph}{Loss terms in \texttt {model\_pretrain} vs.\ Equations 1--4}{13}{section*.31}%
 \contentsline {paragraph}{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}{13}{section*.32}%
 \contentsline {paragraph}{\texttt {main.py} $\rightarrow $ \texttt {data\_generator} $\rightarrow $ \texttt {Trainer} for FD-A $\rightarrow $ FD-B}{13}{section*.33}%
-\contentsline {paragraph}{Device-specific tensor construction in \texttt {remove\_frequency} and \texttt {add\_frequency}}{13}{section*.35}%
+\contentsline {paragraph}{Device-specific tensor construction in \texttt {remove\_frequency} and \texttt {add\_frequency}}{14}{section*.34}%
 \contentsline {section}{\numberline {2}Part B: Raw-signal baselines}{14}{section.2}%
 \contentsline {subsection}{\numberline {2.1}Protocol}{14}{subsection.2.1}%
 \contentsline {subsection}{\numberline {2.2}Results}{14}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}Comments}{14}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Part C: Pretrain and evaluate T-Loss and TS2Vec}{14}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Protocol}{14}{subsection.3.1}%
-\contentsline {paragraph}{Principal representation test}{14}{section*.39}%
-\contentsline {subsection}{\numberline {3.2}Results}{14}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Comparison with the raw-signal baselines}{14}{subsection.3.3}%
+\contentsline {section}{\numberline {3}Part C: Pretrain and evaluate T-Loss and TS2Vec}{15}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Protocol}{15}{subsection.3.1}%
+\contentsline {paragraph}{Principal representation test}{15}{section*.38}%
+\contentsline {subsection}{\numberline {3.2}Results}{15}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Comparison with the raw-signal baselines}{15}{subsection.3.3}%
 \contentsline {subsection}{\numberline {3.4}Training time and representation dimensionality}{16}{subsection.3.4}%
 \contentsline {section}{\numberline {4}Part D: Robustness to contiguous sensor dropout}{16}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Corruption design}{16}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Results (100\%-label models)}{16}{subsection.4.2}%
 \contentsline {subsection}{\numberline {4.3}Discussion}{16}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Part E: Focused TS2Vec continuous masking ablation}{17}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Setup}{17}{subsection.5.1}%
+\contentsline {section}{\numberline {5}Part E: Focused TS2Vec continuous masking ablation}{16}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Setup}{16}{subsection.5.1}%
 \contentsline {subsection}{\numberline {5.2}Results}{17}{subsection.5.2}%
 \contentsline {subsection}{\numberline {5.3}Interpretation}{17}{subsection.5.3}%
 \contentsline {section}{\numberline {6}Part F: TF-C for industrial bearing fault classification (FD-A $\rightarrow $ FD-B)}{17}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Execution record}{17}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Classification result}{17}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}What was transferred, where labels entered, and encoder status}{17}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.3}What was transferred, where labels entered, and encoder status}{18}{subsection.6.3}%
 \contentsline {subsection}{\numberline {6.4}Material differences between the paper's protocol and the supplied execution path}{18}{subsection.6.4}%
 \contentsline {section}{\numberline {7}Part G: Synthesis}{18}{section.7}%
 \contentsline {subsection}{\numberline {7.1}When SSL provides a useful representation and when raw nonlinear classification remains competitive}{18}{subsection.7.1}%
