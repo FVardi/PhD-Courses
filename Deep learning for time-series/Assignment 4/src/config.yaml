@@ -1,0 +1,90 @@
+# Assignment 4 — Self-Supervised Representation Learning for Time Series
+# Single source of truth for paths, seeds, regimes and protocol constants.
+# Values marked TODO are deliberate decisions still to be confirmed.
+
+# --- External official checkouts (kept outside this repo, referenced by path) ---
+# Verified commits required by the assignment. Do not modify these working trees;
+# all compatibility/integration code lives under src/methods/.
+checkouts:
+  root: "C:/Users/Bruger/Documents/Repos/Time series research"
+  tloss:
+    path: "${checkouts.root}/T-Loss"
+    commit: "4aff592"
+  ts2vec:
+    path: "${checkouts.root}/ts2vec"
+    commit: "b0088e1"
+  tfc:
+    path: "${checkouts.root}/TFC-pretraining"
+    commit: "9667582"
+
+# --- Data ---
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  results: "results"
+
+# TF-C consumes FD-A / FD-B from inside its own checkout (datasets/FD-A, datasets/FD-B).
+tfc_data:
+  fd_a: "${checkouts.tfc.path}/datasets/FD-A"
+  fd_b: "${checkouts.tfc.path}/datasets/FD-B"
+
+# --- Datasets for Parts B-E (official train/test partitions, UCR/UEA) ---
+datasets:
+  required: [FordA, ArticularyWordRecognition, Epilepsy]
+  optional: [FordB]          # Part 7 noisy-condition extension
+  meta:
+    FordA:                       {n_train: 3601, n_test: 1320, length: 500, channels: 1, classes: 2}
+    ArticularyWordRecognition:   {n_train: 275,  n_test: 300,  length: 144, channels: 9, classes: 25}
+    Epilepsy:                    {n_train: 137,  n_test: 138,  length: 206, channels: 3, classes: 4}
+    FordB:                       {n_train: 3636, n_test: 810,  length: 500, channels: 1, classes: 2}
+
+# --- Protocol ---
+# Three fixed seeds. The 10% subset a seed generates is reused by EVERY method.
+seeds: [42, 123, 456]
+
+label_regimes: [1.0, 0.1]
+label_subset:
+  stratified: true
+  save_indices: true            # results/label_subsets/{dataset}_seed{seed}.json
+
+# Normalisation/imputation/feature transforms are fit on training data only.
+preprocessing:
+  scaler: standard              # TODO confirm: per-channel, fit on train split only
+  fit_on: train
+
+# --- Downstream probes (Parts B-E) ---
+# Report logistic regression and RBF-SVM separately. The RBF-SVM is NOT a linear probe.
+probes:
+  principal: logistic_regression   # the principal representation test
+  tuning:
+    method: cv                     # training-only CV; never tune on test
+    folds: 5
+  logistic_regression:
+    C: [0.01, 0.1, 1, 10, 100]     # TODO confirm grid
+  rbf_svm:
+    C: [0.1, 1, 10, 100]           # TODO confirm grid
+    gamma: [scale, 0.001, 0.01, 0.1]
+
+metrics: [accuracy, macro_f1]      # retain both even when they disagree
+
+# --- Part D: contiguous sensor dropout ---
+# Fixed BEFORE examining any result, applied identically to all methods.
+corruption:
+  proportion: 0.2                # TODO confirm
+  n_intervals: 1                 # TODO confirm: one contiguous interval per series
+  replacement: train_channel_mean # TODO confirm convention (zero / train mean / ffill)
+  applies_to: test_only
+  seeded_by: dataset_seed
+
+# --- Part E: TS2Vec masking ablation (FordA) ---
+ablation:
+  dataset: FordA
+  masks: [binomial, continuous]  # binomial = TS2Vec default
+  evaluate_on: [clean, corrupted]
+
+# --- Part F: TF-C FD-A -> FD-B exploratory reproduction ---
+tfc_run:
+  pretrain_dataset: FD-A
+  target_dataset: FD-B
+  seed: 42                       # one fully documented seed required
+  record: [commands, environment, hardware, data_consumed, training_time, metrics]

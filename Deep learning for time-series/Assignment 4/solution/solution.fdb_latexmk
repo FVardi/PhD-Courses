@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1790280377.63027 "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution/solution.tex" "solution.pdf" "solution" 1790280379.16327 0
-  "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution/solution.tex" 1790280375 42657 56e5e883026bba66c9212384509412c3 ""
+["pdflatex"] 1790531965.28456 "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution/solution.tex" "solution.pdf" "solution" 1790531966.86278 0
+  "c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution/solution.tex" 1790531957 43402 aa2d206eb5ba957b239648ba20c8f35a ""
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1764817323 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1764818414 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1764817923 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -177,11 +177,11 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1764790676 5587484 30eee748fa419a911c40b0c750dd21ba ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1764790790 3635704 cfe86ccc3f51b2e248635b855298a7b7 ""
   "c:/texlive/2025/texmf.cnf" 1764790650 713 e69b156964470283e0530f5060668171 ""
-  "solution.aux" 1790280379 20075 9fcdbdff015e0727fda9031dc4f62343 "pdflatex"
-  "solution.out" 1790280379 10821 a9b912955e73782334b0e8f74ec50c90 "pdflatex"
-  "solution.tdo" 1790280379 3290 677eb6297f59b38016c16ec53906e5b5 "pdflatex"
-  "solution.tex" 1790280375 42657 56e5e883026bba66c9212384509412c3 ""
-  "solution.toc" 1790280379 8281 be64f88b641ec1f13c1764c1b9e4be2e "pdflatex"
+  "solution.aux" 1790531966 19746 89110dfa34fbfae6dd9492156b92ea65 "pdflatex"
+  "solution.out" 1790531966 10821 a9b912955e73782334b0e8f74ec50c90 "pdflatex"
+  "solution.tdo" 1790531966 3131 03554b3657aa00598b346a761816e401 "pdflatex"
+  "solution.tex" 1790531957 43402 aa2d206eb5ba957b239648ba20c8f35a ""
+  "solution.toc" 1790531966 8281 6f4b9082f70274ef572cfeb1b2e1c3af "pdflatex"
   (generated)
   "solution.aux"
   "solution.log"
