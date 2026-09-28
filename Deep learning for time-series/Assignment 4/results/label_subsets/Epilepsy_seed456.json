@@ -1,0 +1,28 @@
+{
+  "dataset": "Epilepsy",
+  "seed": 456,
+  "fraction": 0.1,
+  "n_selected": 13,
+  "n_available": 137,
+  "per_class_counts": {
+    "0": 3,
+    "1": 4,
+    "2": 3,
+    "3": 3
+  },
+  "indices": [
+    3,
+    9,
+    21,
+    34,
+    43,
+    52,
+    57,
+    73,
+    89,
+    98,
+    119,
+    123,
+    128
+  ]
+}

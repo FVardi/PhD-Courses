@@ -1,0 +1,25 @@
+# --- Data: never committed, fetched via dev/0_fetch_data.py ---
+data/raw/**
+data/processed/**
+!data/raw/**/.gitkeep
+!data/processed/.gitkeep
+
+# --- Large run artifacts ---
+results/checkpoints/**
+results/representations/**
+!results/checkpoints/.gitkeep
+!results/representations/.gitkeep
+
+# TF-C stage logs/checkpoints are large; the execution record itself is kept (see below)
+results/tfc/**
+!results/tfc/.gitkeep
+!results/tfc/*.md
+!results/tfc/*.json
+
+# --- Re-include machine-readable outputs ---
+# The repository root .gitignore ignores *.csv globally, but the submission
+# requires machine-readable per-seed results, configs and label-subset indices.
+!results/metrics/**/*.csv
+!results/tables/**/*.csv
+!results/label_subsets/**/*.csv
+!results/runs/**/*.csv
