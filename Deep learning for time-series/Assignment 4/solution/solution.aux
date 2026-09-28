@@ -1,2 +1,165 @@
 \relax 
-\gdef \@abspage@last{1}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Part A: Understand the methods and connect paper to code}{2}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}The three learning ideas}{2}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.1}T-Loss (Franceschi et al., NeurIPS 2019)}{2}{subsubsection.1.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.2}TS2Vec (Yue et al., AAAI 2022)}{2}{subsubsection.1.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.1.3}TF-C (Zhang et al., NeurIPS 2022)}{3}{subsubsection.1.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Paper-to-code map}{3}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.1}T-Loss}{3}{subsubsection.1.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {losses/triplet\_loss.py: TripletLoss.forward}}{3}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {networks/causal\_cnn.py: CausalConvolutionBlock.forward}}{4}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {networks/causal\_cnn.py: CausalCNNEncoder.forward}}{4}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {scikit\_wrappers.py: TimeSeriesEncoderClassifier.fit\_encoder}}{4}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {scikit\_wrappers.py: TimeSeriesEncoderClassifier.encode}}{4}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Required specifics}{5}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.2}TS2Vec}{5}{subsubsection.1.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {ts2vec.py: TS2Vec.fit}}{5}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {ts2vec.py: TS2Vec.\_eval\_with\_pooling}}{5}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {ts2vec.py: TS2Vec.encode}}{6}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {models/losses.py: hierarchical\_contrastive\_loss}}{6}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {models/losses.py: instance\_contrastive\_loss}}{6}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {models/losses.py: temporal\_contrastive\_loss}}{6}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {models/encoder.py: TSEncoder.forward}}{7}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {models/encoder.py: generate\_binomial\_mask}}{7}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {models/encoder.py: generate\_continuous\_mask}}{7}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Required specifics}{7}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.3}TF-C}{8}{subsubsection.1.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/dataloader.py: Load\_Dataset.\_\_init\_\_}}{8}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/dataloader.py: Load\_Dataset.\_\_getitem\_\_}}{8}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/dataloader.py: data\_generator}}{8}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/dataloader.py: the \texttt  {fft.fft(...).abs()} operation}}{8}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/augmentations.py: DataTransform\_TD}, \texttt  {DataTransform\_FD}, \texttt  {remove\_frequency}, \texttt  {add\_frequency}}{9}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/model.py: TFC.\_\_init\_\_}, \texttt  {TFC.forward}, \texttt  {target\_classifier.forward}}{9}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/loss.py: NTXentLoss\_poly.forward}}{9}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/trainer.py: Trainer}, \texttt  {model\_pretrain}, \texttt  {model\_finetune}, \texttt  {model\_test}}{9}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {code/TFC/main.py: the \texttt  {subset} setting, call to \texttt  {data\_generator}, pretrained-checkpoint loading}}{10}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {1.2.4}Following one TF-C batch through the pipeline}{10}{subsubsection.1.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{FFT dimension, spectrum conversion, \texttt  {fft} vs.\ \texttt  {rfft}}{10}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Active time-domain augmentation; the two frequency operations and how they are combined}{10}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Attributes defining the time encoder, frequency encoder and the two projectors; the four outputs of \texttt  {TFC.forward} in terms of $h$ and $z$}{10}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Loss terms in \texttt  {model\_pretrain} vs.\ Equations 1--4}{11}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Tensors concatenated for the downstream classifier; is the encoder frozen or fine-tuned?}{11}{section*.32}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{11}{section*.33}\protected@file@percent }
+\pgfsyspdfmark {pgfid1}{19562754}{35013031}
+\@writefile{toc}{\contentsline {paragraph}{\texttt  {main.py} $\rightarrow $ \texttt  {data\_generator} $\rightarrow $ \texttt  {Trainer} for FD-A $\rightarrow $ FD-B}{11}{section*.34}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{11}{section*.35}\protected@file@percent }
+\pgfsyspdfmark {pgfid2}{19562754}{29241003}
+\@writefile{toc}{\contentsline {paragraph}{Device-specific tensor construction in \texttt  {remove\_frequency} and \texttt  {add\_frequency}}{11}{section*.36}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{11}{section*.37}\protected@file@percent }
+\pgfsyspdfmark {pgfid3}{19562754}{26122912}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Part B: Raw-signal baselines}{11}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Protocol}{11}{subsection.2.1}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{11}{section*.38}\protected@file@percent }
+\pgfsyspdfmark {pgfid4}{19562754}{17002386}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Results}{11}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Comments}{11}{subsection.2.3}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{11}{section*.39}\protected@file@percent }
+\pgfsyspdfmark {pgfid5}{19562754}{12173125}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Part C: Pretrain and evaluate T-Loss and TS2Vec}{11}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Protocol}{11}{subsection.3.1}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{11}{section*.40}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Raw-signal baselines. Test accuracy and macro-F1 as mean $\pm $ standard deviation over three paired seeds.}}{12}{table.1}\protected@file@percent }
+\newlabel{tab:baselines}{{1}{12}{Raw-signal baselines. Test accuracy and macro-F1 as mean $\pm $ standard deviation over three paired seeds}{table.1}{}}
+\pgfsyspdfmark {pgfid6}{19562754}{34902008}
+\@writefile{toc}{\contentsline {paragraph}{Principal representation test}{12}{section*.41}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{12}{section*.42}\protected@file@percent }
+\pgfsyspdfmark {pgfid7}{19562754}{31776006}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Results}{12}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Comparison with the raw-signal baselines}{12}{subsection.3.3}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{12}{section*.43}\protected@file@percent }
+\pgfsyspdfmark {pgfid8}{19562754}{26765985}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Training time and representation dimensionality}{12}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Part D: Robustness to contiguous sensor dropout}{12}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Corruption design}{12}{subsection.4.1}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{12}{section*.44}\protected@file@percent }
+\pgfsyspdfmark {pgfid9}{19562754}{18096474}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Results (100\%-label models)}{12}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Discussion}{12}{subsection.4.3}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{12}{section*.45}\protected@file@percent }
+\pgfsyspdfmark {pgfid10}{19562754}{11317252}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Part E: Focused TS2Vec continuous masking ablation}{12}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Setup}{12}{subsection.5.1}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{12}{section*.46}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Frozen-representation classification. Mean $\pm $ standard deviation over three paired seeds.}}{13}{table.2}\protected@file@percent }
+\newlabel{tab:ssl-clean}{{2}{13}{Frozen-representation classification. Mean $\pm $ standard deviation over three paired seeds}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Training time and representation dimensionality.}}{13}{table.3}\protected@file@percent }
+\newlabel{tab:cost}{{3}{13}{Training time and representation dimensionality}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Clean versus contiguous-dropout test performance for the 100\%-label models.}}{14}{table.4}\protected@file@percent }
+\newlabel{tab:dropout}{{4}{14}{Clean versus contiguous-dropout test performance for the 100\%-label models}{table.4}{}}
+\pgfsyspdfmark {pgfid11}{19562754}{34621053}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Results}{14}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces FordA: standard versus continuous TS2Vec masking, clean and contiguous-dropout test sets.}}{14}{table.5}\protected@file@percent }
+\newlabel{tab:masking-ablation}{{5}{14}{FordA: standard versus continuous TS2Vec masking, clean and contiguous-dropout test sets}{table.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Interpretation}{14}{subsection.5.3}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{14}{section*.47}\protected@file@percent }
+\pgfsyspdfmark {pgfid12}{19562754}{18863058}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Part F: TF-C for industrial bearing fault classification (FD-A $\rightarrow $ FD-B)}{14}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Execution record}{14}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Classification result}{14}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}What was transferred, where labels entered, and encoder status}{14}{subsection.6.3}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{14}{section*.48}\protected@file@percent }
+\pgfsyspdfmark {pgfid13}{19562754}{7555690}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces TF-C FD-A $\rightarrow $ FD-B execution record.}}{15}{table.6}\protected@file@percent }
+\newlabel{tab:tfc-record}{{6}{15}{TF-C FD-A $\rightarrow $ FD-B execution record}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces FD-B classification result, compared cautiously with Table 5 of the TF-C supplement. Exact numerical reproduction is not expected.}}{15}{table.7}\protected@file@percent }
+\newlabel{tab:tfc-result}{{7}{15}{FD-B classification result, compared cautiously with Table 5 of the TF-C supplement. Exact numerical reproduction is not expected}{table.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Material differences between the paper's protocol and the supplied execution path}{15}{subsection.6.4}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{15}{section*.49}\protected@file@percent }
+\pgfsyspdfmark {pgfid14}{19562754}{29653852}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Part G: Synthesis}{15}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}When SSL provides a useful representation and when raw nonlinear classification remains competitive}{15}{subsection.7.1}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{15}{section*.50}\protected@file@percent }
+\pgfsyspdfmark {pgfid15}{19562754}{23139759}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Whether the effect of SSL becomes clearer with only 10\% labels}{15}{subsection.7.2}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{15}{section*.51}\protected@file@percent }
+\pgfsyspdfmark {pgfid16}{19562754}{19510703}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Stability of conclusions across the paired seeds}{15}{subsection.7.3}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{15}{section*.52}\protected@file@percent }
+\pgfsyspdfmark {pgfid17}{19562754}{15881647}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Role of dataset size, dimensionality and number of classes}{15}{subsection.7.4}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{15}{section*.53}\protected@file@percent }
+\pgfsyspdfmark {pgfid18}{19562754}{12252591}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.5}Whether continuous masking improves accuracy, robustness, both or neither}{15}{subsection.7.5}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{15}{section*.54}\protected@file@percent }
+\pgfsyspdfmark {pgfid19}{19562754}{7858947}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.6}What the TF-C bearing experiment shows about transfer between operating conditions}{16}{subsection.7.6}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.55}\protected@file@percent }
+\pgfsyspdfmark {pgfid20}{19562754}{47886241}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.7}Implications for future multichannel industrial sensor data}{16}{subsection.7.7}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.56}\protected@file@percent }
+\pgfsyspdfmark {pgfid21}{19562754}{44257185}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Experimental rules: compliance notes}{16}{section.8}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.57}\protected@file@percent }
+\pgfsyspdfmark {pgfid22}{20459780}{38868738}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.58}\protected@file@percent }
+\pgfsyspdfmark {pgfid23}{20459780}{35862165}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.59}\protected@file@percent }
+\pgfsyspdfmark {pgfid24}{20459780}{32855592}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.60}\protected@file@percent }
+\pgfsyspdfmark {pgfid25}{20459780}{29849019}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.61}\protected@file@percent }
+\pgfsyspdfmark {pgfid26}{20459780}{26842446}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.62}\protected@file@percent }
+\pgfsyspdfmark {pgfid27}{20459780}{23835873}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.63}\protected@file@percent }
+\pgfsyspdfmark {pgfid28}{20459780}{20829300}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.64}\protected@file@percent }
+\pgfsyspdfmark {pgfid29}{20459780}{17822727}
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.65}\protected@file@percent }
+\pgfsyspdfmark {pgfid30}{20459780}{14816154}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Limitations and conclusions}{16}{section.9}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.66}\protected@file@percent }
+\pgfsyspdfmark {pgfid31}{19562754}{10753446}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Optional extension: TF-C on FordA}{16}{appendix.A}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{16}{section*.67}\protected@file@percent }
+\pgfsyspdfmark {pgfid32}{19562754}{6507238}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Optional extension: FordB noisy-condition experiments}{17}{appendix.B}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{17}{section*.68}\protected@file@percent }
+\pgfsyspdfmark {pgfid33}{19562754}{48525981}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Per-seed results}{17}{appendix.C}\protected@file@percent }
+\@writefile{tdo}{\contentsline {todo}{\fcolorbox {black}{orange}{\textcolor {orange}{o}}\ Fill in.}{17}{section*.69}\protected@file@percent }
+\pgfsyspdfmark {pgfid34}{19562754}{44463273}
+\gdef \@abspage@last{17}
