@@ -60,10 +60,17 @@ probes:
     method: cv                     # training-only CV; never tune on test
     folds: 5
   logistic_regression:
-    C: [0.01, 0.1, 1, 10, 100]     # TODO confirm grid
+    C: [0.01, 0.1, 1, 10, 100]
   rbf_svm:
-    C: [0.1, 1, 10, 100]           # TODO confirm grid
+    C: [0.1, 1, 10, 100]
     gamma: [scale, 0.001, 0.01, 0.1]
+  # Fixed a priori, used wherever the label budget makes stratified CV impossible
+  # (a class with a single example). Chosen before seeing any result and never
+  # re-selected, so a scarce-label cell never borrows a choice made under a larger
+  # budget. These are the sklearn defaults. Applies identically in Parts B-E.
+  untunable_defaults:
+    logistic_regression: {C: 1}
+    rbf_svm: {C: 1, gamma: scale}
 
 metrics: [accuracy, macro_f1]      # retain both even when they disagree
 

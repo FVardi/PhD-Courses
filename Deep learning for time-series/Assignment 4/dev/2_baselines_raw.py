@@ -14,8 +14,9 @@ single call becomes a frozen T-Loss or TS2Vec encoder and nothing else changes.
 
 Hyperparameters are selected by stratified CV on training data only, with the fold count
 adapted to the label budget. Where the budget leaves a class with one example the cell
-cannot be tuned at all; it inherits the parameters chosen at 100% labels, and the output
-records this per row so the write-up can state it rather than imply uniform tuning.
+cannot be tuned at all and falls back to the a priori defaults in config.yaml, fixed before
+any result was seen. The output records `tuned` per row so the write-up can state this
+rather than imply uniform tuning.
 
     python dev/2_baselines_raw.py
     python dev/2_baselines_raw.py --datasets Epilepsy --probes logistic_regression
@@ -89,7 +90,6 @@ def main() -> int:
             model = build(kind, params, anchor_seed).fit(A_train, y_train)
             result = score(y_test, model.predict(A_test))
             elapsed = time.time() - t0
-            full_params = params
             rows.append({
                 "dataset": name, "probe": kind, "label_fraction": 1.0, "seed": anchor_seed,
                 "n_train": len(y_train), "n_features": A_train.shape[1],
@@ -103,18 +103,16 @@ def main() -> int:
 
             # --- 10% labels: the three saved subsets ---
             for fraction in [f for f in cfg["label_regimes"] if f < 1.0]:
-                accs, f1s = [], []
+                accs, f1s, tuned_flags = [], [], []
                 for seed in cfg["seeds"]:
                     set_seed(seed)
                     idx = load_indices(subset_path(subsets_dir, name, seed))
                     A, b = A_train[idx], y_train[idx]
                     t0 = time.time()
+                    # Where the budget leaves a class with one example, tune() returns the
+                    # a priori defaults rather than anything selected under a larger budget.
                     params, info = tune(kind, A, b, cfg, seed)
-                    if not info["tuned"]:
-                        # Inherited from the 100% cell: one scalar chosen under a label
-                        # budget this regime does not have. Declared, not hidden.
-                        params = full_params
-                        info = {**info, "reason": info["reason"] + "; inherited 100% params"}
+                    tuned_flags.append(info["tuned"])
                     model = build(kind, params, seed).fit(A, b)
                     result = score(y_test, model.predict(A_test))
                     elapsed = time.time() - t0
@@ -129,7 +127,7 @@ def main() -> int:
                     })
                 a_mu, a_sd = mean_sd(accs)
                 f_mu, f_sd = mean_sd(f1s)
-                flag = "" if info["tuned"] else "  (params inherited from 100%)"
+                flag = "" if all(tuned_flags) else "  (untuned: a priori defaults)"
                 print(f"  {kind:<20} {fraction:.0%} x{len(cfg['seeds'])}     "
                       f"acc {a_mu:.4f}+/-{a_sd:.4f}  f1 {f_mu:.4f}+/-{f_sd:.4f}{flag}")
 
