@@ -27,9 +27,7 @@ Writes results/metrics/corruption.csv.
 
 import argparse
 import csv
-import json
 import sys
-import time
 import warnings
 from pathlib import Path
 
@@ -38,26 +36,21 @@ sys.path.insert(0, str(ROOT))
 
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
-from sklearn.preprocessing import StandardScaler  # noqa: E402
 
 from src.corruption.dropout import from_config as corrupt  # noqa: E402
 from src.dataio.scaling import apply_scaler, load_scaler  # noqa: E402
 from src.dataio.splits import load_split, processed_dir  # noqa: E402
-from src.evaluation.metrics import mean_sd, score  # noqa: E402
+from src.evaluation.metrics import mean_sd  # noqa: E402
+from src.evaluation.robustness import FIELDS as SCORE_FIELDS, clean_vs_corrupt  # noqa: E402
 from src.methods import METHODS, encode as encode_frozen, load_pretrained  # noqa: E402
-from src.probes.probes import KINDS, build, tune  # noqa: E402
+from src.probes.probes import KINDS  # noqa: E402
 from src.representations.raw import encode as flatten  # noqa: E402
 from src.utils.config import load_config, results_dir  # noqa: E402
-from src.utils.seeding import set_seed  # noqa: E402
 
 warnings.filterwarnings("ignore", message=".*weight_norm.*", category=FutureWarning)
 
 REPRESENTATIONS = ("raw", *METHODS)
-FIELDS = [
-    "representation", "dataset", "probe", "seed", "n_train", "n_features",
-    "accuracy_clean", "macro_f1_clean", "accuracy_corrupt", "macro_f1_corrupt",
-    "delta_accuracy", "delta_macro_f1", "params", "folds", "fit_seconds",
-]
+FIELDS = ["representation", "dataset", "probe", "seed", *SCORE_FIELDS]
 
 
 def feature_matrices(representation, cfg, ckpt_dir, reps_dir, dataset, seed,
@@ -131,37 +124,14 @@ def main() -> int:
                     if mats is None:
                         continue
                     A, B_clean, B_corrupt = mats
-
-                    if representation != "raw":
-                        # Same representation scaler as dev/6_, fitted on clean TRAIN.
-                        rep_scaler = StandardScaler().fit(A)
-                        A = rep_scaler.transform(A)
-                        B_clean = rep_scaler.transform(B_clean)
-                        B_corrupt = rep_scaler.transform(B_corrupt)
-
-                    set_seed(seed)
-                    t0 = time.time()
-                    params, info = tune(kind, A, y_train, cfg, seed)
-                    model = build(kind, params, seed).fit(A, y_train)
-                    clean = score(y_test, model.predict(B_clean))
-                    dirty = score(y_test, model.predict(B_corrupt))
-                    elapsed = time.time() - t0
-
-                    cleans.append(clean["accuracy"])
-                    corrupts.append(dirty["accuracy"])
-                    deltas.append(dirty["accuracy"] - clean["accuracy"])
-                    rows.append({
-                        "representation": representation, "dataset": dataset, "probe": kind,
-                        "seed": seed, "n_train": len(y_train), "n_features": A.shape[1],
-                        "accuracy_clean": clean["accuracy"],
-                        "macro_f1_clean": clean["macro_f1"],
-                        "accuracy_corrupt": dirty["accuracy"],
-                        "macro_f1_corrupt": dirty["macro_f1"],
-                        "delta_accuracy": dirty["accuracy"] - clean["accuracy"],
-                        "delta_macro_f1": dirty["macro_f1"] - clean["macro_f1"],
-                        "params": json.dumps(params), "folds": info["folds"],
-                        "fit_seconds": round(elapsed, 2),
-                    })
+                    # Same representation scaler as dev/6_, fitted on clean TRAIN.
+                    result = clean_vs_corrupt(kind, A, y_train, B_clean, B_corrupt, y_test,
+                                              cfg, seed, standardise=representation != "raw")
+                    cleans.append(result["accuracy_clean"])
+                    corrupts.append(result["accuracy_corrupt"])
+                    deltas.append(result["delta_accuracy"])
+                    rows.append({"representation": representation, "dataset": dataset,
+                                 "probe": kind, "seed": seed, **result})
                 if cleans:
                     c_mu, c_sd = mean_sd(cleans)
                     d_mu, d_sd = mean_sd(corrupts)

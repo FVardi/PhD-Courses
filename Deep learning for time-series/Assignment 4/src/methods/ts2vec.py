@@ -19,6 +19,7 @@ give a single vector per series.
 """
 
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
@@ -26,6 +27,7 @@ import numpy as np
 from src.methods._checkout import activate, other_roots
 
 ENCODING_WINDOW = "full_series"
+MASK_MODES = ("binomial", "continuous")
 
 
 def install_checkout(path: str | Path, others: list[str] | None = None) -> None:
@@ -52,17 +54,64 @@ def default_iters(X: np.ndarray) -> int:
     return 200 if to_checkout_layout(X).size <= 100_000 else 600
 
 
-def build(cfg: dict, input_dims: int, device: str = "cuda"):
+def build(cfg: dict, input_dims: int, device: str = "cuda", mask_mode: str = "binomial"):
     """Construct an untrained TS2Vec with the published defaults.
 
     Seed before calling this: the encoder's weights are initialised here.
     Only input_dims and device are set; everything else is left at the checkout's own
     defaults (output_dims=320, hidden_dims=64, depth=10, lr=0.001, batch_size=16).
+
+    mask_mode (Part E). TSEncoder accepts it, but TS2Vec.__init__ never passes it on, so
+    through the public class it is fixed at 'binomial'. It is set here after construction
+    instead of editing the checkout. Two networks must be changed: _net, the one fit()
+    trains, and net.module, the weight-averaged deep copy that encode() uses. The copy only
+    runs in eval mode, where masking is off, but leaving it at the old value would make the
+    saved object misreport how it was trained. The default leaves the model byte-identical
+    to the Part C construction.
     """
+    if mask_mode not in MASK_MODES:
+        raise ValueError(f"mask_mode must be one of {MASK_MODES}, got {mask_mode!r}")
     install_checkout(cfg["checkouts"]["ts2vec"]["path"], other_roots(cfg, "ts2vec"))
     from ts2vec import TS2Vec
 
-    return TS2Vec(input_dims=input_dims, device=device)
+    model = TS2Vec(input_dims=input_dims, device=device)
+    for net in (model._net, model.net.module):
+        # Guard against a checkout where the attribute has moved: setattr would otherwise
+        # create a dead attribute and the ablation would silently train binomial twice.
+        if not hasattr(net, "mask_mode"):
+            raise AttributeError("TSEncoder has no mask_mode; checkout differs from b0088e1")
+        net.mask_mode = mask_mode
+    return model
+
+
+@contextmanager
+def count_mask_calls(model):
+    """Count calls to the checkout's two mask generators while the block runs.
+
+    Yields a dict {'binomial': n, 'continuous': n}. TSEncoder.forward() looks the
+    generators up as module globals at call time, so replacing them in the module that
+    defines TSEncoder (found from the model itself, not by import name) is seen by every
+    forward pass. This is how Part E shows which mask was used, from the calls themselves
+    rather than from the attribute it set.
+    """
+    encoder = sys.modules[type(model._net).__module__]
+    names = {"binomial": "generate_binomial_mask", "continuous": "generate_continuous_mask"}
+    counts = dict.fromkeys(names, 0)
+    originals = {mode: getattr(encoder, name) for mode, name in names.items()}
+
+    def counted(mode):
+        def wrapper(*args, **kwargs):
+            counts[mode] += 1
+            return originals[mode](*args, **kwargs)
+        return wrapper
+
+    for mode, name in names.items():
+        setattr(encoder, name, counted(mode))
+    try:
+        yield counts
+    finally:
+        for mode, name in names.items():
+            setattr(encoder, name, originals[mode])
 
 
 def pretrain(model, X: np.ndarray, n_iters: int | None = None, verbose: bool = False):

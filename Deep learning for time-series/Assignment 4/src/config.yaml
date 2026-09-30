@@ -98,7 +98,12 @@ corruption:
 # --- Part E: TS2Vec masking ablation (FordA) ---
 ablation:
   dataset: FordA
-  masks: [binomial, continuous]  # binomial = TS2Vec default
+  masks: [binomial, continuous]  # binomial = TS2Vec default (p=0.5 per timestamp).
+                                 # continuous = checkout defaults n=5 runs, l=0.1 of the crop
+                                 # each (~41% covered, runs may overlap); neither is tuned.
+                                 # The binomial arm reuses the Part C checkpoints (same code,
+                                 # n_iters, seeds); only the continuous arm is trained.
+                                 # Both probes are reported; logistic regression is principal
   evaluate_on: [clean, corrupted]
 
 # --- Part F: TF-C FD-A -> FD-B exploratory reproduction ---
