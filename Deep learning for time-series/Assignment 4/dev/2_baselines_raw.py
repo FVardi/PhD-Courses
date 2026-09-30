@@ -82,24 +82,31 @@ def main() -> int:
         print(f"\n{name}  train {A_train.shape}  test {A_test.shape}")
 
         for kind in args.probes:
-            # --- 100% labels: one run, the training set does not depend on the seed ---
-            anchor_seed = cfg["seeds"][0]
-            set_seed(anchor_seed)
-            t0 = time.time()
-            params, info = tune(kind, A_train, y_train, cfg, anchor_seed)
-            model = build(kind, params, anchor_seed).fit(A_train, y_train)
-            result = score(y_test, model.predict(A_test))
-            elapsed = time.time() - t0
-            rows.append({
-                "dataset": name, "probe": kind, "label_fraction": 1.0, "seed": anchor_seed,
-                "n_train": len(y_train), "n_features": A_train.shape[1],
-                **result, "params": json.dumps(params), "tuned": info["tuned"],
-                "folds": info["folds"], "tuning_note": info["reason"],
-                "fit_seconds": round(elapsed, 2),
-            })
-            print(f"  {kind:<20} 100%          acc {result['accuracy']:.4f}  "
-                  f"f1 {result['macro_f1']:.4f}  {params}  "
-                  f"[{info['folds']}-fold]  {elapsed:.1f}s")
+            # 100% labels, per seed. The labelled set does not depend on the seed but the
+            # CV fold shuffle does, and that is enough to change the selected hyperparameter
+            # and hence the score. Running it once would report a standard deviation of zero
+            # that is an artefact of the procedure rather than a property of the result.
+            accs, f1s = [], []
+            for seed in cfg["seeds"]:
+                set_seed(seed)
+                t0 = time.time()
+                params, info = tune(kind, A_train, y_train, cfg, seed)
+                model = build(kind, params, seed).fit(A_train, y_train)
+                result = score(y_test, model.predict(A_test))
+                elapsed = time.time() - t0
+                accs.append(result["accuracy"])
+                f1s.append(result["macro_f1"])
+                rows.append({
+                    "dataset": name, "probe": kind, "label_fraction": 1.0, "seed": seed,
+                    "n_train": len(y_train), "n_features": A_train.shape[1],
+                    **result, "params": json.dumps(params), "tuned": info["tuned"],
+                    "folds": info["folds"], "tuning_note": info["reason"],
+                    "fit_seconds": round(elapsed, 2),
+                })
+            a_mu, a_sd = mean_sd(accs)
+            f_mu, f_sd = mean_sd(f1s)
+            print(f"  {kind:<20} 100% x{len(accs)}    acc {a_mu:.4f}+/-{a_sd:.4f}  "
+                  f"f1 {f_mu:.4f}+/-{f_sd:.4f}")
 
             # --- 10% labels: the three saved subsets ---
             for fraction in [f for f in cfg["label_regimes"] if f < 1.0]:

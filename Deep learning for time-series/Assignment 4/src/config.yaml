@@ -6,9 +6,9 @@
 # Verified commits required by the assignment. Do not modify these working trees;
 # all compatibility/integration code lives under src/methods/.
 checkouts:
-  root: "C:/Users/Bruger/Documents/Repos/Time series research"
+  root: "C:/Users/au808956/Documents/Repos/Time series repos"
   tloss:
-    path: "${checkouts.root}/T-Loss"
+    path: "${checkouts.root}/UnsupervisedScalableRepresentationLearningTimeSeries"
     commit: "4aff592"
   ts2vec:
     path: "${checkouts.root}/ts2vec"
@@ -77,11 +77,23 @@ metrics: [accuracy, macro_f1]      # retain both even when they disagree
 # --- Part D: contiguous sensor dropout ---
 # Fixed BEFORE examining any result, applied identically to all methods.
 corruption:
-  proportion: 0.2                # TODO confirm
-  n_intervals: 1                 # TODO confirm: one contiguous interval per series
-  replacement: train_channel_mean # TODO confirm convention (zero / train mean / ffill)
-  applies_to: test_only
-  seeded_by: dataset_seed
+  proportion: 0.2                 # 100 steps on FordA, 41 on Epilepsy, 29 on AWR; 80% survives
+  n_intervals: 1                  # one unbroken outage, not several short gaps: neighbouring
+                                  # samples are highly correlated, so scattered gaps are a
+                                  # much easier and different failure mode
+  interval_start: uniform         # start drawn uniformly per series from the seeded RNG; a
+                                  # fixed position risks blanking a systematically (un)informative
+                                  # region and turning that choice into the result
+  channels: all                   # every channel loses the SAME interval. Blanking one channel
+                                  # would cost AWR 2.2% of its data against FordA's 20%, so the
+                                  # per-dataset Delta columns would not be comparable
+  replacement: train_channel_mean # corruption precedes the per-channel scaler, so this lands at
+                                  # exactly 0 after scaling: blanked features contribute nothing
+                                  # to a linear probe. That is the gentlest convention for the raw
+                                  # baseline (forward-fill would inject a misleading constant), so
+                                  # any SSL advantage is not an artefact of the fill
+  applies_to: test_only           # a robustness test, not augmentation: models never learn to cope
+  seeded_by: dataset_seed         # every method sees the identical corrupted arrays
 
 # --- Part E: TS2Vec masking ablation (FordA) ---
 ablation:
