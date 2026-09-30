@@ -1,0 +1,73 @@
+method,dataset,probe,label_fraction,seed,n_train,n_features,accuracy,macro_f1,params,tuned,folds,tuning_note,fit_seconds
+tloss,FordA,logistic_regression,1.0,42,3601,320,0.9227272727272727,0.9226333173206213,"{""C"": 0.01}",True,5,,7.27
+tloss,FordA,logistic_regression,1.0,123,3601,320,0.9128787878787878,0.9127681961347921,"{""C"": 0.1}",True,5,,4.9
+tloss,FordA,logistic_regression,1.0,456,3601,320,0.9333333333333333,0.933245062341388,"{""C"": 0.01}",True,5,,0.59
+tloss,FordA,logistic_regression,0.1,42,360,320,0.9083333333333333,0.9081739130434783,"{""C"": 0.01}",True,5,,0.07
+tloss,FordA,logistic_regression,0.1,123,360,320,0.9053030303030303,0.9051003664276154,"{""C"": 0.01}",True,5,,0.07
+tloss,FordA,logistic_regression,0.1,456,360,320,0.9159090909090909,0.9156068079018108,"{""C"": 0.01}",True,5,,0.06
+tloss,FordA,rbf_svm,1.0,42,3601,320,0.9257575757575758,0.9257082867191502,"{""C"": 1, ""gamma"": ""scale""}",True,5,,23.98
+tloss,FordA,rbf_svm,1.0,123,3601,320,0.931060606060606,0.9309407114624506,"{""C"": 1, ""gamma"": ""scale""}",True,5,,25.08
+tloss,FordA,rbf_svm,1.0,456,3601,320,0.931060606060606,0.9309803921568627,"{""C"": 10, ""gamma"": 0.001}",True,5,,24.55
+tloss,FordA,rbf_svm,0.1,42,360,320,0.9053030303030303,0.9050435677376025,"{""C"": 1, ""gamma"": ""scale""}",True,5,,0.22
+tloss,FordA,rbf_svm,0.1,123,360,320,0.9196969696969697,0.9196231617647059,"{""C"": 1, ""gamma"": ""scale""}",True,5,,0.2
+tloss,FordA,rbf_svm,0.1,456,360,320,0.9204545454545454,0.9202237418979036,"{""C"": 1, ""gamma"": ""scale""}",True,5,,0.2
+tloss,ArticularyWordRecognition,logistic_regression,1.0,42,275,320,0.97,0.9697604945778859,"{""C"": 1}",True,5,,0.1
+tloss,ArticularyWordRecognition,logistic_regression,1.0,123,275,320,0.97,0.9697955204216073,"{""C"": 0.1}",True,5,,0.12
+tloss,ArticularyWordRecognition,logistic_regression,1.0,456,275,320,0.9566666666666667,0.9556828389002302,"{""C"": 0.01}",True,5,,0.12
+tloss,ArticularyWordRecognition,logistic_regression,0.1,42,27,320,0.8233333333333334,0.8149463742450151,"{""C"": 1}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.02
+tloss,ArticularyWordRecognition,logistic_regression,0.1,123,27,320,0.86,0.8538884484275789,"{""C"": 1}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.02
+tloss,ArticularyWordRecognition,logistic_regression,0.1,456,27,320,0.76,0.7347652495763439,"{""C"": 1}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.01
+tloss,ArticularyWordRecognition,rbf_svm,1.0,42,275,320,0.9766666666666667,0.9762522694696608,"{""C"": 10, ""gamma"": 0.001}",True,5,,0.17
+tloss,ArticularyWordRecognition,rbf_svm,1.0,123,275,320,0.9666666666666667,0.9664679841897234,"{""C"": 10, ""gamma"": 0.001}",True,5,,0.15
+tloss,ArticularyWordRecognition,rbf_svm,1.0,456,275,320,0.9666666666666667,0.9662880308097699,"{""C"": 10, ""gamma"": 0.001}",True,5,,0.16
+tloss,ArticularyWordRecognition,rbf_svm,0.1,42,27,320,0.19333333333333333,0.18806690935483505,"{""C"": 1, ""gamma"": ""scale""}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.01
+tloss,ArticularyWordRecognition,rbf_svm,0.1,123,27,320,0.13333333333333333,0.13508210271494817,"{""C"": 1, ""gamma"": ""scale""}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.01
+tloss,ArticularyWordRecognition,rbf_svm,0.1,456,27,320,0.21333333333333335,0.20526964308727108,"{""C"": 1, ""gamma"": ""scale""}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.01
+tloss,Epilepsy,logistic_regression,1.0,42,137,320,0.9637681159420289,0.9635129753766509,"{""C"": 0.1}",True,5,,0.06
+tloss,Epilepsy,logistic_regression,1.0,123,137,320,0.9782608695652174,0.9779508527367593,"{""C"": 0.01}",True,5,,0.06
+tloss,Epilepsy,logistic_regression,1.0,456,137,320,0.9637681159420289,0.9637314094128384,"{""C"": 0.01}",True,5,,0.06
+tloss,Epilepsy,logistic_regression,0.1,42,13,320,0.7608695652173914,0.7585555160564048,"{""C"": 1}",True,3,reduced from 5: smallest class limits the split,0.04
+tloss,Epilepsy,logistic_regression,0.1,123,13,320,0.7536231884057971,0.7514578558696206,"{""C"": 100}",True,3,reduced from 5: smallest class limits the split,0.03
+tloss,Epilepsy,logistic_regression,0.1,456,13,320,0.717391304347826,0.7118188705183932,"{""C"": 100}",True,3,reduced from 5: smallest class limits the split,0.03
+tloss,Epilepsy,rbf_svm,1.0,42,137,320,0.9782608695652174,0.9788059701492537,"{""C"": 1, ""gamma"": 0.001}",True,5,,0.08
+tloss,Epilepsy,rbf_svm,1.0,123,137,320,0.9710144927536232,0.9717806041335453,"{""C"": 1, ""gamma"": ""scale""}",True,5,,0.08
+tloss,Epilepsy,rbf_svm,1.0,456,137,320,0.9710144927536232,0.9709217843885813,"{""C"": 1, ""gamma"": 0.001}",True,5,,0.08
+tloss,Epilepsy,rbf_svm,0.1,42,13,320,0.7536231884057971,0.7472614342179559,"{""C"": 10, ""gamma"": 0.001}",True,3,reduced from 5: smallest class limits the split,0.04
+tloss,Epilepsy,rbf_svm,0.1,123,13,320,0.717391304347826,0.7113339233077166,"{""C"": 1, ""gamma"": ""scale""}",True,3,reduced from 5: smallest class limits the split,0.04
+tloss,Epilepsy,rbf_svm,0.1,456,13,320,0.6304347826086957,0.6235495985495986,"{""C"": 10, ""gamma"": 0.001}",True,3,reduced from 5: smallest class limits the split,0.04
+ts2vec,FordA,logistic_regression,1.0,42,3601,320,0.9257575757575758,0.9256237120989108,"{""C"": 0.01}",True,5,,0.58
+ts2vec,FordA,logistic_regression,1.0,123,3601,320,0.9204545454545454,0.9203535703839406,"{""C"": 0.01}",True,5,,0.59
+ts2vec,FordA,logistic_regression,1.0,456,3601,320,0.9356060606060606,0.9355311355311355,"{""C"": 0.01}",True,5,,0.58
+ts2vec,FordA,logistic_regression,0.1,42,360,320,0.9121212121212121,0.9119141416000884,"{""C"": 0.1}",True,5,,0.06
+ts2vec,FordA,logistic_regression,0.1,123,360,320,0.9068181818181819,0.9066677167219191,"{""C"": 0.01}",True,5,,0.05
+ts2vec,FordA,logistic_regression,0.1,456,360,320,0.9174242424242425,0.917127405957634,"{""C"": 0.01}",True,5,,0.05
+ts2vec,FordA,rbf_svm,1.0,42,3601,320,0.9340909090909091,0.9339844825594061,"{""C"": 10, ""gamma"": ""scale""}",True,5,,25.0
+ts2vec,FordA,rbf_svm,1.0,123,3601,320,0.928030303030303,0.9279389446330891,"{""C"": 1, ""gamma"": ""scale""}",True,5,,25.17
+ts2vec,FordA,rbf_svm,1.0,456,3601,320,0.9424242424242424,0.9423542364349727,"{""C"": 1, ""gamma"": 0.001}",True,5,,24.74
+ts2vec,FordA,rbf_svm,0.1,42,360,320,0.9227272727272727,0.9225216598687058,"{""C"": 1, ""gamma"": ""scale""}",True,5,,0.16
+ts2vec,FordA,rbf_svm,0.1,123,360,320,0.9128787878787878,0.9127272727272727,"{""C"": 10, ""gamma"": ""scale""}",True,5,,0.15
+ts2vec,FordA,rbf_svm,0.1,456,360,320,0.9151515151515152,0.9148840133477343,"{""C"": 1, ""gamma"": 0.001}",True,5,,0.12
+ts2vec,ArticularyWordRecognition,logistic_regression,1.0,42,275,320,0.98,0.9798071146245059,"{""C"": 1}",True,5,,0.11
+ts2vec,ArticularyWordRecognition,logistic_regression,1.0,123,275,320,0.9833333333333333,0.9831520421607377,"{""C"": 0.01}",True,5,,0.13
+ts2vec,ArticularyWordRecognition,logistic_regression,1.0,456,275,320,0.9866666666666667,0.9866434782608695,"{""C"": 0.1}",True,5,,0.15
+ts2vec,ArticularyWordRecognition,logistic_regression,0.1,42,27,320,0.8566666666666667,0.8471670875602704,"{""C"": 1}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.02
+ts2vec,ArticularyWordRecognition,logistic_regression,0.1,123,27,320,0.85,0.8333897912026142,"{""C"": 1}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.02
+ts2vec,ArticularyWordRecognition,logistic_regression,0.1,456,27,320,0.8066666666666666,0.7949459184937446,"{""C"": 1}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.02
+ts2vec,ArticularyWordRecognition,rbf_svm,1.0,42,275,320,0.98,0.9802113712374582,"{""C"": 10, ""gamma"": 0.001}",True,5,,0.13
+ts2vec,ArticularyWordRecognition,rbf_svm,1.0,123,275,320,0.99,0.9898245059288538,"{""C"": 1, ""gamma"": ""scale""}",True,5,,0.12
+ts2vec,ArticularyWordRecognition,rbf_svm,1.0,456,275,320,0.98,0.9799826086956521,"{""C"": 10, ""gamma"": 0.001}",True,5,,0.12
+ts2vec,ArticularyWordRecognition,rbf_svm,0.1,42,27,320,0.21,0.21186715340483847,"{""C"": 1, ""gamma"": ""scale""}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.01
+ts2vec,ArticularyWordRecognition,rbf_svm,0.1,123,27,320,0.13333333333333333,0.12342983906720675,"{""C"": 1, ""gamma"": ""scale""}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.0
+ts2vec,ArticularyWordRecognition,rbf_svm,0.1,456,27,320,0.13,0.10966289850500377,"{""C"": 1, ""gamma"": ""scale""}",False,,smallest class has 1 example(s); no train/validation split can both fit and score it; a priori defaults used,0.01
+ts2vec,Epilepsy,logistic_regression,1.0,42,137,320,0.9565217391304348,0.9541807432432432,"{""C"": 10}",True,5,,0.06
+ts2vec,Epilepsy,logistic_regression,1.0,123,137,320,0.9710144927536232,0.9700272119626958,"{""C"": 100}",True,5,,0.05
+ts2vec,Epilepsy,logistic_regression,1.0,456,137,320,0.9710144927536232,0.9700272119626958,"{""C"": 100}",True,5,,0.05
+ts2vec,Epilepsy,logistic_regression,0.1,42,13,320,0.7753623188405797,0.7711232231645851,"{""C"": 100}",True,3,reduced from 5: smallest class limits the split,0.04
+ts2vec,Epilepsy,logistic_regression,0.1,123,13,320,0.6811594202898551,0.6802587365591398,"{""C"": 0.01}",True,3,reduced from 5: smallest class limits the split,0.05
+ts2vec,Epilepsy,logistic_regression,0.1,456,13,320,0.7536231884057971,0.7493755881703285,"{""C"": 100}",True,3,reduced from 5: smallest class limits the split,0.04
+ts2vec,Epilepsy,rbf_svm,1.0,42,137,320,0.9565217391304348,0.9550939927652256,"{""C"": 10, ""gamma"": 0.001}",True,5,,0.07
+ts2vec,Epilepsy,rbf_svm,1.0,123,137,320,0.9565217391304348,0.9541807432432432,"{""C"": 100, ""gamma"": 0.001}",True,5,,0.07
+ts2vec,Epilepsy,rbf_svm,1.0,456,137,320,0.9565217391304348,0.9550939927652256,"{""C"": 10, ""gamma"": ""scale""}",True,5,,0.07
+ts2vec,Epilepsy,rbf_svm,0.1,42,13,320,0.7391304347826086,0.7315504442010466,"{""C"": 10, ""gamma"": ""scale""}",True,3,reduced from 5: smallest class limits the split,0.04
+ts2vec,Epilepsy,rbf_svm,0.1,123,13,320,0.572463768115942,0.590948652972837,"{""C"": 10, ""gamma"": 0.01}",True,3,reduced from 5: smallest class limits the split,0.04
+ts2vec,Epilepsy,rbf_svm,0.1,456,13,320,0.6521739130434783,0.6541816734523437,"{""C"": 10, ""gamma"": 0.001}",True,3,reduced from 5: smallest class limits the split,0.04

@@ -9,10 +9,17 @@ single example makes any validation scheme uninformative: that example is either
 trained on or never scored. Hence:
 
     min class count >= 2  ->  k = min(configured folds, min class count), tune normally
-    min class count == 1  ->  untunable; the caller must supply parameters from elsewhere
+    min class count == 1  ->  untunable; fall back to the a priori defaults in config.yaml
 
 This is not specific to k-fold. A single train/validation split fails identically, and
 sklearn refuses to stratify it at all.
+
+The fallback is a fixed value chosen before any result was seen, NOT the parameters tuned
+under a larger label budget. Borrowing across budgets would let a 10%-label cell benefit
+from a choice made with 100% of the labels; a fixed default keeps the budget honest at the
+cost of being untuned, which `info["tuned"]` records per row. In practice this path is
+reached only by ArticularyWordRecognition at 10% labels, where 27 examples spread over 25
+classes leave most classes with one example.
 """
 
 import numpy as np
@@ -43,6 +50,13 @@ def grid(kind: str, cfg: dict) -> dict:
     raise ValueError(f"kind must be one of {KINDS}, got {kind!r}")
 
 
+def defaults(kind: str, cfg: dict) -> dict:
+    """The a priori hyperparameters for cells that cannot be tuned at all."""
+    if kind not in KINDS:
+        raise ValueError(f"kind must be one of {KINDS}, got {kind!r}")
+    return dict(cfg["probes"]["untunable_defaults"][kind])
+
+
 def usable_folds(y: np.ndarray, configured: int) -> int | None:
     """Return the number of stratified folds this label set supports, or None if it cannot
     be tuned at all."""
@@ -63,11 +77,12 @@ def tune(kind: str, X: np.ndarray, y: np.ndarray, cfg: dict, seed: int) -> tuple
     folds = usable_folds(y, configured)
     if folds is None:
         _, counts = np.unique(y, return_counts=True)
-        return {}, {
+        return defaults(kind, cfg), {
             "tuned": False,
             "folds": None,
             "reason": f"smallest class has {counts.min()} example(s); "
-                      "no train/validation split can both fit and score it",
+                      "no train/validation split can both fit and score it; "
+                      "a priori defaults used",
         }
 
     search = GridSearchCV(
