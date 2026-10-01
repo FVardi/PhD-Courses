@@ -1,0 +1,4 @@
+mask,dataset,seed,n_iters,calls_binomial,calls_continuous,device,seconds,checkpoint
+continuous,FordA,42,600,0,1200,NVIDIA GeForce RTX 5060,55.5,results\checkpoints\ts2vec_FordA_seed42_continuous.pth
+continuous,FordA,123,600,0,1200,NVIDIA GeForce RTX 5060,45.2,results\checkpoints\ts2vec_FordA_seed123_continuous.pth
+continuous,FordA,456,600,0,1200,NVIDIA GeForce RTX 5060,44.5,results\checkpoints\ts2vec_FordA_seed456_continuous.pth

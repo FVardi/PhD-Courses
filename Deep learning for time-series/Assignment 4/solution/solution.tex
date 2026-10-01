@@ -432,13 +432,14 @@ Discrepancies from the paper's stated protocol are recorded, not repaired.
 %======================================================================
 
 \subsection{Protocol}
-Datasets: FordA, ArticularyWordRecognition, Epilepsy. Classifiers: logistic regression and
-RBF-kernel SVM on the vectorised raw signal. Label regimes: 100\% and a stratified 10\% subset.
-Three fixed seeds; the 10\% subset of a given seed is reused by every method.
-Hyperparameters selected on training data only.
-\TODOfill
+\begin{itemize}
+    \item Scaling: appied per channel before flattening, across time series and fitted on the full training set.
+    \item Tuning of classifiers/probes: stratified cross-validation on training labels to ensure close to even splits across the train/val barrier. Tuning of $C$ for logistic regression, $C$ and $\gamma$ for RBF-SVM.
+    \item AWR class problem: AWR has too few instances in each class to ensure at least one of each on either side of the train/val barrier under 10\% label usage. The probes use \code{sklearn} defaults in that case.
+\end{itemize}
 
 \subsection{Results}
+The results are shown in Table~\ref{tab:baselines}.
 
 \begin{table}[htbp]
     \centering
@@ -447,20 +448,20 @@ Hyperparameters selected on training data only.
         \toprule
         Dataset & Model & Labels & Accuracy & Macro-F1 \\
         \midrule
-        FordA & Logistic regression & 100\% & & \\
-        FordA & Logistic regression & 10\%  & & \\
-        FordA & RBF-SVM             & 100\% & & \\
-        FordA & RBF-SVM             & 10\%  & & \\
+        FordA & Logistic regression & 100\% & $0.4922 \pm 0.0034$ & $0.4908 \pm 0.0046$ \\
+        FordA & Logistic regression & 10\%  & $0.5058 \pm 0.0083$ & $0.5057 \pm 0.0084$ \\
+        FordA & RBF-SVM             & 100\% & $0.8280 \pm 0.0000$ & $0.8278 \pm 0.0000$ \\
+        FordA & RBF-SVM             & 10\%  & $0.6689 \pm 0.0131$ & $0.6674 \pm 0.0137$ \\
         \midrule
-        AWR & Logistic regression & 100\% & & \\
-        AWR & Logistic regression & 10\%  & & \\
-        AWR & RBF-SVM             & 100\% & & \\
-        AWR & RBF-SVM             & 10\%  & & \\
+        AWR & Logistic regression & 100\% & $0.9733 \pm 0.0000$ & $0.9732 \pm 0.0000$ \\
+        AWR & Logistic regression & 10\%  & $0.8278 \pm 0.0222$ & $0.8200 \pm 0.0266$ \\
+        AWR & RBF-SVM             & 100\% & $0.9800 \pm 0.0000$ & $0.9800 \pm 0.0000$ \\
+        AWR & RBF-SVM             & 10\%  & $0.2300 \pm 0.1305$ & $0.2181 \pm 0.1576$ \\
         \midrule
-        Epilepsy & Logistic regression & 100\% & & \\
-        Epilepsy & Logistic regression & 10\%  & & \\
-        Epilepsy & RBF-SVM             & 100\% & & \\
-        Epilepsy & RBF-SVM             & 10\%  & & \\
+        Epilepsy & Logistic regression & 100\% & $0.6329 \pm 0.0167$ & $0.5996 \pm 0.0183$ \\
+        Epilepsy & Logistic regression & 10\%  & $0.4396 \pm 0.0715$ & $0.3744 \pm 0.0881$ \\
+        Epilepsy & RBF-SVM             & 100\% & $0.8478 \pm 0.0000$ & $0.8369 \pm 0.0000$ \\
+        Epilepsy & RBF-SVM             & 10\%  & $0.5145 \pm 0.1007$ & $0.4799 \pm 0.1223$ \\
         \bottomrule
     \end{tabular}
     \caption{Raw-signal baselines. Test accuracy and macro-F1 as mean $\pm$ standard deviation over three paired seeds.}
@@ -468,22 +469,43 @@ Hyperparameters selected on training data only.
 \end{table}
 
 \subsection{Comments}
-\TODOfill
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{l p{5.8cm} p{5.8cm}}
+        \toprule
+        Dataset & Logistic regression & RBF-SVM \\
+        \midrule
+        FordA & Bad, since it assumes that same timestamps in channels are similar, but they are not phase-synced. Equivalent to random guessing. & Performs well because the RBF-SVM merely uses neighborhoods to classify. If it has seen a set of phse-shifted time series in the same class it will be able to classify a new one well. \\
+        \midrule
+        AWR & Performs well because intra-class time series are similar and synchronous. & Same as logistic regression. \\
+        \midrule
+        Epilepsy & Performs poorly because, as on FordA, the waveform has no consistent position in time. It beats chance only because the mean level of each channel differs between classes. & Performs well mainly because the classes differ in amplitude, which distance captures and a linear model on the raw signal cannot. With only 13 labelled series at 10\% it loses most of that. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Comments on the raw-signal baselines, per dataset and probe.}
+    \label{tab:baselines-comments}
+\end{table}
 
 %======================================================================
 \section{Part C: Pretrain and evaluate T-Loss and TS2Vec}
 %======================================================================
 
 \subsection{Protocol}
-Per dataset and seed: pretrain on the unlabelled official training series, extract one
-fixed-length representation per series, freeze the encoder, fit the probe on the 10\% and
-100\% labelled training representations, and evaluate once on the official test set.
-\TODOfill
+\begin{itemize}
+    \item Seeds: 42, 123 and 456.
+    \item Hyperparameter grids: $C \in \{0.01, 0.1, 1, 10, 100\}$ for logistic regression; $C \in \{0.1, 1, 10, 100\}$ and $\gamma \in \{\text{scale}, 0.001, 0.01, 0.1\}$ for RBF-SVM.
+    \item Folds: 5-fold stratified cross-validation, reduced to the size of the smallest class when that is lower.
+    \item Fixed defaults: when a class has a single labelled example, no tuning is possible and the \code{sklearn} defaults are used ($C = 1$, $\gamma = \text{scale}$).
+    \item Representation scaling: the representations are standardised per dimension, fitted on the training representations, before the probe. Part B has no equivalent step, and TS2Vec's own protocol scales only before its logistic regression.
+\end{itemize}
 
 \paragraph{Principal representation test}
-The probe treated as the principal representation test is: \TODOfill
+The probe treated as the principal representation test is logistic regression, since it is the linear probe.
 
 \subsection{Results}
+The results are shown in Table~\ref{tab:ssl-clean}.
 
 \begin{table}[htbp]
     \centering
@@ -492,32 +514,32 @@ The probe treated as the principal representation test is: \TODOfill
         \toprule
         Dataset & Method & Probe & Labels & Accuracy & Macro-F1 \\
         \midrule
-        FordA & T-Loss & Logistic regression & 100\% & & \\
-        FordA & T-Loss & Logistic regression & 10\%  & & \\
-        FordA & T-Loss & RBF-SVM             & 100\% & & \\
-        FordA & T-Loss & RBF-SVM             & 10\%  & & \\
-        FordA & TS2Vec & Logistic regression & 100\% & & \\
-        FordA & TS2Vec & Logistic regression & 10\%  & & \\
-        FordA & TS2Vec & RBF-SVM             & 100\% & & \\
-        FordA & TS2Vec & RBF-SVM             & 10\%  & & \\
+        FordA & T-Loss & Logistic regression & 100\% & $0.9230 \pm 0.0102$ & $0.9229 \pm 0.0102$ \\
+        FordA & T-Loss & Logistic regression & 10\%  & $0.9098 \pm 0.0055$ & $0.9096 \pm 0.0054$ \\
+        FordA & T-Loss & RBF-SVM             & 100\% & $0.9293 \pm 0.0031$ & $0.9292 \pm 0.0030$ \\
+        FordA & T-Loss & RBF-SVM             & 10\%  & $0.9152 \pm 0.0085$ & $0.9150 \pm 0.0086$ \\
+        FordA & TS2Vec & Logistic regression & 100\% & $0.9273 \pm 0.0077$ & $0.9272 \pm 0.0077$ \\
+        FordA & TS2Vec & Logistic regression & 10\%  & $0.9121 \pm 0.0053$ & $0.9119 \pm 0.0052$ \\
+        FordA & TS2Vec & RBF-SVM             & 100\% & $0.9348 \pm 0.0072$ & $0.9348 \pm 0.0072$ \\
+        FordA & TS2Vec & RBF-SVM             & 10\%  & $0.9169 \pm 0.0052$ & $0.9167 \pm 0.0051$ \\
         \midrule
-        AWR & T-Loss & Logistic regression & 100\% & & \\
-        AWR & T-Loss & Logistic regression & 10\%  & & \\
-        AWR & T-Loss & RBF-SVM             & 100\% & & \\
-        AWR & T-Loss & RBF-SVM             & 10\%  & & \\
-        AWR & TS2Vec & Logistic regression & 100\% & & \\
-        AWR & TS2Vec & Logistic regression & 10\%  & & \\
-        AWR & TS2Vec & RBF-SVM             & 100\% & & \\
-        AWR & TS2Vec & RBF-SVM             & 10\%  & & \\
+        AWR & T-Loss & Logistic regression & 100\% & $0.9656 \pm 0.0077$ & $0.9651 \pm 0.0081$ \\
+        AWR & T-Loss & Logistic regression & 10\%  & $0.8144 \pm 0.0506$ & $0.8012 \pm 0.0607$ \\
+        AWR & T-Loss & RBF-SVM             & 100\% & $0.9700 \pm 0.0058$ & $0.9697 \pm 0.0057$ \\
+        AWR & T-Loss & RBF-SVM             & 10\%  & $0.1800 \pm 0.0416$ & $0.1761 \pm 0.0366$ \\
+        AWR & TS2Vec & Logistic regression & 100\% & $0.9833 \pm 0.0033$ & $0.9832 \pm 0.0034$ \\
+        AWR & TS2Vec & Logistic regression & 10\%  & $0.8378 \pm 0.0271$ & $0.8252 \pm 0.0271$ \\
+        AWR & TS2Vec & RBF-SVM             & 100\% & $0.9833 \pm 0.0058$ & $0.9833 \pm 0.0056$ \\
+        AWR & TS2Vec & RBF-SVM             & 10\%  & $0.1578 \pm 0.0453$ & $0.1483 \pm 0.0555$ \\
         \midrule
-        Epilepsy & T-Loss & Logistic regression & 100\% & & \\
-        Epilepsy & T-Loss & Logistic regression & 10\%  & & \\
-        Epilepsy & T-Loss & RBF-SVM             & 100\% & & \\
-        Epilepsy & T-Loss & RBF-SVM             & 10\%  & & \\
-        Epilepsy & TS2Vec & Logistic regression & 100\% & & \\
-        Epilepsy & TS2Vec & Logistic regression & 10\%  & & \\
-        Epilepsy & TS2Vec & RBF-SVM             & 100\% & & \\
-        Epilepsy & TS2Vec & RBF-SVM             & 10\%  & & \\
+        Epilepsy & T-Loss & Logistic regression & 100\% & $0.9686 \pm 0.0084$ & $0.9684 \pm 0.0083$ \\
+        Epilepsy & T-Loss & Logistic regression & 10\%  & $0.7440 \pm 0.0233$ & $0.7406 \pm 0.0252$ \\
+        Epilepsy & T-Loss & RBF-SVM             & 100\% & $0.9734 \pm 0.0042$ & $0.9738 \pm 0.0043$ \\
+        Epilepsy & T-Loss & RBF-SVM             & 10\%  & $0.7005 \pm 0.0633$ & $0.6940 \pm 0.0636$ \\
+        Epilepsy & TS2Vec & Logistic regression & 100\% & $0.9662 \pm 0.0084$ & $0.9647 \pm 0.0091$ \\
+        Epilepsy & TS2Vec & Logistic regression & 10\%  & $0.7367 \pm 0.0493$ & $0.7336 \pm 0.0474$ \\
+        Epilepsy & TS2Vec & RBF-SVM             & 100\% & $0.9565 \pm 0.0000$ & $0.9548 \pm 0.0005$ \\
+        Epilepsy & TS2Vec & RBF-SVM             & 10\%  & $0.6546 \pm 0.0834$ & $0.6589 \pm 0.0704$ \\
         \bottomrule
     \end{tabular}
     \caption{Frozen-representation classification. Mean $\pm$ standard deviation over three paired seeds.}
@@ -525,9 +547,17 @@ The probe treated as the principal representation test is: \TODOfill
 \end{table}
 
 \subsection{Comparison with the raw-signal baselines}
-\TODOfill
+Only logistic regression, the principal probe, is discussed.
+\begin{itemize}
+    \item Both methods improve clearly on FordA (from chance to 0.92) and Epilepsy (from 0.63 to 0.97), but not on AWR, where T-Loss is slightly below and TS2Vec slightly above the raw baseline.
+    \item The representations are close to linearly separable: a linear classifier that fails on the raw signal reaches 0.92--0.97 on them.
+    \item T-Loss and TS2Vec are on par. The differences on FordA and Epilepsy are within the spread across seeds; only on AWR with 100\% labels is TS2Vec ahead (0.983 against 0.966).
+    \item AWR is already saturated on the raw signal and becomes less stable with 10\% labels, where only 27 labelled series cover 25 classes.
+    \item The drop from 100\% to 10\% labels follows the number of labels left: about 0.014 on FordA (360 series), 0.15 on AWR (27) and 0.23 on Epilepsy (13). On AWR and Epilepsy it is no smaller than for the raw baseline.
+\end{itemize}
 
 \subsection{Training time and representation dimensionality}
+Training time and representation dimensionality are shown in Table~\ref{tab:cost}.
 
 \begin{table}[htbp]
     \centering
@@ -555,82 +585,125 @@ The probe treated as the principal representation test is: \TODOfill
 \subsection{Corruption design}
 Dropout proportion, number of intervals and replacement convention, fixed before inspecting
 any result, plus a brief justification. The same corrupted inputs are applied to all methods.
-\TODOfill
+\begin{itemize}
+    \item Proportion: 20\% of each series (100 timesteps on FordA, 41 on Epilepsy, 29 on AWR).
+    \item Intervals: one contiguous interval per series. Neighbouring samples are highly correlated, so several short gaps would be a much easier problem.
+    \item Position: the start is drawn uniformly at random per series, so that no fixed region is systematically removed.
+    \item Channels: all channels lose the same interval. Removing a single channel would cost AWR 2.2\% of its data against 20\% for FordA.
+    \item Replacement: the training mean of the channel, which is exactly 0 after scaling. The removed part then contributes nothing to a linear classifier on the raw signal.
+    \item Scope: applied to the test set only. The models never see corrupted data during training.
+    \item Seeding: the corruption is seeded by the run's seed, so every method sees identical corrupted inputs.
+\end{itemize}
 
 \subsection{Results (100\%-label models)}
+Accuracy is shown in Table~\ref{tab:dropout} and macro-F1 in Table~\ref{tab:dropout-f1}.
 
 \begin{table}[htbp]
     \centering
     \small
-    \begin{tabular}{l l c c c c}
+    \begin{tabular}{l l c c c}
         \toprule
-        & & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Macro-F1} \\
-        \cmidrule(lr){3-4} \cmidrule(lr){5-6}
-        Dataset & Method & Clean & Corrupted ($\Delta$) & Clean & Corrupted ($\Delta$) \\
+        Dataset & Method & Clean & Corrupted & $\Delta$ \\
         \midrule
-        FordA & Logistic regression (raw) & & & & \\
-        FordA & RBF-SVM (raw)             & & & & \\
-        FordA & T-Loss                    & & & & \\
-        FordA & TS2Vec                    & & & & \\
+        FordA & Logistic regression (raw) & $0.4922 \pm 0.0034$ & $0.5063 \pm 0.0129$ & $+0.0141 \pm 0.0097$ \\
+        FordA & RBF-SVM (raw)             & $0.8280 \pm 0.0000$ & $0.8058 \pm 0.0042$ & $-0.0222 \pm 0.0042$ \\
+        FordA & T-Loss                    & $0.9230 \pm 0.0102$ & $0.8937 \pm 0.0081$ & $-0.0293 \pm 0.0054$ \\
+        FordA & TS2Vec                    & $0.9273 \pm 0.0077$ & $0.8997 \pm 0.0052$ & $-0.0275 \pm 0.0123$ \\
         \midrule
-        AWR & Logistic regression (raw) & & & & \\
-        AWR & RBF-SVM (raw)             & & & & \\
-        AWR & T-Loss                    & & & & \\
-        AWR & TS2Vec                    & & & & \\
+        AWR & Logistic regression (raw) & $0.9733 \pm 0.0000$ & $0.9633 \pm 0.0033$ & $-0.0100 \pm 0.0033$ \\
+        AWR & RBF-SVM (raw)             & $0.9800 \pm 0.0000$ & $0.9700 \pm 0.0067$ & $-0.0100 \pm 0.0067$ \\
+        AWR & T-Loss                    & $0.9656 \pm 0.0077$ & $0.9511 \pm 0.0158$ & $-0.0144 \pm 0.0084$ \\
+        AWR & TS2Vec                    & $0.9833 \pm 0.0033$ & $0.9611 \pm 0.0102$ & $-0.0222 \pm 0.0135$ \\
         \midrule
-        Epilepsy & Logistic regression (raw) & & & & \\
-        Epilepsy & RBF-SVM (raw)             & & & & \\
-        Epilepsy & T-Loss                    & & & & \\
-        Epilepsy & TS2Vec                    & & & & \\
+        Epilepsy & Logistic regression (raw) & $0.6329 \pm 0.0167$ & $0.5966 \pm 0.0327$ & $-0.0362 \pm 0.0377$ \\
+        Epilepsy & RBF-SVM (raw)             & $0.8478 \pm 0.0000$ & $0.8116 \pm 0.0126$ & $-0.0362 \pm 0.0126$ \\
+        Epilepsy & T-Loss                    & $0.9686 \pm 0.0084$ & $0.9396 \pm 0.0233$ & $-0.0290 \pm 0.0192$ \\
+        Epilepsy & TS2Vec                    & $0.9662 \pm 0.0084$ & $0.9517 \pm 0.0182$ & $-0.0145 \pm 0.0126$ \\
         \bottomrule
     \end{tabular}
-    \caption{Clean versus contiguous-dropout test performance for the 100\%-label models.}
+    \caption{Accuracy: clean versus contiguous-dropout test performance for the 100\%-label models. T-Loss and TS2Vec are evaluated with logistic regression, the principal probe. Mean $\pm$ standard deviation over three paired seeds; $\Delta$ is corrupted minus clean.}
     \label{tab:dropout}
 \end{table}
 
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{l l c c c}
+        \toprule
+        Dataset & Method & Clean & Corrupted & $\Delta$ \\
+        \midrule
+        FordA & Logistic regression (raw) & $0.4908 \pm 0.0046$ & $0.5054 \pm 0.0142$ & $+0.0145 \pm 0.0100$ \\
+        FordA & RBF-SVM (raw)             & $0.8278 \pm 0.0000$ & $0.8044 \pm 0.0040$ & $-0.0234 \pm 0.0040$ \\
+        FordA & T-Loss                    & $0.9229 \pm 0.0102$ & $0.8934 \pm 0.0083$ & $-0.0295 \pm 0.0055$ \\
+        FordA & TS2Vec                    & $0.9272 \pm 0.0077$ & $0.8997 \pm 0.0051$ & $-0.0275 \pm 0.0123$ \\
+        \midrule
+        AWR & Logistic regression (raw) & $0.9732 \pm 0.0000$ & $0.9632 \pm 0.0033$ & $-0.0100 \pm 0.0033$ \\
+        AWR & RBF-SVM (raw)             & $0.9800 \pm 0.0000$ & $0.9701 \pm 0.0065$ & $-0.0099 \pm 0.0065$ \\
+        AWR & T-Loss                    & $0.9651 \pm 0.0081$ & $0.9507 \pm 0.0158$ & $-0.0144 \pm 0.0080$ \\
+        AWR & TS2Vec                    & $0.9832 \pm 0.0034$ & $0.9609 \pm 0.0103$ & $-0.0223 \pm 0.0136$ \\
+        \midrule
+        Epilepsy & Logistic regression (raw) & $0.5996 \pm 0.0183$ & $0.5719 \pm 0.0376$ & $-0.0277 \pm 0.0402$ \\
+        Epilepsy & RBF-SVM (raw)             & $0.8369 \pm 0.0000$ & $0.8062 \pm 0.0126$ & $-0.0307 \pm 0.0126$ \\
+        Epilepsy & T-Loss                    & $0.9684 \pm 0.0083$ & $0.9407 \pm 0.0224$ & $-0.0277 \pm 0.0185$ \\
+        Epilepsy & TS2Vec                    & $0.9647 \pm 0.0091$ & $0.9517 \pm 0.0174$ & $-0.0130 \pm 0.0115$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{Macro-F1: clean versus contiguous-dropout test performance for the 100\%-label models. T-Loss and TS2Vec are evaluated with logistic regression, the principal probe. Mean $\pm$ standard deviation over three paired seeds; $\Delta$ is corrupted minus clean.}
+    \label{tab:dropout-f1}
+\end{table}
+
 \subsection{Discussion}
-Whether any apparent robustness comes from the representation, the classifier or the
-preprocessing convention.
-\TODOfill
+Only two of three dimensions requested can be evaluated here since only one preprocessing convention was used.
+\begin{itemize}
+    \item All results for the corrupted cases are lower, except the results from logistic regression for FordA.
+    \item Representation: using the encoded representation instead of the raw signals is not more robust -- they drop at about the same rate.
+    \item Classifier: not shown in the table, but there is no difference in robustness.
+    \item Preprocessing: not tested.
+\end{itemize}
 
 %======================================================================
 \section{Part E: Focused TS2Vec continuous masking ablation}
 %======================================================================
 
 \subsection{Setup}
-On FordA: standard (binomial) TS2Vec masking versus continuous masking, with encoder,
-training budget, downstream probe, label regime and the three seeds matched.
-\TODOfill
+Mask configurations are the standards in the checkout for TS2Vec. The rest of the setup is inherited from earlier tests.
 
 \subsection{Results}
+The results are shown in Table~\ref{tab:masking-ablation}.
 
 \begin{table}[htbp]
     \centering
     \small
-    \begin{tabular}{l c c c c}
+    \begin{tabular}{l l c c c}
         \toprule
-        & \multicolumn{2}{c}{Accuracy} & \multicolumn{2}{c}{Macro-F1} \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-        Masking & Clean & Corrupted ($\Delta$) & Clean & Corrupted ($\Delta$) \\
+        Masking & Metric & Clean & Corrupted & $\Delta$ \\
         \midrule
-        Binomial (default) & & & & \\
-        Continuous         & & & & \\
+        Binomial (default) & Accuracy & $0.9275 \pm 0.0068$ & $0.8975 \pm 0.0099$ & $-0.0301 \pm 0.0147$ \\
+        Continuous         & Accuracy & $0.9263 \pm 0.0096$ & $0.8967 \pm 0.0031$ & $-0.0295 \pm 0.0107$ \\
+        \midrule
+        Binomial (default) & Macro-F1 & $0.9274 \pm 0.0068$ & $0.8974 \pm 0.0099$ & $-0.0300 \pm 0.0146$ \\
+        Continuous         & Macro-F1 & $0.9262 \pm 0.0096$ & $0.8966 \pm 0.0031$ & $-0.0295 \pm 0.0108$ \\
         \bottomrule
     \end{tabular}
-    \caption{FordA: standard versus continuous TS2Vec masking, clean and contiguous-dropout test sets.}
+    \caption{FordA: standard versus continuous TS2Vec masking, clean and contiguous-dropout test sets, with logistic regression on 100\% labels. Mean $\pm$ standard deviation over three paired seeds; $\Delta$ is corrupted minus clean.}
     \label{tab:masking-ablation}
 \end{table}
 
+\todo[inline]{Rerun on one machine so that the binomial row here matches the TS2Vec FordA row in Table~\ref{tab:dropout}. This table uses encoders retrained on a second machine; Parts C and D use the first machine's.}
+
 \subsection{Interpretation}
-Does continuous masking change (i) clean performance, (ii) corrupted performance, and
-(iii) sensitivity to corruption relative to the model's own clean score?
-\TODOfill
+\begin{itemize}
+\item Clean performance: no big difference binomial and continuous.
+\item Corrupted performance: no big difference.
+\item Sensitivity to corruption relative to clean score: no big difference.
+\end{itemize}
 
 %======================================================================
 \section{Part F: TF-C for industrial bearing fault classification (\texorpdfstring{FD-A $\rightarrow$ FD-B}{FD-A to FD-B})}
 %======================================================================
 
 \subsection{Execution record}
+The execution record is shown in Table~\ref{tab:tfc-record}.
 
 \begin{table}[htbp]
     \centering
@@ -654,6 +727,7 @@ Does continuous masking change (i) clean performance, (ii) corrupted performance
 \end{table}
 
 \subsection{Classification result}
+The classification result is shown in Table~\ref{tab:tfc-result}.
 
 \begin{table}[htbp]
     \centering

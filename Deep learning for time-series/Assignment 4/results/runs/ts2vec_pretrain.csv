@@ -8,3 +8,12 @@ ts2vec,ArticularyWordRecognition,456,275,9,144,600,16,320,NVIDIA RTX 4500 Ada Ge
 ts2vec,Epilepsy,42,137,3,206,200,16,320,NVIDIA RTX 4500 Ada Generation,6.6,results\checkpoints\ts2vec_Epilepsy_seed42.pth
 ts2vec,Epilepsy,123,137,3,206,200,16,320,NVIDIA RTX 4500 Ada Generation,7.2,results\checkpoints\ts2vec_Epilepsy_seed123.pth
 ts2vec,Epilepsy,456,137,3,206,200,16,320,NVIDIA RTX 4500 Ada Generation,7.4,results\checkpoints\ts2vec_Epilepsy_seed456.pth
+ts2vec,FordA,42,3601,1,500,600,16,320,NVIDIA GeForce RTX 5060,53.2,results\checkpoints\ts2vec_FordA_seed42.pth
+ts2vec,FordA,123,3601,1,500,600,16,320,NVIDIA GeForce RTX 5060,42.9,results\checkpoints\ts2vec_FordA_seed123.pth
+ts2vec,FordA,456,3601,1,500,600,16,320,NVIDIA GeForce RTX 5060,42.3,results\checkpoints\ts2vec_FordA_seed456.pth
+ts2vec,ArticularyWordRecognition,42,275,9,144,600,16,320,NVIDIA GeForce RTX 5060,42.3,results\checkpoints\ts2vec_ArticularyWordRecognition_seed42.pth
+ts2vec,ArticularyWordRecognition,123,275,9,144,600,16,320,NVIDIA GeForce RTX 5060,36.7,results\checkpoints\ts2vec_ArticularyWordRecognition_seed123.pth
+ts2vec,ArticularyWordRecognition,456,275,9,144,600,16,320,NVIDIA GeForce RTX 5060,33.7,results\checkpoints\ts2vec_ArticularyWordRecognition_seed456.pth
+ts2vec,Epilepsy,42,137,3,206,200,16,320,NVIDIA GeForce RTX 5060,12.1,results\checkpoints\ts2vec_Epilepsy_seed42.pth
+ts2vec,Epilepsy,123,137,3,206,200,16,320,NVIDIA GeForce RTX 5060,11.5,results\checkpoints\ts2vec_Epilepsy_seed123.pth
+ts2vec,Epilepsy,456,137,3,206,200,16,320,NVIDIA GeForce RTX 5060,11.9,results\checkpoints\ts2vec_Epilepsy_seed456.pth

@@ -6,6 +6,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = ROOT / "src" / "config.yaml"
+LOCAL_CONFIG_NAME = "config.local.yaml"
 _REF = re.compile(r"\$\{([^}]+)\}")
 
 
@@ -32,11 +33,31 @@ def _resolve(value: Any, cfg: dict) -> Any:
     return value
 
 
+def _merge(base: dict, override: dict) -> dict:
+    """Recursively overlay `override` on `base`; only the keys it names are replaced."""
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            _merge(base[key], value)
+        else:
+            base[key] = value
+    return base
+
+
 def load_config(path: Path | str = DEFAULT_CONFIG) -> dict:
-    """Return the parsed config with every ${...} reference substituted."""
+    """Return the parsed config with every ${...} reference substituted.
+
+    An untracked config.local.yaml beside the config is overlaid first. It exists for the
+    one thing that legitimately differs between machines - where the external checkouts
+    live - so that moving machines never means editing (and committing) the tracked file.
+    Protocol values do not belong in it.
+    """
     import yaml
 
-    cfg = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    path = Path(path)
+    cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+    local = path.with_name(LOCAL_CONFIG_NAME)
+    if local.exists():
+        _merge(cfg, yaml.safe_load(local.read_text(encoding="utf-8")) or {})
     return _resolve(cfg, cfg)
 
 

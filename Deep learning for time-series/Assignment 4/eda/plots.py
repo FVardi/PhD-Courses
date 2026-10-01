@@ -96,6 +96,45 @@ def plot_class_examples(X, y, class_names, title, seed=42):
     return fig
 
 
+def plot_class_spectra(groups, class_names, sampling_hz, title):
+    """Mean amplitude spectrum per class, one panel per class on shared log-y axes.
+
+    `groups` maps a label to (X, y) with X as (n_series, 1, length); every group is drawn
+    in every panel, so two datasets can be compared class by class. Each series has its own
+    mean removed first: the 0 Hz bin would otherwise dwarf everything else on the axis.
+    """
+    classes = np.unique(np.concatenate([y for _, y in groups.values()]))
+    fig, axes = plt.subplots(
+        len(classes), 1, figsize=(8.4, 1.9 * len(classes) + 0.9), sharex=True, sharey=True
+    )
+    fig.patch.set_facecolor(SURFACE)
+    flat = np.atleast_1d(axes).ravel()
+
+    for slot, cls in enumerate(classes):
+        ax = flat[slot]
+        for g, (label, (X, y)) in enumerate(groups.items()):
+            series = X[y == cls, 0, :]
+            if len(series) == 0:
+                continue
+            series = series - series.mean(axis=1, keepdims=True)
+            amplitude = np.abs(np.fft.rfft(series, axis=1)).mean(axis=0) / series.shape[1]
+            freqs = np.fft.rfftfreq(series.shape[1], d=1.0 / sampling_hz) / 1000.0
+            ax.plot(freqs[1:], amplitude[1:], lw=1.0, color=CATEGORICAL[g],
+                    label=label if slot == 0 else None)
+        ax.set_yscale("log")
+        ax.set_title(class_names[slot], loc="left", fontsize=9.5, color=INK, pad=6)
+        _style(ax)
+
+    flat[-1].set_xlabel("frequency (kHz)", color=INK_MUTED, fontsize=8.5)
+    fig.suptitle(title, x=0.01, ha="left", fontsize=12.5, color=INK)
+    if len(groups) > 1:
+        handles, labels = flat[0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc="upper right", frameon=False, fontsize=8.5,
+                   labelcolor=INK_MUTED, ncol=len(labels))
+    fig.tight_layout()
+    return fig
+
+
 def plot_channels(X, y, class_names, cls_index, title, seed=42):
     """Every channel of one example series, faceted - for datasets with too many channels
     to distinguish by colour."""
