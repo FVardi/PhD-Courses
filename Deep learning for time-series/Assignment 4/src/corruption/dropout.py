@@ -78,8 +78,15 @@ def contiguous_dropout(
     return out
 
 
-def from_config(X: np.ndarray, scaler: dict, cfg: dict, seed: int) -> np.ndarray:
-    """Apply the corruption exactly as src/config.yaml specifies it."""
+def from_config(X: np.ndarray, scaler: dict, cfg: dict, seed: int,
+                proportion: float | None = None,
+                n_intervals: int | None = None) -> np.ndarray:
+    """Apply the corruption exactly as src/config.yaml specifies it.
+
+    `proportion` and `n_intervals` override the configured values for the Part E
+    sensitivity sweep only. Everything else - fill, channel scope, start rule, seed - stays
+    as configured, so the sweep's 20% x 1 cell produces the Part D arrays bit for bit.
+    """
     spec = cfg["corruption"]
     if spec["replacement"] != "train_channel_mean":
         raise NotImplementedError(f"unsupported replacement: {spec['replacement']}")
@@ -90,7 +97,7 @@ def from_config(X: np.ndarray, scaler: dict, cfg: dict, seed: int) -> np.ndarray
     return contiguous_dropout(
         X,
         fill=np.asarray(scaler["mean"]),
-        proportion=spec["proportion"],
+        proportion=spec["proportion"] if proportion is None else proportion,
         seed=seed,
-        n_intervals=spec["n_intervals"],
+        n_intervals=spec["n_intervals"] if n_intervals is None else n_intervals,
     )

@@ -1,0 +1,4 @@
+mask,dataset,seed,n_iters,calls_binomial,calls_continuous,device,seconds,checkpoint
+continuous,FordA,42,600,0,1200,NVIDIA RTX 4500 Ada Generation,38.2,results\checkpoints\ts2vec_FordA_seed42_continuous.pth
+continuous,FordA,123,600,0,1200,NVIDIA RTX 4500 Ada Generation,27.9,results\checkpoints\ts2vec_FordA_seed123_continuous.pth
+continuous,FordA,456,600,0,1200,NVIDIA RTX 4500 Ada Generation,26.7,results\checkpoints\ts2vec_FordA_seed456_continuous.pth

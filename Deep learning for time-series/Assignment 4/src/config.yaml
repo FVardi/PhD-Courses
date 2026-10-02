@@ -105,6 +105,14 @@ ablation:
                                  # n_iters, seeds); only the continuous arm is trained.
                                  # Both probes are reported; logistic regression is principal
   evaluate_on: [clean, corrupted]
+  # Exploratory sensitivity sweep (dev/8b_), declared 2026-09-30 AFTER the main Part E result
+  # (no difference at 20% x 1) was seen. It does not replace that result; every cell is
+  # reported. Question: does the null hold under heavier dropout (more headroom) and under
+  # several shorter gaps (closer to the 5-run continuous training mask)?
+  sweep:
+    proportions: [0.1, 0.2, 0.4]
+    n_intervals: [1, 5]           # 5 non-overlapping blocks of proportion/5 each
+    probe: logistic_regression    # the main (linear) probe only
 
 # --- Part F: TF-C FD-A -> FD-B exploratory reproduction ---
 tfc_run:

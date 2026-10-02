@@ -59,7 +59,7 @@ from src.dataio.scaling import apply_scaler, load_scaler  # noqa: E402
 from src.dataio.splits import load_split, processed_dir  # noqa: E402
 from src.evaluation.metrics import mean_sd  # noqa: E402
 from src.evaluation.robustness import FIELDS as SCORE_FIELDS, clean_vs_corrupt  # noqa: E402
-from src.methods import checkpoint_path as part_c_checkpoint, ts2vec  # noqa: E402
+from src.methods import mask_checkpoint_path, ts2vec  # noqa: E402
 from src.probes.probes import KINDS  # noqa: E402
 from src.utils.config import load_config, results_dir  # noqa: E402
 from src.utils.seeding import set_seed  # noqa: E402
@@ -77,10 +77,9 @@ def checkpoint(ckpt_dir: Path, dataset: str, seed: int, mask: str,
                n_iters: int | None) -> Path:
     """Protocol binomial -> the Part C file. Everything else gets its own name, and smoke
     runs are tagged so a short encoder can never be reused as a protocol run."""
-    if mask == "binomial" and n_iters is None:
-        return part_c_checkpoint(ckpt_dir, "ts2vec", dataset, seed)
-    tag = "" if n_iters is None else f"_smoke{n_iters}"
-    return ckpt_dir / f"ts2vec_{dataset}_seed{seed}_{mask}{tag}.pth"
+    if n_iters is None:
+        return mask_checkpoint_path(ckpt_dir, dataset, seed, mask)
+    return ckpt_dir / f"ts2vec_{dataset}_seed{seed}_{mask}_smoke{n_iters}.pth"
 
 
 def append_run(path: Path, row: dict) -> None:

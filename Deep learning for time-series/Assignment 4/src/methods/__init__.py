@@ -19,6 +19,14 @@ def checkpoint_path(ckpt_dir: Path, method: str, dataset: str, seed: int) -> Pat
     return ckpt_dir / f"ts2vec_{dataset}_seed{seed}.pth"
 
 
+def mask_checkpoint_path(ckpt_dir: Path, dataset: str, seed: int, mask: str) -> Path:
+    """Part E encoders. The binomial arm IS the Part C encoder, so it maps to that file;
+    other masks get a suffixed name. Shared by dev/8_ (writes) and dev/8b_ (reads)."""
+    if mask == "binomial":
+        return checkpoint_path(ckpt_dir, "ts2vec", dataset, seed)
+    return ckpt_dir / f"ts2vec_{dataset}_seed{seed}_{mask}.pth"
+
+
 def load_pretrained(method: str, cfg: dict, ckpt_dir: Path, dataset: str, seed: int,
                     channels: int, cuda: bool = True):
     """Rebuild the architecture and restore trained weights. Returns None if absent.
