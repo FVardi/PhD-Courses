@@ -4,6 +4,9 @@ data/processed/**
 !data/raw/**/.gitkeep
 !data/processed/.gitkeep
 
+# --- Per-machine path overrides (see src/utils/config.py) ---
+src/config.local.yaml
+
 # --- Large run artifacts ---
 results/checkpoints/**
 results/representations/**

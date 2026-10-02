@@ -1,0 +1,422 @@
+{
+  "checkout": {
+    "path": "C:\\Users\\au808956\\Documents\\Repos\\Time series repos\\TFC-pretraining",
+    "commit": "9667582",
+    "tracked_files_modified": false
+  },
+  "seed": 42,
+  "environment": {
+    "python": "3.13.11",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.2",
+    "sklearn": "1.8.0",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "Intel64 Family 6 Model 143 Stepping 8, GenuineIntel",
+    "gpu": "NVIDIA RTX 4500 Ada Generation",
+    "gpu_memory_gb": 25.8,
+    "cuda": "12.8"
+  },
+  "shims": [
+    "np.float = float (alias removed in NumPy 1.24; used by trainer.py's AUROC fallback)"
+  ],
+  "data_links": {
+    "C:\\Users\\au808956\\Documents\\Repos\\Time series repos\\TFC-pretraining\\datasets\\FD_A": "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\data\\raw\\FD-A",
+    "C:\\Users\\au808956\\Documents\\Repos\\Time series repos\\TFC-pretraining\\datasets\\FD_B": "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\data\\raw\\FD-B"
+  },
+  "data_available": {
+    "fd_a_train": 8184,
+    "fd_a_test": 2728,
+    "fd_b_train": 60,
+    "fd_b_test": 13559
+  },
+  "stages": {
+    "pre_train": {
+      "command": [
+        "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\.venv\\Scripts\\python.exe",
+        "-u",
+        "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\src\\methods\\_tfc_launch.py",
+        "--training_mode",
+        "pre_train",
+        "--pretrain_dataset",
+        "FD_A",
+        "--target_dataset",
+        "FD_B",
+        "--seed",
+        "42",
+        "--logs_save_dir",
+        "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc"
+      ],
+      "equivalent": "python main.py --training_mode pre_train --pretrain_dataset FD_A --target_dataset FD_B --seed 42 --logs_save_dir C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc",
+      "cwd": "C:\\Users\\au808956\\Documents\\Repos\\Time series repos\\TFC-pretraining\\code\\TFC",
+      "seconds": 179.6,
+      "returncode": 0,
+      "log": "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc\\pre_train.log",
+      "finished": "2026-10-02T11:57:10",
+      "subset_sizes_reported": [
+        640,
+        60
+      ]
+    },
+    "fine_tune_test": {
+      "command": [
+        "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\.venv\\Scripts\\python.exe",
+        "-u",
+        "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\src\\methods\\_tfc_launch.py",
+        "--training_mode",
+        "fine_tune_test",
+        "--pretrain_dataset",
+        "FD_A",
+        "--target_dataset",
+        "FD_B",
+        "--seed",
+        "42",
+        "--logs_save_dir",
+        "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc"
+      ],
+      "equivalent": "python main.py --training_mode fine_tune_test --pretrain_dataset FD_A --target_dataset FD_B --seed 42 --logs_save_dir C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc",
+      "cwd": "C:\\Users\\au808956\\Documents\\Repos\\Time series repos\\TFC-pretraining\\code\\TFC",
+      "seconds": 249.4,
+      "returncode": 0,
+      "log": "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc\\fine_tune_test.log",
+      "finished": "2026-10-02T12:01:33",
+      "subset_sizes_reported": [
+        640,
+        60
+      ],
+      "results_percent": {
+        "best": {
+          "accuracy": 45.527,
+          "precision": 15.1757,
+          "recall": 33.3333,
+          "macro_f1": 20.8561,
+          "auroc": 45.3846,
+          "auprc": 37.3947
+        },
+        "best_knn_macro_f1": 0.2509225363111659,
+        "epochs": [
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 45.3846,
+            "auprc": 37.3947
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 44.8423,
+            "auprc": 37.6703
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 45.3261,
+            "auprc": 37.4032
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 45.3569,
+            "auprc": 37.2997
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.0989
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.0626
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.1705
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.0542,
+            "auprc": 37.5764
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.377
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.6654
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.551,
+            "auprc": 37.6536
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.7682,
+            "auprc": 37.8286
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.7865
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 45.8527,
+            "auprc": 38.0647
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.7053
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.5701
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.493,
+            "auprc": 38.5146
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.6814,
+            "auprc": 38.3016
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 39.1529
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.6558
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.3856
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.6066,
+            "auprc": 37.7475
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.3544
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.8771
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.0477,
+            "auprc": 37.8406
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.3756,
+            "auprc": 38.2206
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.1284
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.3654
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.3083
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.237
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 47.4494,
+            "auprc": 38.3111
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 47.3825,
+            "auprc": 38.5549
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.1155,
+            "auprc": 37.9472
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.8766
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 37.9003
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.5524
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.2478
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.0798
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": 46.261,
+            "auprc": 37.9955
+          },
+          {
+            "accuracy": 45.527,
+            "precision": 15.1757,
+            "recall": 33.3333,
+            "macro_f1": 20.8561,
+            "auroc": null,
+            "auprc": 38.0074
+          }
+        ]
+      }
+    }
+  },
+  "checkpoint": "C:\\Users\\au808956\\Documents\\Repos\\PhD-Courses\\Deep learning for time-series\\Assignment 4\\results\\tfc\\FD_A_2_FD_B\\run1\\pre_train_seed_42_2layertransformer\\saved_models\\ckp_last.pt"
+}

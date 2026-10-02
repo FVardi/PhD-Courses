@@ -1,8 +1,8 @@
-PWD c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution
+PWD C:/Users/au808956/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution
 INPUT c:/texlive/2025/texmf.cnf
 INPUT c:/texlive/2025/texmf-dist/web2c/texmf.cnf
 INPUT c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT c:/Users/Bruger/Documents/Repos/PhD-Courses/Deep learning for time-series/Assignment 4/solution/solution.tex
+INPUT solution.tex
 OUTPUT solution.log
 INPUT c:/texlive/2025/texmf-dist/tex/latex/base/article.cls
 INPUT c:/texlive/2025/texmf-dist/tex/latex/base/article.cls
@@ -314,6 +314,7 @@ INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmex10.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
+INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
 INPUT solution.aux
 INPUT ./solution.out
 INPUT ./solution.out

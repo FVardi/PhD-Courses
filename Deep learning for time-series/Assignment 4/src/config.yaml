@@ -23,10 +23,15 @@ paths:
   data_processed: "data/processed"
   results: "results"
 
-# TF-C consumes FD-A / FD-B from inside its own checkout (datasets/FD-A, datasets/FD-B).
+# TF-C reads datasets/<name> inside its own checkout, and <name> must be FD_A / FD_B (with
+# underscores) because the same argument selects config_files/FD_A_Configs.py. The files
+# themselves live in data/raw/FD-A and data/raw/FD-B like every other dataset; datasets/FD_A
+# and datasets/FD_B are directory junctions to them, created by dev/9_. These are the paths
+# TF-C actually opens, so the EDA notebooks read exactly what it consumes.
 tfc_data:
-  fd_a: "${checkouts.tfc.path}/datasets/FD-A"
-  fd_b: "${checkouts.tfc.path}/datasets/FD-B"
+  fd_a: "${checkouts.tfc.path}/datasets/FD_A"
+  fd_b: "${checkouts.tfc.path}/datasets/FD_B"
+  raw: {FD_A: "FD-A", FD_B: "FD-B"}   # junction name -> folder under paths.data_raw
 
 # --- Datasets for Parts B-E (official train/test partitions, UCR/UEA) ---
 datasets:
