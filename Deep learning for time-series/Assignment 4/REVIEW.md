@@ -1,185 +1,109 @@
-# Review of `solution/solution.tex`
+# Submission status check
 
-Reviewed 2 October 2026 on the RTX 4500 machine. Claims were checked against the result
-CSVs in `results/` and against the three checkouts. Nothing in the document was edited.
+Checked 5 October 2026 against the assignment PDF (§5 tasks, §6 experimental rules,
+§8 submission, §9 expected result tables), with the slide presentation excluded. Claims
+were checked against the result CSVs, the label-subset files and the three checkouts. This
+replaces the review of 2 October, most of whose points have since been fixed.
 
-**Summary:** the tables are all correct and consistent with the CSVs. The problems are in
-Part A (a few factual errors and stale statements), in two Part G conclusions, and in
-sections that are still empty.
+Line numbers refer to `solution/solution.tex` at commit `f4ae2bd`.
 
-Line numbers refer to `solution/solution.tex` as it was at the time of the review. They
-will drift once the file is edited, so fix from the bottom of each table upwards, or search
-for the quoted text.
+**Summary:** the written answers are complete; the reproducibility deliverables are not.
+Every Part A–G question has an answer, every number in the tables matches the CSVs
+(including the per-seed table), and the experimental rules are followed. Still missing:
+the README is the original placeholder, the training-time table is empty, and
+`dev/10_aggregate_results.py`, `tests/` and `results/figures/` are empty.
 
-## 1. Factual errors
+## §8 Submission
 
-| Line | What it says | What is true |
-|---|---|---|
-| 423 | All TF-C datasets are reduced to one channel and length 178 | One channel, yes. The length is `TSlength_aligned`, which is 5120 in the FD-A config; 178 is the SleepEEG value. It contradicts Part F. |
-| 410 | "I cannot check the number of samples without loading the files" | Stale. Part F now has them: 640 of 8,184 FD-A, 60 FD-B train, 13,559 FD-B test. |
-| 180 | `_eval_with_pooling` is called by `TS2Vec.fit()` | It is only called by `TS2Vec.encode()`. |
-| 216 | `temporal_contrastive_loss` ↔ Equation (2) | Line 258 says Equation (1), and instance ↔ (2). The two places disagree; line 258 is the consistent one. |
-| 300 | The FFT "is called in `TFC.forward()`" | The FFT is computed once in `Load_Dataset.__init__`; `forward` only receives the result. |
-| 119 | `CausalCNNEncoder.forward` "wraps the whole classification pipeline" | It is the encoder (convolutions, pooling, linear layer). No classification happens there. |
-| 316 | `__init__` defines "the four encoders" | Two encoders and two projectors. Item (i) there also describes the code where the paper location should be. |
-| 341 | `model_finetune` "does the same for the test datasets" | It trains on the FD-B training set; `model_test` handles the test set. |
-| 42, 47 | T-Loss series are zero-padded "if they are too short" | The causal padding is applied in every convolution, whatever the length. |
-| 480 | FordA: "same timestamps in channels" | FordA has one channel. The point is the same timestamps across series. |
-
-Smaller imprecisions in Part A:
-
-- **Line 46:** the T-Loss objective is a logistic loss on dot products, not a comparison of
-  distances, and it is a "triplet" loss.
-- **Line 58:** "same view, no masking" is wrong, since both views are masked.
-- **Line 61:** "dilation of 2" should be max-pooling with kernel 2.
-- **Line 78:** the released TF-C code truncates to the configured length; it does not
-  zero-pad.
-- **Line 155:** "the anchor itself can contain a negative sample" presumably means a
-  negative can be drawn from the anchor's own series.
-- **Line 249:** the sentence about the `while` loop and Algorithm 1 belongs under
-  `hierarchical_contrastive_loss`, not under the mask generator.
-- **Lines 311 and 374** describe the frequency augmentation differently ("amplifies others"
-  and "halved"). Both follow from the code: the two augmented copies are summed, so kept
-  bins are doubled and "removed" bins stay at 1×. One consistent description would be
-  better.
-
-## 2. Conclusions and interpretations
-
-### "The effect of SSL is deemed clearer with only 10% labels" (line 806)
-
-Only half supported. It holds for the RBF-SVM, and it does not hold for logistic
-regression, which the document names as the principal probe.
-
-| Gain over raw (accuracy) | 100% labels | 10% labels |
-|---|---|---|
-| FordA, logistic regression | +0.43 | +0.40 |
-| FordA, RBF-SVM | +0.10 | +0.25 |
-| Epilepsy, logistic regression | +0.33 | +0.30 |
-| Epilepsy, RBF-SVM | +0.11 to +0.13 | +0.14 to +0.19 |
-| AWR, logistic regression | −0.01 to +0.01 | −0.01 to +0.01 |
-
-It also sits awkwardly beside Part C (line 556), which says the drop to 10% is no smaller
-than for the raw baseline. The statement the numbers support is "clearer for the nonlinear
-probe, unchanged for the linear probe".
-
-### Other points
-
-- **"AWR: representations worsen the results" (line 802) is too strong.** With logistic
-  regression T-Loss is 0.013 lower and TS2Vec 0.010 higher, both inside the seed spread
-  (0.02–0.05). Only the RBF-SVM cell is lower (0.16–0.18 against 0.23), and that cell is
-  untuned for all three representations.
-- **"Epilepsy is between FordA and AWR" (line 812) does not match Part C.** Epilepsy has
-  the largest drop to 10% (0.23 against 0.15 for AWR) and similar seed spread. It has the
-  fewest labels (13), though more per class than AWR (about 3 against 1). The same
-  paragraph uses series length as an explanation without a mechanism, and it does not
-  address dimensionality (1, 9 and 3 channels), which the heading asks about.
-- **Epilepsy baseline comments (line 484) are stated as fact.** "Beats chance only because
-  the mean level differs" and "classes differ in amplitude" were not tested in anything in
-  the repo. The FordA explanation is backed by the circular-shift experiment; these need a
-  "likely" or a check.
-- **The AWR baseline comment (line 482) skips the most striking number in the table.**
-  "Same as logistic regression" is true at 100% labels, but at 10% the RBF-SVM scores 0.23
-  against 0.83. The reason (untuned defaults with about one label per class) is in the
-  protocol and should be in the comment.
-- **Part D, "several short gaps would be a much easier problem" (line 590) is contradicted
-  by the sweep.** At the same total, 5 blocks hurt TS2Vec on FordA more than 1 block
-  (−0.040 against −0.028 at 20%; −0.096 against −0.057 at 40%). Present it as the
-  assumption made beforehand, or drop it.
-- **Part D discussion (lines 655–662) is thin on three points.**
-  - "Classifier: not shown in the table, but there is no difference" rests on numbers the
-    reader cannot see. The RBF rows are in `results/metrics/corruption.csv` and could go in
-    the appendix.
-  - The FordA logistic-regression increase (+0.014) is noise around chance and should be
-    labelled so.
-  - The SSL representations keep a much higher absolute accuracy after corruption, and the
-    differences in Δ are within the seed spread. Both are worth stating.
-- **Part G, first subsection (line 797) answers only half the heading.** It does not say
-  where raw nonlinear classification stays competitive: on AWR, where the raw RBF-SVM
-  reaches 0.98.
-- **The stability subsection (line 809)** is fair, but should mention that three seeds is
-  few, and that the spread at 10% mixes two sources (label subset and encoder seed). At
-  100% the raw rows have spread 0 because nothing in them depends on the seed.
-
-## 3. Fidelity to the process
-
-- **Part E setup (line 669) says too little for the design to be judged.** Missing are:
-  - the mask parameters (binomial p = 0.5; continuous 5 runs of 10% of the crop);
-  - that seeds, initial weights, 600 iterations and the probe are matched;
-  - that the binomial arm is the Part C encoders;
-  - the two confounds (about 41% against 50% coverage; hidden-layer masking against
-    input-level corruption).
-- **The sweep and the second-machine replication are not mentioned.**
-  `results/metrics/mask_sweep.csv` is in the repo, but the word "sweep" does not appear in
-  the document. The RTX 5060 run retrained every encoder and gave the same Part E
-  conclusion (Δ −0.030 for both arms). Both strengthen "neither".
-- **Part F's collapse numbers have no stated source.** The sentence saying they come from a
-  separate diagnostic script is gone, and the scripts exist only in a temporary folder on
-  the RTX 4500 machine, not in the repo. As it stands a grader cannot reproduce the
-  1.27 → 0.002 figures or the seed-0 result.
-- **Part F's command row** shows `python main.py …`. The actual run went through the
-  launcher (`src/methods/_tfc_launch.py`) with an absolute log path. The text below the
-  table explains it, so this is minor.
-- **Parts B and C never state the pretraining settings.** T-Loss 1,500 steps; TS2Vec
-  600/600/200 iterations; pretraining on the full unlabelled training set; `full_series`
-  pooling; and "seeded but not bitwise reproducible", which now has a concrete example from
-  the second machine.
-- **The pretraining-cost table (lines 562–579) is empty, and the data for it is
-  incomplete.** TS2Vec is fully logged (about 7 to 37 s per run). T-Loss has only 7 rows
-  from the RTX 4500 (about 9 to 11 min each), with FordA seeds 42 and 123 missing. All nine
-  T-Loss runs were logged on the RTX 5060 (about 21 to 27 min each); those rows are in git
-  history at commit `1790f90`. Both methods give 320 dimensions.
-- **Leftover template prompts** remain as body text at lines 85–86, 406–408 and 586–587.
-- **The discrepancy list at lines 414–424** is nested under the "test influences the best
-  results" bullet. It needs its own lead-in.
-- **"Following one TF-C batch" (lines 354–362)** lists six generic steps with no tensor
-  shapes.
-
-## 4. Still empty
-
-- "Implications for future multichannel industrial sensor data" (lines 823–826) has an
-  empty bullet. One relevant fact from this work: the TF-C code keeps only the first
-  channel of every dataset.
-- All nine compliance notes, "Limitations and conclusions", the per-seed appendix, and the
-  two optional extensions (which should be removed or marked as not done).
-- `\listoftodos` is still printed at the top.
-
-## 5. Typos and grammar
-
-| Line | Fix |
+| Item | Status |
 |---|---|
-| 42 | "positiv" → positive; "which sub-series" → while |
-| 46 | "triple loss" → triplet |
-| 47 | "dot product are" → is |
-| 48 | "avalable" |
-| 55 | "to produced"; "After and input" → an |
-| 59 | "both view" → views |
-| 74, 269 | "agumented" |
-| 79 | "ocnnected" |
-| 107 | "where is is called" |
-| 108 | "achitecture" |
-| 138 | "to sue" → use; "calls is" → it |
-| 142 | "can be training" → trained |
-| 151 | "wether" |
-| 198, 211, 219 | "reprensentation(s)" |
-| 258 | "hierarchical\_contastive\_loss" |
-| 269 | "two version" |
-| 279 | "if run" → If |
-| 280, 341 | "mode\_finetune", "mode\_test", "mode\_pretrain" → model\_ |
-| 306 | "Sectio" |
-| 316 | "augmentments"; "is training during" → trained |
-| 329 | "postive" |
-| 349 | "pre-training of fine-tuning" → or |
-| 373 | "multiple different of which a radnom" |
-| 374 | "The two augmentation are" |
-| 385 | "transofmr" |
-| 401, 402 | "repesentations" |
-| 411 | "train.py" → train.pt |
-| 419 | "aguments" |
-| 421 | "Pertubations" |
-| 428 | "torch.cude" → cuda |
-| 436 | "appied" |
-| 480 | "phse" |
-| 694 | "difference binomial and continuous" → between |
-| 770 | stray comma after the commit hash |
-| 802 | "Representations worsens"; "atrributed" |
-| 815 | "Neither are" → is |
+| 1. Presentation (slides excluded): method comparison, paper-to-code map, protocol, tables, interpretation, limitations, conclusions | Done in `solution.tex`, apart from plots: §8.1 asks for "principal result tables and plots", and `results/figures/` is empty. They may belong in the slides. |
+| 2. Reproducible code for baselines, pretraining, extraction, probes, corruption, ablation | Done: `dev/2_` to `dev/8_`, plus `8b_` and `9_`. |
+| 3. README with environment setup and a command per result table or figure | **Not done.** See below. |
+| 4. Machine-readable per-seed results, configurations, label-subset indices | Done. All metric CSVs are tracked, `src/config.yaml` holds the configuration, and the 9 label-subset JSON files hold the indices and class counts. The two `*_smoke20.csv` files are also tracked; they are not results and could be removed. |
+
+What is wrong with `README.md`:
+
+- It still says "Status: structure only — no implementation yet".
+- It lists the checkouts as "not yet cloned", under the old folder name
+  (`Time series research`).
+- The command table is `_TBD_`, and the environment section says "to be recorded".
+- It describes `tests/`, `results/tables/` and `results/figures/` as holding content, but
+  they are empty, and `dev/10_aggregate_results.py` is still a stub.
+
+## §9 Expected result tables
+
+| Required | Status |
+|---|---|
+| Clean-test results for every method and label regime | Tables `tab:baselines` and `tab:ssl-clean` |
+| Clean-versus-dropout table for the 100%-label models | Tables `tab:dropout` and `tab:dropout-f1` |
+| FordA standard-versus-continuous ablation table | Table `tab:masking-ablation` |
+| FD-A → FD-B execution record and classification result | Tables `tab:tfc-record` and `tab:tfc-result` |
+| Brief record of training time and representation dimensionality | **Missing.** `tab:cost` is empty, with a todo note at line 577. See below. |
+| Per-seed results in supplementary material, mean ± sd in the main text | Done: per-seed table and CSVs |
+
+Data available for `tab:cost`, from `results/runs/` (RTX 4500):
+
+- TS2Vec: about 24–37 s per run on FordA, 18–19 s on AWR, 7 s on Epilepsy.
+- T-Loss: about 525–590 s per run on AWR, 540–560 s on Epilepsy, 646 s on FordA seed 456.
+  FordA seeds 42 and 123 have no timing row on this machine.
+- All nine T-Loss runs were timed on the RTX 5060 (about 21–27 min each); those rows are
+  in git history at commit `1790f90`.
+- Both methods give 320-dimensional representations.
+
+## §6 Experimental rules
+
+All nine are followed, and the compliance section says so accurately.
+
+- **Test sets held out:** yes. The one exception is Part F, where the supplied code
+  evaluates the test set every epoch; the write-up states it.
+- **Training-only normalisation:** yes. The claim about the T-Loss loaders is right:
+  `ucr.py` lines 102–103 compute mean and variance over train and test together, and they
+  are not used.
+- **Stratified 10% subsets with saved indices:** yes. For example, AWR seed 42 has 27
+  indices covering all 25 classes.
+- **Same seeds, subsets, corruptions and probe settings:** yes. The clean columns matched
+  across Parts B–E with zero difference.
+- **Recording software versions is only partly met.** Versions are recorded only in
+  `results/tfc/execution_record.json`. Parts B–E list device and runtime per run but no
+  versions. Saying in the README or the compliance note that one environment was used
+  throughout (Python 3.13.11, PyTorch 2.11.0 + CUDA 12.8, NumPy 2.4.2, scikit-learn 1.8.0)
+  would close this.
+
+## Parts A–G: gaps
+
+- **Part A, the comparison asks "what information the objective encourages the encoder to
+  preserve".** The "Objective" bullets describe the losses rather than what is preserved,
+  and nothing compares the three methods side by side. A sentence per method, or a small
+  table, would answer it.
+- **Part A, the CPU-only question asks to "explain any failure observed".** The answer says
+  the script "will crash". Reproduced on the RTX 4500 machine with the GPU hidden
+  (`CUDA_VISIBLE_DEVICES=-1`): `torch.cuda.FloatTensor` raises
+  `RuntimeError: No CUDA GPUs are available`. Quoting that makes it an observation rather
+  than a prediction.
+- **Part A, the call sites:** the assignment asks for the call site when a `forward` is
+  invoked through `module(...)` or `nn.Sequential`.
+  - `CausalConvolutionBlock.forward` runs through the `nn.Sequential` inside `CausalCNN`,
+    so name that.
+  - `CausalCNNEncoder.forward` is also called from inside `TripletLoss.forward`, not only
+    from `encode`.
+- **Part B's protocol does not mention the seeds or the hyperparameter grids.** Both are in
+  Part C; a forward reference would do.
+- **Part C says "only logistic regression … is discussed",** but the assignment asks for a
+  comparison with *both* raw baselines. The comparison with the raw RBF-SVM is in Part G;
+  one bullet in Part C would cover it.
+- **Part F, the pretraining loss of 8.18 cannot be checked from tracked files.** The stage
+  logs are gitignored, and `execution_record.json` does not hold the loss curve. The
+  command row also shows `--logs_save_dir results/tfc`, but the run used an absolute path;
+  run from `code/TFC`, the relative path would point inside the checkout.
+- **Part G, "Implications for future multichannel industrial sensor data" is thin on the
+  multichannel part.** Two points from the results bear on it: AWR is the only
+  multichannel dataset, and the TF-C code drops every channel but the first.
+
+## Small items
+
+- Line 67: missing full stop after "domains".
+- Line 665: the old sentence "Mask configurations are the standards…" now duplicates the
+  bullets below it.
+- `\listoftodos` is still printed at the top.
+- "Per-seed results" no longer sits under `\appendix`, so it is numbered as a main section.

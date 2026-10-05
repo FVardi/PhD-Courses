@@ -43,7 +43,7 @@ The general idea is that sub-series of a reference series (which may be a sub-se
 
 \begin{itemize}
 \item Positive/negative samples: a positive example $x^{pos}$ is a sub-series of the reference series $x^{ref}$, which itself is randomly sampled in length and location. A sub-series of another time series is negative.
-\item Objective: triplet loss with one anchor, one positive, and $K\geq1$ negative samples $x_{k}^{neg}$. The objective pushes the dot product between the representations of $x^{ref}$ and $x^{pos}$ up and the dot products between $x^{ref}$ and each $x_k^{neg}$ down, through a logistic loss.
+\item Objective: triplet loss with one anchor, one positive, and $K\geq1$ negative samples $x_{k}^{neg}$. The objective pushes the dot product between the representations of $x^{ref}$ and $x^{pos}$ up and the dot products between $x^{ref}$ and each $x_k^{neg}$ down, through a logistic loss. Encourages the encoder to preserve information
 \item Fixed length problem: the convolutional network ends with a representation $Y\in\mathbb{R}^{160 \times L}$ which is max pooled into $z\in\mathbb{R}^{160}$ and thereafter transformed through $f(x)=Wz+b$ where $W\in\mathbb{R}^{320\times160}$. The final dot product is therefore always between vectors of length 320.
 \item Classification: an SVM with a radial basis function is trained on the features with their labels now available. It is evaluated in a train/test split.
 \end{itemize}
