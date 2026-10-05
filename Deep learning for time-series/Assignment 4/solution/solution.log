@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.20)  2 OCT 2026 13:36
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.11.20)  2 OCT 2026 15:54
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -702,13 +702,17 @@ Overfull \hbox (1.47412pt too wide) in paragraph at lines 709--724
  [][] 
  []
 
-[18] [19]
-Package hyperref Info: bookmark level for unknown todo defaults to 0 on input line 799.
- [20] [21] [22] (./solution.aux)
+[18] [19] [20]
+Package hyperref Info: bookmark level for unknown todo defaults to 0 on input line 832.
+ [21] [22] (./solution.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-11-06>
  ***********
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `solution.out' has not changed.
 (rerunfilecheck)             Checksum: A9B912955E73782334B0E8F74EC50C90;10821.
  ) 
@@ -719,9 +723,27 @@ Here is how much of TeX's memory you used:
  54335 multiletter control sequences out of 15000+600000
  640604 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 99i,11n,108p,733b,1313s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 99i,11n,108p,733b,1311s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{section*.54} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section*.53} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section*.52} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section*.51} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section*.50} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{section*.49} has been referenced but does not exist, replaced by a fixed one
+
 <c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb><c:/texlive/2025/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on solution.pdf (22 pages, 236928 bytes).
+Output written on solution.pdf (22 pages, 237058 bytes).
 PDF statistics:
  639 PDF objects out of 1000 (max. 8388607)
  583 compressed objects within 6 object streams

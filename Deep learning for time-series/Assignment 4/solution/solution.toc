@@ -71,7 +71,7 @@
 \contentsline {subsection}{\numberline {7.5}Whether continuous masking improves accuracy, robustness, both or neither}{21}{subsection.7.5}%
 \contentsline {subsection}{\numberline {7.6}What the TF-C bearing experiment shows about transfer between operating conditions}{21}{subsection.7.6}%
 \contentsline {subsection}{\numberline {7.7}Implications for future multichannel industrial sensor data}{21}{subsection.7.7}%
-\contentsline {section}{\numberline {8}Experimental rules: compliance notes}{21}{section.8}%
+\contentsline {section}{\numberline {8}Experimental rules: compliance notes}{22}{section.8}%
 \contentsline {section}{\numberline {9}Limitations and conclusions}{22}{section.9}%
 \contentsline {section}{\numberline {A}Optional extension: TF-C on FordA}{22}{appendix.A}%
 \contentsline {section}{\numberline {B}Optional extension: FordB noisy-condition experiments}{22}{appendix.B}%
