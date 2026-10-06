@@ -76,7 +76,7 @@
 \contentsline {section}{\numberline {9}Limitations and conclusions}{24}{section.9}%
 \contentsline {subsection}{\numberline {9.1}Limitations}{24}{subsection.9.1}%
 \contentsline {subsection}{\numberline {9.2}Conclusions}{24}{subsection.9.2}%
-\contentsline {paragraph}{Advantages of SSL}{24}{section*.38}%
-\contentsline {paragraph}{Disadvantages of SSL}{24}{section*.39}%
-\contentsline {paragraph}{Transfer learning}{24}{section*.40}%
+\contentsline {paragraph}{Advantages of SSL}{24}{section*.37}%
+\contentsline {paragraph}{Disadvantages of SSL}{24}{section*.38}%
+\contentsline {paragraph}{Transfer learning}{24}{section*.39}%
 \contentsline {section}{\numberline {10}Per-seed results}{24}{section.10}%

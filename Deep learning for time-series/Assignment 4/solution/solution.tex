@@ -562,19 +562,19 @@ Training time and representation dimensionality are shown in Table~\ref{tab:cost
         \toprule
         Dataset & Method & Pretraining time & Representation dimension \\
         \midrule
-        FordA & T-Loss & & \\
-        FordA & TS2Vec & & \\
-        AWR & T-Loss & & \\
-        AWR & TS2Vec & & \\
-        Epilepsy & T-Loss & & \\
-        Epilepsy & TS2Vec & & \\
+        FordA & T-Loss & $638 \pm 7$ s & 320 \\
+        FordA & TS2Vec & $29 \pm 7$ s & 320 \\
+        AWR & T-Loss & $547 \pm 38$ s & 320 \\
+        AWR & TS2Vec & $18 \pm 1$ s & 320 \\
+        Epilepsy & T-Loss & $545 \pm 12$ s & 320 \\
+        Epilepsy & TS2Vec & $7 \pm 0$ s & 320 \\
         \bottomrule
     \end{tabular}
-    \caption{Training time and representation dimensionality.}
+    \caption{Pretraining time per encoder and representation dimensionality. Mean $\pm$ standard deviation over the three seeds on one NVIDIA RTX 4500 Ada Generation GPU; T-Loss runs 1500 steps, TS2Vec 600 iterations (200 on Epilepsy).}
     \label{tab:cost}
 \end{table}
 
-\todo[inline]{Fill Table~\ref{tab:cost} on the RTX 4500 machine from \code{results/runs/tloss\_pretrain.csv} and \code{ts2vec\_pretrain.csv}, with all three seeds per cell. T-Loss on FordA has a timing row for seed 456 only; seeds 42 and 123 must be re-timed. Retraining replaces their checkpoints, so rerun the later steps afterwards or keep the old checkpoints.}
+The T-Loss timings for FordA seeds 42 and 123 come from a second, timing-only training run, since the first runs were not timed. The encoders used for the results are the original ones.
 
 %======================================================================
 \section{Part D: Robustness to contiguous sensor dropout}

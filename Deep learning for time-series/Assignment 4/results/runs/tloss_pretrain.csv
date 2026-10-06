@@ -6,3 +6,5 @@ tloss,ArticularyWordRecognition,456,275,9,144,1500,10,320,NVIDIA RTX 4500 Ada Ge
 tloss,Epilepsy,42,137,3,206,1500,10,320,NVIDIA RTX 4500 Ada Generation,538.1,results\checkpoints\tloss_Epilepsy_seed42_CausalCNN_encoder.pth
 tloss,Epilepsy,123,137,3,206,1500,10,320,NVIDIA RTX 4500 Ada Generation,559.1,results\checkpoints\tloss_Epilepsy_seed123_CausalCNN_encoder.pth
 tloss,Epilepsy,456,137,3,206,1500,10,320,NVIDIA RTX 4500 Ada Generation,537.1,results\checkpoints\tloss_Epilepsy_seed456_CausalCNN_encoder.pth
+tloss,FordA,42,3601,1,500,1500,10,320,NVIDIA RTX 4500 Ada Generation,632.0,results\checkpoints\tloss_FordA_seed42_CausalCNN_encoder.pth
+tloss,FordA,123,3601,1,500,1500,10,320,NVIDIA RTX 4500 Ada Generation,634.6,results\checkpoints\tloss_FordA_seed123_CausalCNN_encoder.pth
