@@ -277,10 +277,6 @@ INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
 INPUT c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
-INPUT ./solution.tdo
-INPUT ./solution.tdo
-INPUT solution.tdo
-OUTPUT solution.tdo
 INPUT ./solution.toc
 INPUT ./solution.toc
 INPUT solution.toc

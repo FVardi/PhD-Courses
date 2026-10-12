@@ -4,9 +4,10 @@ Downloads and verifies, nothing more. Splitting, the stratified 10% subsets, sca
 array construction belong to dev/1_prepare_data.py, so that "the official partition,
 untouched" stays something you can check by looking at data/raw/.
 
-FD-A and FD-B are deliberately NOT fetched. Part F reads them from inside the unchanged TF-C
-checkout (see tfc_data in src/config.yaml); a separately obtained copy could be preprocessed
-differently and would quietly invalidate the reproduction.
+FD-A and FD-B are deliberately NOT fetched. Part F must use the TF-C authors' own processed
+files from Figshare, since a copy prepared any other way could differ and would quietly
+invalidate the reproduction. They go in data/raw/FD-A and data/raw/FD-B; data/README.md
+says how to download them, and dev/9_tfc_fda_fdb.py links them into the TF-C checkout.
 
 Safe to re-run: a dataset that already verifies is left alone, so this also serves to check a
 hand-copied course-supplied data folder. Use --force to re-download regardless.
