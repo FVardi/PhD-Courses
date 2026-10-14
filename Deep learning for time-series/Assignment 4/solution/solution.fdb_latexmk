@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1791276887.47791 "solution.tex" "solution.pdf" "solution" 1791276889.15208 0
+["pdflatex"] 1791798030.39298 "solution.tex" "solution.pdf" "solution" 1791798032.15967 0
   "c:/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1763632804 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1763634081 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1763633584 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -176,16 +176,14 @@
   "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1763638596 5587484 30eee748fa419a911c40b0c750dd21ba ""
   "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1763638817 3635915 fe279a530594b791758ac31258019447 ""
   "c:/texlive/2025/texmf.cnf" 1763638579 713 e69b156964470283e0530f5060668171 ""
-  "solution.aux" 1791276888 16708 456f26d62a5d3a206d6c09b1306a64f1 "pdflatex"
-  "solution.out" 1791276888 10503 4b4b716346eb6e072d5d93cd96dcb70d "pdflatex"
-  "solution.tdo" 1791276888 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "solution.tex" 1791276883 69185 1858884f163788967c2a0c2633001dea ""
-  "solution.toc" 1791276888 8483 d1ef56595edce0caba84d398dc9c017d "pdflatex"
+  "solution.aux" 1791798031 16707 bdee984497a502e1b930f6304726206a "pdflatex"
+  "solution.out" 1791798031 10503 4b4b716346eb6e072d5d93cd96dcb70d "pdflatex"
+  "solution.tex" 1791798016 69345 f9cb543075665bf00785a8a060c913fb ""
+  "solution.toc" 1791798031 8482 0582a4177527b17c7a1475ed8e6a5fa5 "pdflatex"
   (generated)
   "solution.aux"
   "solution.log"
   "solution.out"
   "solution.pdf"
-  "solution.tdo"
   "solution.toc"
   (rewritten before read)

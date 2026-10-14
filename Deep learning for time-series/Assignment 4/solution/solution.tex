@@ -28,7 +28,6 @@
 \begin{document}
 
 \maketitle
-\listoftodos
 \tableofcontents
 \newpage
 
@@ -64,8 +63,7 @@ The loss is calculated at coarser and coarser granularity: after each level the 
 \end{itemize}
 
 \subsubsection{TF-C (Zhang et al., NeurIPS 2022)}
-They seek to enforce discrimination in different domains
-This encourages that the time domain is robust to augmentation, the frequency domain is robust to augmentation, and the time-frequency domain enforces temporal and spectral consistency.
+They seek to enforce discrimination in different domains. This encourages that the time domain is robust to augmentation, the frequency domain is robust to augmentation, and the time-frequency domain enforces temporal and spectral consistency.
 
 \begin{itemize}
 \item Positive/negative samples: 
@@ -543,12 +541,11 @@ The results are shown in Table~\ref{tab:ssl-clean}.
 \end{table}
 
 \subsection{Comparison with the raw-signal baselines}
-Only logistic regression, the principal probe, is discussed.
 \begin{itemize}
     \item Both methods improve clearly on FordA (from chance to 0.92) and Epilepsy (from 0.63 to 0.97), but not on AWR, where T-Loss is slightly below and TS2Vec slightly above the raw baseline.
-    \item The representations are close to linearly separable: a linear classifier that fails on the raw signal reaches 0.92--0.97 on them.
+    \item The representations are close to linearly separable: a linear classifier that fails on the raw signal reaches 0.92--0.97 on them. The performance is better than RBF-SVM on FordA and Epilepsy.
     \item T-Loss and TS2Vec are on par. The differences on FordA and Epilepsy are within the spread across seeds; only on AWR with 100\% labels is TS2Vec ahead (0.983 against 0.966).
-    \item AWR is already saturated on the raw signal and becomes less stable with 10\% labels, where only 27 labelled series cover 25 classes.
+    \item AWR is already saturated on the raw signal and becomes less stable with 10\% labels, where only 27 labelled series cover 25 classes. Compared to RBF-SVM, it is more stable when using fewer labels, but neither probe could be tuned there: with about one label per class both run on default hyperparameters, which the RBF-SVM tolerates far worse than logistic regression.
     \item The drop from 100\% to 10\% labels follows the number of labels left: about 0.014 on FordA (360 series), 0.15 on AWR (27) and 0.23 on Epilepsy (13). On AWR and Epilepsy it is no smaller than for the raw baseline.
 \end{itemize}
 
@@ -662,8 +659,6 @@ Only two of three dimensions requested can be evaluated here since only one prep
 %======================================================================
 
 \subsection{Setup}
-Mask configurations are the standards in the checkout for TS2Vec. The rest of the setup is inherited from earlier tests.
-
 \begin{itemize}
     \item Masks: both at the checkout's defaults. Binomial masks each timestamp independently with $p = 0.5$; continuous masks 5 runs of 10\% of the crop each, which may overlap (about 41\% in expectation).
     \item Matched: encoder, 600 iterations, seeds (and thereby initial weights), probe, label regime and corrupted test sets. The binomial-mask encoders are the ones trained in Part C; only the continuous-mask encoders are trained here.
@@ -855,6 +850,7 @@ Neither is improved.
 \item Only one corruption type and fill convention was used.
 \item The 10\% labels set results from AWR are untuned.
 \item TF-C was not run with the 2022 library version.
+\item TF-C only uses the first channel of multivariate data.
 \end{itemize}
 
 \subsection{Conclusions}
